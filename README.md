@@ -11,7 +11,7 @@ while providing the following advantages:
 EasyRouter provides methods for routing client-side pages, and connecting them to actions.
 
 ¿Want to create a modern hibrid-app or website using something like React, Web Components, Handlebars, vanilla JS, etc.?
-¿Have an existing Backbone project and want to migrate to a more modern framework? Good news, EasyRouter will integrates perfectly with it!
+¿Have an existing Backbone project and want to migrate to a more modern framework? Good news, EasyRouter will integrates perfectly with all of those!
 
 Install it via [Bower](http://bower.io/):
 ``` bash
