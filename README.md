@@ -5,7 +5,7 @@ while providing the following advantages:
 * __Great performance__, only native functions are used.
 * __Small footprint__, 5kb for minified version.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
-* __Supports both routes styles__, hash and the pushState of History API
+* __Supports both routes' styles__, hash and the pushState of History API.
 * Proper JSDoc used in the source code.
 * Works with normal script include and as well in CommonJS style.
 
