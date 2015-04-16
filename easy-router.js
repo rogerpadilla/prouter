@@ -1,8 +1,19 @@
 /**
- * Unobtrusive and ultra-lightweight (5k for minified version) router library 100% compatible
- * with the Backbone.Router providing the following advantages:
- * great performance (only native functions are used) and small footprint with no dependencies.
- * EasyRouter provides methods for routing client-side pages, and connecting them to actions.
+ * Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes,
+ * while providing the following advantages:
+ * - Unobtrusive, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla).
+ * - Great performance, only native functions are used.
+ * - Small footprint, 5kb for minified version.
+ * - No dependencies, no jQuery, no Underscore... zero dependencies.
+ * - Supports both routes' styles, hash and the pushState of History API.
+ * - Proper JSDoc used in the source code.
+ * - Works with normal script include and as well in CommonJS style.
+ *
+ * EasyRouter provides methods for routing client-side pages, and connecting them to actions. 
+ *
+ * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
+ * ¿Have an existing Backbone project and want to migrate to a more modern framework?
+ * Good news, EasyRouter will integrates perfectly with all of those!
  *
  * During page load, after your application has finished creating all of its routers,
  * be sure to call start() on the router instance to let know him you have already
