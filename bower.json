@@ -1,0 +1,8 @@
+{
+  "name"          : "easy-router",
+  "version"       : "1.0.0",
+  "main"          : "easy-router.js",
+  "dependencies"  : {
+  },
+  "ignore"        : ["docs", "examples", "test", "*.yml", "*.html", "*.ico", "*.md", "CNAME", ".*", "karma.*", "component.json", "package.json"]
+}
