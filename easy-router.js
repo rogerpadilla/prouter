@@ -391,7 +391,7 @@
         for (var i = 0; i < n; i++) {
             handler = this.handlers[i];
             if (handler.route.test(fragment)) {
-                handler.callback.call(handler.callback, fragment);
+                handler.callback(fragment);
                 return true;
             }
         }
