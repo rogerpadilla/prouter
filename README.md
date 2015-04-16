@@ -5,10 +5,11 @@ providing the following advantages:
 * Small footprint (5kb for minified version).
 * No dependencies (no jQuery, no Underscore... zero dependencies).
 * Proper JSDoc used in the source code.
+* Works with normal script include and as well in CommonJS style.
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions.
 
-Just use it like the Backbone.Router:
+Just use it like the [Backbone.Router](http://backbonejs.org/#Router):
 
 ```javascript
 var appRouter = new EasyRouter({
