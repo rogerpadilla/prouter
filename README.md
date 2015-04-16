@@ -1,6 +1,6 @@
 # easy-router
-Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router
-providing the following advantages:
+Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes,
+while providing the following advantages:
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks / vanilla.
 * __Great performance__ (only native functions are used).
 * __Small footprint__ (5kb for minified version).
