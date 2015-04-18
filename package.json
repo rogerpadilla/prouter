@@ -1,9 +1,19 @@
 {
   "name": "EasyRouter",
   "version": "1.0.3",
-  "description": "",
+  "description": "Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes",
   "author": "Roger Padilla <rogerjose81@gmail.com>",
+  "homepage": "https://github.com/rogerpadilla/easy-router",
+  "bugs": "https://github.com/rogerpadilla/easy-router/issues",
   "license": "MIT",
+  "keywords": [
+    "js",
+    "router",
+    "front-end",
+    "library",
+    "mobile",
+    "web"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/rogerpadilla/easy-router.git"

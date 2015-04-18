@@ -51,6 +51,11 @@
     var splatParam = /\*\w+/g;
     var escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 
+    var global = typeof global === 'undefined' ? window : global;
+    var document = global.document;
+    var location = global.location;
+    var history = global.history;
+
     var EasyRouter = (function () {
 
         /**
@@ -306,11 +311,6 @@
             this.checkUrl = this.checkUrl.bind(this);
             this.handlers = [];
             this.evtHandlers = {};
-            // Ensure that `History` can be used outside of the browser.
-            if (typeof root !== 'undefined') {
-                this.location = global.location;
-                this.history = global.history;
-            }
         }
 
         _createClass(History, [{
@@ -321,7 +321,19 @@
              * @returns {boolean} if we are in the root.
              */
             value: function atRoot() {
-                return this.location.pathname.replace(/[^\/]$/, '$&/') === this.root;
+                return location.pathname.replace(/[^\/]$/, '$&/') === this.root;
+            }
+        }, {
+            key: 'getHash',
+
+            /**
+             * Gets the true hash value. Cannot use location.hash directly due to bug
+             * in Firefox where location.hash will always be decoded.
+             * @returns {string} The hash.
+             */
+            value: function getHash() {
+                var match = location.href.match(/#(.*)$/);
+                return match ? match[1] : '';
             }
         }, {
             key: 'getFragment',
@@ -336,7 +348,7 @@
             value: function getFragment(fragment, forcePushState) {
                 if (fragment === undefined) {
                     if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                        fragment = decodeURI(this.location.pathname + this.location.search);
+                        fragment = decodeURI(location.pathname + location.search);
                         var rootUrl = this.root.replace(trailingSlash, '');
                         if (!fragment.indexOf(rootUrl)) {
                             fragment = fragment.slice(rootUrl.length);
@@ -370,7 +382,7 @@
                 this.root = this.options.root;
                 this._wantsHashChange = this.options.hashChange !== false;
                 this._wantsPushState = !!this.options.pushState;
-                this._hasPushState = !!(this.options.pushState && this.history && this.history.pushState);
+                this._hasPushState = !!(this.options.pushState && history && history.pushState);
 
                 // Determine if we need to change the base url, for a pushState link
                 // opened by a non-pushState browser.
@@ -387,8 +399,6 @@
                     global.addEventListener('hashchange', this.checkUrl);
                 }
 
-                var loc = this.location;
-
                 // Transition from hashChange to pushState or vice versa if both are
                 // requested.
                 if (this._wantsHashChange && this._wantsPushState) {
@@ -397,14 +407,14 @@
                     // browser, but we're currently in a browser that doesn't support it...
                     if (!this._hasPushState && !this.atRoot()) {
                         this.fragment = this.getFragment(null, true);
-                        this.location.replace(this.root + '#' + this.fragment);
+                        location.replace(this.root + '#' + this.fragment);
                         // Return immediately as browser will do redirect to new url
                         return true;
                         // Or if we've started out with a hash-based route, but we're currently
                         // in a browser where it could be `pushState`-based instead...
-                    } else if (this._hasPushState && this.atRoot() && loc.hash) {
-                        this.fragment = this.getHash().replace(routeStripper, '');
-                        this.history.replaceState({}, document.title, this.root + this.fragment);
+                    } else if (this._hasPushState && this.atRoot() && location) {
+                        this.fragment = History.getHash().replace(routeStripper, '');
+                        history.replaceState({}, global.document.title, this.root + this.fragment);
                     }
                 }
 
@@ -529,15 +539,15 @@
 
                 // If pushState is available, we use it to set the fragment as a real URL.
                 if (this._hasPushState) {
-                    this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+                    history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
                     // If hash changes haven't been explicitly disabled, update the hash
                     // fragment to store history.
                 } else if (this._wantsHashChange) {
-                    History._updateHash(this.location, fragmentAux, options.replace);
+                    History._updateHash(fragmentAux, options.replace);
                     // If you've told us that you explicitly don't want fallback hashchange-
                     // based history, then `navigate` becomes a page refresh.
                 } else {
-                    return this.location.assign(url);
+                    return location.assign(url);
                 }
                 if (options.trigger) {
                     return this.loadUrl(fragmentAux);
@@ -545,30 +555,16 @@
                 return false;
             }
         }], [{
-            key: 'getHash',
-
-            /**
-             * Gets the true hash value. Cannot use location.hash directly due to bug
-             * in Firefox where location.hash will always be decoded.
-             * @param {Window} window The window object.
-             * @returns {string} The hash.
-             */
-            value: function getHash(window) {
-                var match = (window || this).location.href.match(/#(.*)$/);
-                return match ? match[1] : '';
-            }
-        }, {
             key: '_updateHash',
 
             /**
              * Update the hash location, either replacing the current entry, or adding
              * a new one to the browser history.
-             * @param {Location} location The Location object
              * @param {string} fragment URL fragment
              * @param {boolean} replace flag
              * @private
              */
-            value: function _updateHash(location, fragment, replace) {
+            value: function _updateHash(fragment, replace) {
                 if (replace) {
                     var href = location.href.replace(/(javascript:|#).*$/, '');
                     location.replace(href + '#' + fragment);

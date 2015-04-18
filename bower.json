@@ -1,23 +1,20 @@
 {
   "name": "easy-router",
   "version": "1.0.3",
-  "main": "src/easy-router.js",
+  "description": "Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes",
+  "keywords": [
+    "js",
+    "router",
+    "front-end",
+    "library",
+    "mobile",
+    "web"
+  ],
   "dependencies": {},
   "ignore": [
     ".*",
-    "docs",
-    "examples",
-    "test",
-    "*.yml",
-    "*.html",
-    "*.ico",
-    "*.md",
     "CNAME",
-    "karma.*",
-    "package.json",
-    "gulpfile.js",
-    ".gitignore",
-    ".eslintrc",
-    ".babelrc"
+    "docs",
+    "js/tests"
   ]
 }

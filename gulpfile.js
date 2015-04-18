@@ -8,7 +8,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
 
 var mainFileName = 'easy-router';
-var mainFile = 'src/' + mainFileName + '.js';
+var mainFile = 'js/' + mainFileName + '.js';
 
 /*** Tasks ***/
 

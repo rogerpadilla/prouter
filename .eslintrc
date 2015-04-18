@@ -19,7 +19,6 @@
     "comma-spacing": [1, {"before": false, "after": true}],
     "camelcase": [1, "always"],
     "no-unused-vars": [1, "always"],
-    "consistent-this": [1, "self"],
     "brace-style": [1, "1tbs", {"allowSingleLine": true }],
     "max-depth": [1, 4],
     "complexity": [1, 11],
