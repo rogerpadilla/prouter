@@ -9,40 +9,27 @@
  * - Proper JSDoc used in the source code.
  * - Works with normal script include and as well in CommonJS style.
  *
- * EasyRouter provides methods for routing client-side pages, and connecting them to actions. 
- *
  * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
  * ¿Have an existing Backbone project and want to migrate to a more modern framework?
  * Good news, EasyRouter will integrates perfectly with all of those!
+ */
+
+/**
+ * EasyRouter provides methods for routing client-side pages, and connecting them to actions.
  *
  * During page load, after your application has finished creating all of its routers,
  * be sure to call start() on the router instance to let know him you have already
  * finished the routing setup.
  */
-(function (global, factory) {
-    'use strict';
-    // Sourced from jquery.js 
-    if (typeof module === 'object' && typeof module.exports === 'object') {
-        // For CommonJS and CommonJS-like environments where a proper `window`
-        // is present, execute the factory and get EasyRouter.
-        // For environments that do not have a `window` with a `location`
-        // (such as Node.js), expose a factory as module.exports.
-        // This accentuates the need for the creation of a real `window`.
-        // e.g. var EasyRouter = require('easyRouter')(window);
-        module.exports = global.location ?
-            factory(global, true) :
-            function (w) {
-                if (!w.location) {
-                    throw new Error('easyRouter requires a window with a location');
-                }
-                return factory(w);
-            };
-    } else {
-        // Normal browser.
-        global.EasyRouter = factory(global);
-    }
-}(typeof window !== 'undefined' ? window : this, function (root, noGlobal) {
-    'use strict';
+
+// Cached regular expressions for matching named param parts and splatted
+// parts of route strings.
+const optionalParam = /\((.*?)\)/g;
+const namedParam = /(\(\?)?:\w+/g;
+const splatParam = /\*\w+/g;
+const escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+
+class EasyRouter {
 
     /**
      * Constructor for the router.
@@ -51,27 +38,22 @@
      * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
-    var EasyRouter = function (options) {
-        options = options || {};
+    constructor(options = {}) {
         this.evtHandlers = {};
-        if (options.routes) { this.routes = options.routes; }
+        if (options.routes) {
+            this.routes = options.routes;
+        }
         this._bindRoutes();
         this.initialize.apply(this, arguments);
-    };
-
-    // Cached regular expressions for matching named param parts and splatted
-    // parts of route strings.
-    var optionalParam = /\((.*?)\)/g;
-    var namedParam = /(\(\?)?:\w+/g;
-    var splatParam = /\*\w+/g;
-    var escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+    }
 
     /**
      * Initialize is an empty function by default. Override it with your own
      * initialization logic.
      */
-    EasyRouter.prototype.initialize = function () {
-    };
+    initialize() {
+
+    }
 
     /**
      * Events listening.
@@ -79,29 +61,29 @@
      * @param {Function} callback Method to be executed when event triggers.
      * @returns {EasyRouter} this
      */
-    EasyRouter.prototype.on = function (evt, callback) {
+    on(evt, callback) {
         if (this.evtHandlers[evt] === undefined) {
             this.evtHandlers[evt] = [];
         }
         this.evtHandlers[evt].push(callback);
         return this;
-    };
+    }
 
     /**
      * Events triggering.
      * @param {string} evt Name of the event being triggered.
      * @returns {boolean} if the event was listened or not.
      */
-    EasyRouter.prototype.trigger = function (evt) {
-        var callbacks = this.evtHandlers[evt];
+    trigger(evt) {
+        const callbacks = this.evtHandlers[evt];
         if (callbacks === undefined) {
             return false;
         }
-        var args = Array.prototype.slice.call(arguments, 1);
-        var i = 0;
-        var callbacksLength = callbacks.length;
-        var respArr = [];
-        var resp;
+        const args = Array.prototype.slice.call(arguments, 1);
+        let i = 0;
+        const callbacksLength = callbacks.length;
+        const respArr = [];
+        let resp;
         for (; i < callbacksLength; i++) {
             resp = callbacks[i].apply(this, args);
             respArr.push(resp);
@@ -112,7 +94,7 @@
             }
         }
         return true;
-    };
+    }
 
     /**
      * Manually bind a single named route to a callback.
@@ -123,25 +105,26 @@
      * @param {Function} onCallback function to call when the new fragment match a route.
      * @returns {EasyRouter} this
      */
-    EasyRouter.prototype.route = function (route, name, onCallback) {
-        if (!(Object.prototype.toString.call(route) === '[object RegExp]')) {
-            route = EasyRouter._routeToRegExp(route);
-        }
+    route(route, name, onCallback) {
+        const routeAux = (Object.prototype.toString.call(route) === '[object RegExp]') ? route :
+            EasyRouter._routeToRegExp(route);
         if (Object.prototype.toString.call(name) === '[object Function]') {
             onCallback = name;
             name = '';
         }
-        if (!onCallback) { onCallback = this[name]; }
-        var router = this;
-        EasyRouter.history.route(route, function (fragment) {
-            var args = EasyRouter._extractParameters(route, fragment);
-            router.execute(onCallback, args);
-            router.trigger.apply(router, ['route:' + name].concat(args));
-            router.trigger('route', name, args);
-            EasyRouter.history.trigger('route', router, name, args);
+        if (!onCallback) {
+            onCallback = this[name];
+        }
+        const self = this;
+        EasyRouter.history.route(routeAux, function (fragment) {
+            const args = EasyRouter._extractParameters(routeAux, fragment);
+            self.execute(onCallback, args);
+            self.trigger.apply(self, ['route:' + name].concat(args));
+            self.trigger('route', name, args);
+            EasyRouter.history.trigger('route', self, name, args);
         });
         return this;
-    };
+    }
 
     /**
      * Execute a route handler with the provided parameters.  This is an
@@ -149,9 +132,11 @@
      * @param {Function} callback The method to execute.
      * @param {Array} args The parameters to pass to the method.
      */
-    EasyRouter.prototype.execute = function (callback, args) {
-        if (callback) { callback.apply(this, args); }
-    };
+    execute(callback, args) {
+        if (callback) {
+            callback.apply(this, args);
+        }
+    }
 
     /**
      * Simple proxy to `EasyRouter.history` to save a fragment into the history.
@@ -159,10 +144,10 @@
      * @param {Object} options parameters
      * @returns {EasyRouter} this
      */
-    EasyRouter.prototype.navigate = function (fragment, options) {
+    navigate(fragment, options) {
         EasyRouter.history.navigate(fragment, options);
         return this;
-    };
+    }
 
     /**
      * Bind all defined routes to `EasyRouter.history`. We have to reverse the
@@ -170,15 +155,17 @@
      * routes can be defined at the bottom of the route map.
      * @private
      */
-    EasyRouter.prototype._bindRoutes = function () {
-        if (!this.routes) { return; }
-        var routes = Object.keys(this.routes);
-        var route = routes.pop();
+    _bindRoutes() {
+        if (!this.routes) {
+            return;
+        }
+        const routes = Object.keys(this.routes);
+        let route = routes.pop();
         while (route !== undefined) {
             this.route(route, this.routes[route]);
             route = routes.pop();
         }
-    };
+    }
 
     /**
      * Convert a route string into a regular expression, suitable for matching
@@ -187,15 +174,15 @@
      * @returns {RegExp} the obtained regex
      * @private
      */
-    EasyRouter._routeToRegExp = function (route) {
-        route = route.replace(escapeRegExp, '\\$&')
+    static _routeToRegExp(route) {
+        const routeAux = route.replace(escapeRegExp, '\\$&')
             .replace(optionalParam, '(?:$1)?')
             .replace(namedParam, function (match, optional) {
                 return optional ? match : '([^/?]+)';
             })
             .replace(splatParam, '([^?]*?)');
-        return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
-    };
+        return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
+    }
 
     /**
      * Given a route, and a URL fragment that it matches, return the array of
@@ -206,65 +193,61 @@
      * @returns {Array} the extracted parameters
      * @private
      */
-    EasyRouter._extractParameters = function (route, fragment) {
-        var params = route.exec(fragment).slice(1);
+    static _extractParameters(route, fragment) {
+        const params = route.exec(fragment).slice(1);
         return params.map(function (param, i) {
             // Don't decode the search params.
-            if (i === params.length - 1) { return param || null; }
+            if (i === params.length - 1) {
+                return param || null;
+            }
             return param ? decodeURIComponent(param) : null;
         });
-    };
+    }
 
+}
 
-    // EasyRouter.history
-    // ----------------
+/**
+ * Handles cross-browser history management, based on either
+ * [pushState](http://diveintohtml5.info/history.html) and real URLs, or
+ * [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange)
+ * and URL fragments.
+ * @constructor
+ */
 
-    /**
-     * Handles cross-browser history management, based on either
-     * [pushState](http://diveintohtml5.info/history.html) and real URLs, or
-     * [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange)
-     * and URL fragments.
-     * @constructor
-     */
-    var History = function () {
+// Cached regex for stripping a leading hash/slash and trailing space.
+const routeStripper = /^[#\/]|\s+$/g;
+
+// Cached regex for stripping leading and trailing slashes.
+const rootStripper = /^\/+|\/+$/g;
+
+// Cached regex for removing a trailing slash.
+const trailingSlash = /\/$/;
+
+// Cached regex for stripping urls of hash.
+const pathStripper = /#.*$/;
+
+class History {
+
+    constructor() {
+        // Has the history handling already been started?
+        this.started = false;
         this.checkUrl = this.checkUrl.bind(this);
         this.handlers = [];
         this.evtHandlers = {};
         // Ensure that `History` can be used outside of the browser.
         if (typeof root !== 'undefined') {
-            this.location = root.location;
-            this.history = root.history;
+            this.location = global.location;
+            this.history = global.history;
         }
-    };
-
-    // Cached regex for stripping a leading hash/slash and trailing space.
-    var routeStripper = /^[#\/]|\s+$/g;
-
-    // Cached regex for stripping leading and trailing slashes.
-    var rootStripper = /^\/+|\/+$/g;
-
-    // Cached regex for removing a trailing slash.
-    var trailingSlash = /\/$/;
-
-    // Cached regex for stripping urls of hash.
-    var pathStripper = /#.*$/;
-
-    // Has the history handling already been started?
-    History.started = false;
+    }
 
     /**
      * Are we at the app root?
-     * @returns {boolean}
+     * @returns {boolean} if we are in the root.
      */
-    History.prototype.atRoot = function () {
+    atRoot() {
         return this.location.pathname.replace(/[^\/]$/, '$&/') === this.root;
-    };
-
-    /**
-     * Copy event bus listeners.
-     */
-    History.prototype.trigger = EasyRouter.prototype.trigger;
-    History.prototype.on = EasyRouter.prototype.on;
+    }
 
     /**
      * Gets the true hash value. Cannot use location.hash directly due to bug
@@ -272,10 +255,10 @@
      * @param {Window} window The window object.
      * @returns {string} The hash.
      */
-    History.prototype.getHash = function (window) {
-        var match = (window || this).location.href.match(/#(.*)$/);
+    static getHash(window) {
+        const match = (window || this).location.href.match(/#(.*)$/);
         return match ? match[1] : '';
-    };
+    }
 
     /**
      * Get the cross-browser normalized URL fragment, either from the URL,
@@ -284,18 +267,20 @@
      * @param {boolean} forcePushState flag to force the usage of pushSate
      * @returns {string} The fragment.
      */
-    History.prototype.getFragment = function (fragment, forcePushState) {
+    getFragment(fragment, forcePushState) {
         if (fragment === undefined) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
                 fragment = decodeURI(this.location.pathname + this.location.search);
-                var rootUrl = this.root.replace(trailingSlash, '');
-                if (!fragment.indexOf(rootUrl)) { fragment = fragment.slice(rootUrl.length); }
+                const rootUrl = this.root.replace(trailingSlash, '');
+                if (!fragment.indexOf(rootUrl)) {
+                    fragment = fragment.slice(rootUrl.length);
+                }
             } else {
                 fragment = this.getHash();
             }
         }
         return fragment.replace(routeStripper, '');
-    };
+    }
 
     /**
      * Start the route change handling, returning `true` if the current URL matches
@@ -303,9 +288,11 @@
      * @param {Object} options Options
      * @returns {boolean} true if the current fragment matched some handler, false otherwise.
      */
-    History.prototype.start = function (options) {
+    start(options) {
 
-        if (History.started) { throw new Error("EasyRouter.history has already been started"); }
+        if (History.started) {
+            throw new Error("EasyRouter.history has already been started");
+        }
 
         History.started = true;
 
@@ -316,7 +303,10 @@
         this._wantsHashChange = this.options.hashChange !== false;
         this._wantsPushState = !!this.options.pushState;
         this._hasPushState = !!(this.options.pushState && this.history && this.history.pushState);
-        var fragment = this.getFragment();
+
+        // Determine if we need to change the base url, for a pushState link
+        // opened by a non-pushState browser.
+        this.fragment = this.getFragment();
 
         // Normalize root to always include a leading and trailing slash.
         this.root = ('/' + this.root + '/').replace(rootStripper, '/');
@@ -324,15 +314,12 @@
         // Depending on whether we're using pushState or hashes, and whether
         // 'onhashchange' is supported, determine how we check the URL state.
         if (this._hasPushState) {
-            root.addEventListener('popstate', this.checkUrl);
-        } else if (this._wantsHashChange && ('onhashchange' in root)) {
-            root.addEventListener('hashchange', this.checkUrl);
+            global.addEventListener('popstate', this.checkUrl);
+        } else if (this._wantsHashChange && ('onhashchange' in global)) {
+            global.addEventListener('hashchange', this.checkUrl);
         }
 
-        // Determine if we need to change the base url, for a pushState link
-        // opened by a non-pushState browser.
-        this.fragment = fragment;
-        var loc = this.location;
+        const loc = this.location;
 
         // Transition from hashChange to pushState or vice versa if both are
         // requested.
@@ -354,18 +341,20 @@
 
         }
 
-        if (!this.options.silent) { return this.loadUrl(); }
-    };
+        if (!this.options.silent) {
+            return this.loadUrl();
+        }
+    }
 
     /**
      * Disable EasyRouter.history, perhaps temporarily. Not useful in a real app,
      * but possibly useful for unit testing Routers.
      */
-    History.prototype.stop = function () {
-        root.removeEventListener('popstate', this.checkUrl);
-        root.removeEventListener('hashchange', this.checkUrl);
+    stop() {
+        global.removeEventListener('popstate', this.checkUrl);
+        global.removeEventListener('hashchange', this.checkUrl);
         History.started = false;
-    };
+    }
 
     /**
      * Add a route to be tested when the fragment changes. Routes added later
@@ -373,20 +362,22 @@
      * @param {string} route The route.
      * @param {Function} callback Method to be executed.
      */
-    History.prototype.route = function (route, callback) {
+    route(route, callback) {
         this.handlers.unshift({route: route, callback: callback});
-    };
+    }
 
     /**
      * Checks the current URL to see if it has changed, and if it has,
      * calls `loadUrl`.
      * @returns {boolean} true if navigated, false otherwise.
      */
-    History.prototype.checkUrl = function () {
-        var current = this.getFragment();
-        if (current === this.fragment) { return false; }
+    checkUrl() {
+        const current = this.getFragment();
+        if (current === this.fragment) {
+            return false;
+        }
         this.loadUrl();
-    };
+    }
 
     /**
      * Attempt to load the current URL fragment. If a route succeeds with a
@@ -395,19 +386,19 @@
      * @param {string} fragment E.g.: 'user/pepito'
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    History.prototype.loadUrl = function (fragment) {
-        fragment = this.fragment = this.getFragment(fragment);
-        var n = this.handlers.length;
-        var handler;
-        for (var i = 0; i < n; i++) {
+    loadUrl(fragment) {
+        const fragmentAux = this.fragment = this.getFragment(fragment);
+        const n = this.handlers.length;
+        let handler;
+        for (let i = 0; i < n; i++) {
             handler = this.handlers[i];
-            if (handler.route.test(fragment)) {
-                handler.callback(fragment);
+            if (handler.route.test(fragmentAux)) {
+                handler.callback(fragmentAux);
                 return true;
             }
         }
         return false;
-    };
+    }
 
     /**
      * Save a fragment into the hash history, or replace the URL state if the
@@ -421,22 +412,33 @@
      * @param {Object} options Options object
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    History.prototype.navigate = function (fragment, options) {
+    navigate(fragment, options) {
 
-        if (!History.started) { return false; }
-        if (!options || options === true) { options = {trigger: !!options}; }
+        if (!History.started) {
+            return false;
+        }
 
-        var url = this.root + (fragment = this.getFragment(fragment || ''));
+        if (!options || options === true) {
+            options = {trigger: !!options};
+        }
+
+        let fragmentAux = this.getFragment(fragment || '');
 
         // Strip the hash for matching.
-        fragment = fragment.replace(pathStripper, '');
+        fragmentAux = fragmentAux.replace(pathStripper, '');
 
-        if (this.fragment === fragment) { return false; }
+        let url = this.root + fragmentAux;
 
-        this.fragment = fragment;
+        if (this.fragment === fragmentAux) {
+            return false;
+        }
+
+        this.fragment = fragmentAux;
 
         // Don't include a trailing slash on the root.
-        if (fragment === '' && url !== '/') { url = url.slice(0, -1); }
+        if (fragmentAux === '' && url !== '/') {
+            url = url.slice(0, -1);
+        }
 
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._hasPushState) {
@@ -444,15 +446,17 @@
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
-            this._updateHash(this.location, fragment, options.replace);
+            History._updateHash(this.location, fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
             return this.location.assign(url);
         }
-        if (options.trigger) { return this.loadUrl(fragment); }
+        if (options.trigger) {
+            return this.loadUrl(fragmentAux);
+        }
         return false;
-    };
+    }
 
     /**
      * Update the hash location, either replacing the current entry, or adding
@@ -462,23 +466,29 @@
      * @param {boolean} replace flag
      * @private
      */
-    History.prototype._updateHash = function (location, fragment, replace) {
+    static _updateHash(location, fragment, replace) {
         if (replace) {
-            var href = location.href.replace(/(javascript:|#).*$/, '');
+            const href = location.href.replace(/(javascript:|#).*$/, '');
             location.replace(href + '#' + fragment);
         } else {
             // Some browsers require that `hash` contains a leading #.
             location.hash = '#' + fragment;
         }
-    };
+    }
+}
 
-    /**
-     * Create the default EasyRouter.history.
-     * @type {History}
-     */
-    EasyRouter.history = new History();
+/**
+ * Copy event bus listeners.
+ */
+History.prototype.trigger = EasyRouter.prototype.trigger;
+History.prototype.on = EasyRouter.prototype.on;
 
 
-    return EasyRouter;
+/**
+ * Create the default EasyRouter.history.
+ * @type {History}
+ */
+EasyRouter.history = new History();
 
-}));
+
+export {EasyRouter};
