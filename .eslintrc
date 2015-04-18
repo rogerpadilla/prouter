@@ -3,7 +3,6 @@
     "blockBindings": true,
     "classes": true,
     "defaultParams": true,
-    "forOf": true,
     "templateStrings": true,
     "modules": true,
     "arrowFunctions": true
@@ -38,6 +37,7 @@
     "max-params": [1, 3],
     "no-multiple-empty-lines": [1, {"max": 2}],
     "quotes": [1, "single"],
-    "no-underscore-dangle": false
+    "no-underscore-dangle": false,
+    "no-trailing-spaces": false
   }
 }

@@ -44,17 +44,28 @@
      * finished the routing setup.
      */
 
+    var root = typeof global === 'undefined' ? window : global;
+    var document = root.document;
+    var location = root.location;
+    var history = root.history;
+
     // Cached regular expressions for matching named param parts and splatted
     // parts of route strings.
     var optionalParam = /\((.*?)\)/g;
     var namedParam = /(\(\?)?:\w+/g;
     var splatParam = /\*\w+/g;
     var escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+    var trueHash = /#(.*)$/;
+    var isRoot = /[^\/]$/;
 
-    var global = typeof global === 'undefined' ? window : global;
-    var document = global.document;
-    var location = global.location;
-    var history = global.history;
+    // Cached regex for stripping a leading hash/slash and trailing space.
+    var routeStripper = /^[#\/]|\s+$/g;
+    // Cached regex for stripping leading and trailing slashes.
+    var rootStripper = /^\/+|\/+$/g;
+    // Cached regex for removing a trailing slash.
+    var trailingSlash = /\/$/;
+    // Cached regex for stripping urls of hash.
+    var pathStripper = /#.*$/;
 
     var EasyRouter = (function () {
 
@@ -139,23 +150,15 @@
              * Manually bind a single named route to a callback.
              * The route argument may be a routing string or regular expression, each matching capture
              * from the route or regular expression will be passed as an argument to the onCallback.
-             * @param {string|RegExp} route The route
+             * @param {string|RegExp} routeExp The route
              * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
              * @param {Function} onCallback function to call when the new fragment match a route.
              * @returns {EasyRouter} this
              */
-            value: (function (_route) {
-                function route(_x, _x2, _x3) {
-                    return _route.apply(this, arguments);
+            value: function route(routeExp, name, onCallback) {
+                if (!(Object.prototype.toString.call(routeExp) === '[object RegExp]')) {
+                    routeExp = EasyRouter._routeToRegExp(routeExp);
                 }
-
-                route.toString = function () {
-                    return _route.toString();
-                };
-
-                return route;
-            })(function (route, name, onCallback) {
-                var routeAux = Object.prototype.toString.call(route) === '[object RegExp]' ? route : EasyRouter._routeToRegExp(route);
                 if (Object.prototype.toString.call(name) === '[object Function]') {
                     onCallback = name;
                     name = '';
@@ -164,15 +167,15 @@
                     onCallback = this[name];
                 }
                 var self = this;
-                EasyRouter.history.route(routeAux, function (fragment) {
-                    var args = EasyRouter._extractParameters(routeAux, fragment);
+                EasyRouter.history.route(routeExp, function (fragment) {
+                    var args = EasyRouter._extractParameters(routeExp, fragment);
                     self.execute(onCallback, args);
                     self.trigger.apply(self, ['route:' + name].concat(args));
                     self.trigger('route', name, args);
                     EasyRouter.history.trigger('route', self, name, args);
                 });
                 return this;
-            })
+            }
         }, {
             key: 'execute',
 
@@ -213,30 +216,11 @@
                 if (!this.routes) {
                     return;
                 }
-                var routes = Object.keys(this.routes).reverse();
-                var _iteratorNormalCompletion = true;
-                var _didIteratorError = false;
-                var _iteratorError = undefined;
-
-                try {
-                    for (var _iterator = routes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                        var route = _step.value;
-
-                        this.route(route, this.routes[route]);
-                    }
-                } catch (err) {
-                    _didIteratorError = true;
-                    _iteratorError = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion && _iterator['return']) {
-                            _iterator['return']();
-                        }
-                    } finally {
-                        if (_didIteratorError) {
-                            throw _iteratorError;
-                        }
-                    }
+                var routes = Object.keys(this.routes);
+                var routesN = routes.length - 1;
+                for (var i = routesN, route = undefined; i >= 0; i--) {
+                    route = routes[i];
+                    this.route(route, this.routes[route]);
                 }
             }
         }], [{
@@ -250,10 +234,10 @@
              * @private
              */
             value: function _routeToRegExp(route) {
-                var routeAux = route.replace(escapeRegExp, '\\$&').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
+                route = route.replace(escapeRegExp, '\\$&').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
                     return optional ? match : '([^/?]+)';
                 }).replace(splatParam, '([^?]*?)');
-                return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
+                return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
             }
         }, {
             key: '_extractParameters',
@@ -290,18 +274,6 @@
      * @constructor
      */
 
-    // Cached regex for stripping a leading hash/slash and trailing space.
-    var routeStripper = /^[#\/]|\s+$/g;
-
-    // Cached regex for stripping leading and trailing slashes.
-    var rootStripper = /^\/+|\/+$/g;
-
-    // Cached regex for removing a trailing slash.
-    var trailingSlash = /\/$/;
-
-    // Cached regex for stripping urls of hash.
-    var pathStripper = /#.*$/;
-
     var History = (function () {
         function History() {
             _classCallCheck(this, History);
@@ -321,7 +293,7 @@
              * @returns {boolean} if we are in the root.
              */
             value: function atRoot() {
-                return location.pathname.replace(/[^\/]$/, '$&/') === this.root;
+                return location.pathname.replace(isRoot, '$&/') === this.root;
             }
         }, {
             key: 'getHash',
@@ -332,7 +304,7 @@
              * @returns {string} The hash.
              */
             value: function getHash() {
-                var match = location.href.match(/#(.*)$/);
+                var match = location.href.match(trueHash);
                 return match ? match[1] : '';
             }
         }, {
@@ -394,9 +366,9 @@
                 // Depending on whether we're using pushState or hashes, and whether
                 // 'onhashchange' is supported, determine how we check the URL state.
                 if (this._hasPushState) {
-                    global.addEventListener('popstate', this.checkUrl);
-                } else if (this._wantsHashChange && 'onhashchange' in global) {
-                    global.addEventListener('hashchange', this.checkUrl);
+                    root.addEventListener('popstate', this.checkUrl);
+                } else if (this._wantsHashChange && 'onhashchange' in root) {
+                    root.addEventListener('hashchange', this.checkUrl);
                 }
 
                 // Transition from hashChange to pushState or vice versa if both are
@@ -412,9 +384,9 @@
                         return true;
                         // Or if we've started out with a hash-based route, but we're currently
                         // in a browser where it could be `pushState`-based instead...
-                    } else if (this._hasPushState && this.atRoot() && location) {
+                    } else if (this._hasPushState && this.atRoot() && location.hash) {
                         this.fragment = History.getHash().replace(routeStripper, '');
-                        history.replaceState({}, global.document.title, this.root + this.fragment);
+                        history.replaceState({}, document.title, this.root + this.fragment);
                     }
                 }
 
@@ -430,8 +402,8 @@
              * but possibly useful for unit testing Routers.
              */
             value: function stop() {
-                global.removeEventListener('popstate', this.checkUrl);
-                global.removeEventListener('hashchange', this.checkUrl);
+                root.removeEventListener('popstate', this.checkUrl);
+                root.removeEventListener('hashchange', this.checkUrl);
                 History.started = false;
             }
         }, {
@@ -440,22 +412,12 @@
             /**
              * Add a route to be tested when the fragment changes. Routes added later
              * may override previous routes.
-             * @param {string} route The route.
+             * @param {string} routeExp The route.
              * @param {Function} callback Method to be executed.
              */
-            value: (function (_route2) {
-                function route(_x4, _x5) {
-                    return _route2.apply(this, arguments);
-                }
-
-                route.toString = function () {
-                    return _route2.toString();
-                };
-
-                return route;
-            })(function (route, callback) {
-                this.handlers.unshift({ route: route, callback: callback });
-            })
+            value: function route(routeExp, callback) {
+                this.handlers.unshift({ route: routeExp, callback: callback });
+            }
         }, {
             key: 'checkUrl',
 
@@ -482,13 +444,13 @@
              * @returns {boolean} true if the fragment matched some handler, false otherwise.
              */
             value: function loadUrl(fragment) {
-                var fragmentAux = this.fragment = this.getFragment(fragment);
+                this.fragment = this.getFragment(fragment);
                 var n = this.handlers.length;
                 var handler = undefined;
                 for (var i = 0; i < n; i++) {
                     handler = this.handlers[i];
-                    if (handler.route.test(fragmentAux)) {
-                        handler.callback(fragmentAux);
+                    if (handler.route.test(this.fragment)) {
+                        handler.callback(this.fragment);
                         return true;
                     }
                 }
