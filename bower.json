@@ -2,8 +2,7 @@
   "name": "easy-router",
   "version": "1.0.3",
   "main": "easy-router.js",
-  "dependencies": {
-  },
+  "dependencies": {},
   "ignore": [
     ".*",
     "docs",

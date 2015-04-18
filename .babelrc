@@ -1,0 +1,4 @@
+{
+  "modules": "umd",
+  "optional": ["es7.classProperties"]
+}

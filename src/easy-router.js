@@ -159,11 +159,9 @@ class EasyRouter {
         if (!this.routes) {
             return;
         }
-        const routes = Object.keys(this.routes);
-        let route = routes.pop();
-        while (route !== undefined) {
+        const routes = Object.keys(this.routes).reverse();
+        for (route of routes) {
             this.route(route, this.routes[route]);
-            route = routes.pop();
         }
     }
 
