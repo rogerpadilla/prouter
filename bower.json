@@ -1,7 +1,7 @@
 {
   "name": "easy-router",
   "version": "1.0.3",
-  "main": "easy-router.js",
+  "main": "src/easy-router.js",
   "dependencies": {},
   "ignore": [
     ".*",
@@ -17,6 +17,7 @@
     "package.json",
     "gulpfile.js",
     ".gitignore",
-    ".eslintrc"
+    ".eslintrc",
+    ".babelrc"
   ]
 }
