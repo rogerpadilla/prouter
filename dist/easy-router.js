@@ -61,10 +61,11 @@
          * @constructor
          */
 
-        function EasyRouter(options) {
+        function EasyRouter() {
+            var options = arguments[0] === undefined ? {} : arguments[0];
+
             _classCallCheck(this, EasyRouter);
 
-            options = options || {};
             this.evtHandlers = {};
             if (options.routes) {
                 this.routes = options.routes;
@@ -149,9 +150,7 @@
 
                 return route;
             })(function (route, name, onCallback) {
-                if (!(Object.prototype.toString.call(route) === '[object RegExp]')) {
-                    route = EasyRouter._routeToRegExp(route);
-                }
+                var routeAux = Object.prototype.toString.call(route) === '[object RegExp]' ? route : EasyRouter._routeToRegExp(route);
                 if (Object.prototype.toString.call(name) === '[object Function]') {
                     onCallback = name;
                     name = '';
@@ -160,8 +159,8 @@
                     onCallback = this[name];
                 }
                 var self = this;
-                EasyRouter.history.route(route, function (fragment) {
-                    var args = EasyRouter._extractParameters(route, fragment);
+                EasyRouter.history.route(routeAux, function (fragment) {
+                    var args = EasyRouter._extractParameters(routeAux, fragment);
                     self.execute(onCallback, args);
                     self.trigger.apply(self, ['route:' + name].concat(args));
                     self.trigger('route', name, args);
@@ -209,11 +208,30 @@
                 if (!this.routes) {
                     return;
                 }
-                var routes = Object.keys(this.routes);
-                var route = routes.pop();
-                while (route !== undefined) {
-                    this.route(route, this.routes[route]);
-                    route = routes.pop();
+                var routes = Object.keys(this.routes).reverse();
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
+
+                try {
+                    for (var _iterator = routes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var route = _step.value;
+
+                        this.route(route, this.routes[route]);
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator['return']) {
+                            _iterator['return']();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
                 }
             }
         }], [{
@@ -300,7 +318,7 @@
 
             /**
              * Are we at the app root?
-             * @returns {boolean}
+             * @returns {boolean} if we are in the root.
              */
             value: function atRoot() {
                 return this.location.pathname.replace(/[^\/]$/, '$&/') === this.root;

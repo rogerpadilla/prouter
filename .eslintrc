@@ -8,7 +8,10 @@
     "modules": true,
     "arrowFunctions": true
   },
-  "envs": ["browser", "node"],
+  "env": {
+    "browser": true,
+    "node": true
+  },
   "rules":{
     "no-var": [1, true],
     "comma-style": [1, "last"],

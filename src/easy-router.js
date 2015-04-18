@@ -160,7 +160,7 @@ class EasyRouter {
             return;
         }
         const routes = Object.keys(this.routes).reverse();
-        for (route of routes) {
+        for (let route of routes) {
             this.route(route, this.routes[route]);
         }
     }
