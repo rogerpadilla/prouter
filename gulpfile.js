@@ -15,8 +15,7 @@ var mainFile = 'src/' + mainFileName + '.js';
 gulp.task('lint', function () {
     return gulp.src([mainFile])
         .pipe(eslint())
-        .pipe(eslint.format())
-        .pipe(eslint.failOnError());
+        .pipe(eslint.format());
 });
 
 gulp.task('clean', function (cb) {

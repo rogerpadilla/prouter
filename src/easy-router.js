@@ -289,7 +289,7 @@ class History {
     start(options) {
 
         if (History.started) {
-            throw new Error("EasyRouter.history has already been started");
+            throw new Error('EasyRouter.history has already been started');
         }
 
         History.started = true;
