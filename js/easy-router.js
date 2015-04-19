@@ -90,7 +90,7 @@ class History {
      * @returns {string} The fragment.
      */
     getFragment(fragment, forcePushState) {
-        if (fragment === undefined) {
+        if (fragment === undefined || fragment === null) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
                 fragment = decodeURI(this.location.pathname + this.location.search);
                 const rootUrl = this.root.replace(trailingSlash, '');

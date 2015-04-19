@@ -344,12 +344,14 @@
         location.replace('http://example.com/root/foo');
 
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({root: '/root', hashChange: false, silent: true});
         strictEqual(EasyRouter.history.getFragment(), 'foo');
 
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({root: '/root/', hashChange: false, silent: true});
         strictEqual(EasyRouter.history.getFragment(), 'foo');
     });
@@ -382,7 +384,8 @@
     test("#1185 - Use pathname when hashChange is not wanted.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/path/name#hash');
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({hashChange: false});
         var fragment = EasyRouter.history.getFragment();
         strictEqual(fragment, location.pathname.replace(/^\//, ''));
@@ -391,7 +394,8 @@
     test("#1206 - Strip leading slash before location.assign.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root/');
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({hashChange: false, root: '/root/'});
         location.assign = function (pathname) {
             strictEqual(pathname, '/root/fragment');
@@ -402,7 +406,8 @@
     test("#1387 - Root fragment without trailing slash.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root');
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({hashChange: false, root: '/root/', silent: true});
         strictEqual(EasyRouter.history.getFragment(), '');
     });
@@ -410,14 +415,13 @@
     test("#1366 - History does not prepend root to fragment.", 2, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root/');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/root/x');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/root/x');
             }
-        });
+        };
         EasyRouter.history.start({
             root: '/root/',
             pushState: true,
@@ -430,14 +434,13 @@
     test("Normalize root.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/root/fragment');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/root/fragment');
             }
-        });
+        };
         EasyRouter.history.start({
             pushState: true,
             root: '/root',
@@ -449,16 +452,15 @@
     test("Normalize root.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root#fragment');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                },
-                replaceState: function (state, title, url) {
-                    strictEqual(url, '/root/fragment');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+            },
+            replaceState: function (state, title, url) {
+                strictEqual(url, '/root/fragment');
             }
-        });
+        };
         EasyRouter.history.start({
             pushState: true,
             root: '/root'
@@ -468,7 +470,8 @@
     test("Normalize root.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root');
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.loadUrl = function () {
             ok(true);
         };
@@ -481,15 +484,14 @@
     test("Normalize root - leading slash.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function () {
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function () {
             }
-        });
+        };
         EasyRouter.history.start({root: 'root'});
         strictEqual(EasyRouter.history.root, '/root/');
     });
@@ -497,16 +499,15 @@
     test("Transition from hashChange to pushState.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root#x/y');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function (state, title, url) {
-                    strictEqual(url, '/root/x/y');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function (state, title, url) {
+                strictEqual(url, '/root/x/y');
             }
-        });
+        };
         EasyRouter.history.start({
             root: 'root',
             pushState: true
@@ -516,15 +517,14 @@
     test("#1619: Router: Normalize empty root", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function () {
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function () {
             }
-        });
+        };
         EasyRouter.history.start({root: ''});
         strictEqual(EasyRouter.history.root, '/');
     });
@@ -532,14 +532,13 @@
     test("#1619: Router: nagivate with empty root", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/fragment');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/fragment');
             }
-        });
+        };
         EasyRouter.history.start({
             pushState: true,
             root: '',
@@ -554,13 +553,12 @@
         location.replace = function (url) {
             strictEqual(url, '/root#x/y?a=b');
         };
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: null,
-                replaceState: null
-            }
-        });
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: null,
+            replaceState: null
+        };
         EasyRouter.history.start({
             root: 'root',
             pushState: true
@@ -570,41 +568,28 @@
     test("#1695 - hashChange to pushState with search.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root#x/y?a=b');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function (state, title, url) {
-                    strictEqual(url, '/root/x/y?a=b');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function (state, title, url) {
+                strictEqual(url, '/root/x/y?a=b');
             }
-        });
+        };
         EasyRouter.history.start({
             root: 'root',
             pushState: true
         });
     });
 
-    test("#1746 - Router allows empty route.", 1, function () {
-        var Router = EasyRouter.Router.extend({
-            routes: {'': 'empty'},
-            empty: function () {
-            },
-            route: function (route) {
-                strictEqual(route, '');
-            }
-        });
-        new Router;
-    });
-
     test("#1794 - Trailing space in fragments.", 1, function () {
-        var history = new EasyRouter.History;
+        var history = new EasyRouter.History();
         strictEqual(history.getFragment('fragment   '), 'fragment');
     });
 
     test("#1820 - Leading slash and trailing space.", 1, function () {
-        var history = new EasyRouter.History;
+        var history = new EasyRouter.History();
         strictEqual(history.getFragment('/fragment '), 'fragment');
     });
 
@@ -627,43 +612,29 @@
     });
 
     test("#2255 - Extend routes by making routes a function.", 1, function () {
-        var RouterBase = EasyRouter.Router.extend({
-            routes: function () {
-                return {
-                    home: "root",
-                    index: "index.html"
-                };
+        var router = new EasyRouter({
+            routes: {
+                home: "root",
+                index: "index.html",
+                show: "show",
+                search: "search"
             }
         });
-
-        var RouterExtended = RouterBase.extend({
-            routes: function () {
-                var _super = RouterExtended.__super__.routes;
-                return _.extend(_super(),
-                    {
-                        show: "show",
-                        search: "search"
-                    });
-            }
-        });
-
-        var router = new RouterExtended();
-        deepEqual({home: "root", index: "index.html", show: "show", search: "search"}, router.routes);
+        deepEqual({home: "root", index: "index.html", show: "show", search: "search"}, router.opts.routes);
     });
 
     test("#2538 - hashChange to pushState only if both requested.", 0, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/root?a=b#x/y');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function () {
-                    ok(false);
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function () {
+                ok(false);
             }
-        });
+        };
         EasyRouter.history.start({
             root: 'root',
             pushState: true,
@@ -673,24 +644,22 @@
 
     test('No hash fallback.', 0, function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                },
-                replaceState: function () {
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+            },
+            replaceState: function () {
             }
-        });
+        };
 
-        var Router = EasyRouter.Router.extend({
+        new EasyRouter({
             routes: {
                 hash: function () {
                     ok(false);
                 }
             }
         });
-        var router = new Router;
 
         location.replace('http://example.com/');
         EasyRouter.history.start({
@@ -703,14 +672,13 @@
 
     test('#2656 - No trailing slash on root.', 1, function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/root');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/root');
             }
-        });
+        };
         location.replace('http://example.com/root/path');
         EasyRouter.history.start({pushState: true, hashChange: false, root: 'root'});
         EasyRouter.history.navigate('');
@@ -718,14 +686,13 @@
 
     test('#2656 - No trailing slash on root.', 1, function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/');
             }
-        });
+        };
         location.replace('http://example.com/path');
         EasyRouter.history.start({pushState: true, hashChange: false});
         EasyRouter.history.navigate('');
@@ -733,14 +700,13 @@
 
     test('#2656 - No trailing slash on root.', 1, function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/root?x=1');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/root?x=1');
             }
-        });
+        };
         location.replace('http://example.com/root/path');
         EasyRouter.history.start({pushState: true, hashChange: false, root: 'root'});
         EasyRouter.history.navigate('?x=1');
@@ -748,23 +714,21 @@
 
     test('#2765 - Fragment matching sans query/hash.', 2, function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function (state, title, url) {
-                    strictEqual(url, '/path?query#hash');
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function (state, title, url) {
+                strictEqual(url, '/path?query#hash');
             }
-        });
+        };
 
-        var Router = EasyRouter.Router.extend({
+        new EasyRouter({
             routes: {
                 path: function () {
                     ok(true);
                 }
             }
         });
-        var router = new Router;
 
         location.replace('http://example.com/');
         EasyRouter.history.start({pushState: true, hashChange: false});
@@ -772,60 +736,59 @@
     });
 
     test('Do not decode the search params.', function () {
-        var Router = EasyRouter.Router.extend({
+        new EasyRouter({
             routes: {
                 path: function (params) {
                     strictEqual(params, 'x=y%3Fz');
                 }
             }
         });
-        var router = new Router;
         EasyRouter.history.navigate('path?x=y%3Fz', true);
     });
 
     test('Navigate to a hash url.', function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({pushState: true});
-        var Router = EasyRouter.Router.extend({
+        new EasyRouter({
             routes: {
                 path: function (params) {
                     strictEqual(params, 'x=y');
                 }
             }
         });
-        var router = new Router;
         location.replace('http://example.com/path?x=y#hash');
         EasyRouter.history.checkUrl();
     });
 
     test('#navigate to a hash url.', function () {
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
         EasyRouter.history.start({pushState: true});
-        var Router = EasyRouter.Router.extend({
+        new EasyRouter({
             routes: {
                 path: function (params) {
                     strictEqual(params, 'x=y');
                 }
             }
         });
-        var router = new Router;
         EasyRouter.history.navigate('path?x=y#hash', true);
     });
 
     test('unicode pathname', 1, function () {
         location.replace('http://example.com/myyjä');
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
-        var Router = EasyRouter.Router.extend({
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        new EasyRouter({
             routes: {
                 myyjä: function () {
                     ok(true);
                 }
             }
         });
-        new Router;
         EasyRouter.history.start({pushState: true});
     });
 
@@ -833,38 +796,39 @@
         location.replace('http://example.com/myyjä/foo%20%25%3F%2f%40%25%20bar');
         location.pathname = '/myyj%C3%A4/foo%20%25%3F%2f%40%25%20bar';
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
-        var Router = EasyRouter.Router.extend({
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        new EasyRouter({
             routes: {
                 'myyjä/:query': function (query) {
                     strictEqual(query, 'foo %?/@% bar');
                 }
             }
         });
-        new Router;
         EasyRouter.history.start({pushState: true});
     });
 
     test('newline in route', 1, function () {
         location.replace('http://example.com/stuff%0Anonsense?param=foo%0Abar');
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
-        var Router = EasyRouter.Router.extend({
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        new EasyRouter({
             routes: {
                 'stuff\nnonsense': function () {
                     ok(true);
                 }
             }
         });
-        new Router;
         EasyRouter.history.start({pushState: true});
     });
 
     test('Router#execute receives callback, args, name.', 3, function () {
         location.replace('http://example.com#foo/123/bar?x=y');
         EasyRouter.history.stop();
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
-        var Router = EasyRouter.Router.extend({
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        new EasyRouter({
             routes: {'foo/:id/bar': 'foo'},
             foo: function () {
             },
@@ -874,7 +838,6 @@
                 strictEqual(name, 'foo');
             }
         });
-        var router = new Router;
         EasyRouter.history.start();
     });
 
@@ -884,27 +847,25 @@
         location.replace = function (url) {
             strictEqual(url, '/#?a=b');
         };
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: null
-        });
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = null;
         EasyRouter.history.start({pushState: true});
     });
 
     test("#3123 - History#navigate decodes before comparison.", 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com/shop/search?keyword=short%20dress');
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: function () {
-                    ok(false);
-                },
-                replaceState: function () {
-                    ok(false);
-                }
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: function () {
+                ok(false);
+            },
+            replaceState: function () {
+                ok(false);
             }
-        });
+        };
         EasyRouter.history.start({pushState: true});
         EasyRouter.history.navigate('shop/search?keyword=short%20dress', true);
         strictEqual(EasyRouter.history.fragment, 'shop/search?keyword=short dress');
@@ -913,8 +874,9 @@
     test('#3175 - Urls in the params', 1, function () {
         EasyRouter.history.stop();
         location.replace('http://example.com#login?a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
-        EasyRouter.history = _.extend(new EasyRouter.History, {location: location});
-        var router = new EasyRouter.Router;
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        var router = new EasyRouter();
         router.route('login', function (params) {
             strictEqual(params, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
         });
@@ -925,6 +887,7 @@
         EasyRouter.history.stop();
         location.replace('/root?foo=bar');
         location.replace = function (url) {
+            console.log('AAAAAAAAAAAAAAA', url);
             strictEqual(url, '/root#?foo=bar');
         };
         EasyRouter.history = new EasyRouter.History();
