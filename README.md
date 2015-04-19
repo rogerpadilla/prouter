@@ -12,11 +12,7 @@ while providing the following differences:
 
 Want to create a modern hibrid-mobile-app or website using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing Backbone project and want to migrate? Good news, EasyRouter was created with all of those use cases in mind!
 
-EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries, each one with a route an a callback, and done!
-
-Handles cross-browser history management, based on either:
-* [pushState](http://diveintohtml5.info/history.html) and real URLs, or
-* [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments.
+EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries, each one with a route an a callback, and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments.
 
 Install it via [Bower](http://bower.io/) (or just download it [here](https://github.com/rogerpadilla/easy-router/tree/master/dist)):
 ``` bash
