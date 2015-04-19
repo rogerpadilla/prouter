@@ -8,7 +8,7 @@ while providing the following advantages:
 * __Supports both routes' styles__, [hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) and [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history) of the History API.
 * __Unit testing__ included in the build process.
 * Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format, thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
-* Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in the source code.
+* Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
 * Tested in every common browser: Chrome, Firefox, IE9+.
 
 ¿Want to create a modern hibrid-mobile-app or website using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), and of course, vanilla JS, etc.?
