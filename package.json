@@ -2,6 +2,9 @@
   "name": "EasyRouter",
   "version": "1.0.3",
   "description": "Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes",
+  "main": [
+    "js/easy-router.js"
+  ],
   "author": "Roger Padilla <rogerjose81@gmail.com>",
   "homepage": "https://github.com/rogerpadilla/easy-router",
   "bugs": "https://github.com/rogerpadilla/easy-router/issues",
@@ -18,16 +21,22 @@
     "type": "git",
     "url": "https://github.com/rogerpadilla/easy-router.git"
   },
-  "dependencies": {
-    "del": "^1.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel": "^5.1.10",
+    "backbone": "^1.1.2",
     "closure-compiler": "^0.2.6",
-    "gulp": ">=3.8.11",
+    "del": "^1.1.1",
+    "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-closure-compiler": "^0.2.19",
     "gulp-eslint": "^0.9.0",
-    "gulp-sourcemaps": "^1.5.2"
+    "gulp-karma": "^0.0.4",
+    "gulp-sourcemaps": "^1.5.2",
+    "karma": "^0.12.31",
+    "karma-chrome-launcher": "^0.1",
+    "karma-firefox-launcher": "^0.1.4",
+    "karma-qunit": "^0.1.4",
+    "underscore": "^1.8.3"
   }
 }

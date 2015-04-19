@@ -24,8 +24,6 @@
 
 const root = typeof global === 'undefined' ? window : global;
 const document = root.document;
-const location = root.location;
-const history = root.history;
 
 // Cached regular expressions for matching named param parts and splatted
 // parts of route strings.
@@ -45,184 +43,6 @@ const trailingSlash = /\/$/;
 // Cached regex for stripping urls of hash.
 const pathStripper = /#.*$/;
 
-
-class EasyRouter {
-
-    /**
-     * Constructor for the router.
-     * Routers map faux-URLs to actions, and fire events when routes are
-     * matched. Creating a new one sets its `routes` hash, if not set statically.
-     * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
-     * @constructor
-     */
-    constructor(options = {}) {
-        this.evtHandlers = {};
-        if (options.routes) {
-            this.routes = options.routes;
-        }
-        this._bindRoutes();
-        this.initialize.apply(this, arguments);
-    }
-
-    /**
-     * Initialize is an empty function by default. Override it with your own
-     * initialization logic.
-     */
-    initialize() {
-
-    }
-
-    /**
-     * Events listening.
-     * @param {string} evt Name of the event for listen to.
-     * @param {Function} callback Method to be executed when event triggers.
-     * @returns {EasyRouter} this
-     */
-    on(evt, callback) {
-        if (this.evtHandlers[evt] === undefined) {
-            this.evtHandlers[evt] = [];
-        }
-        this.evtHandlers[evt].push(callback);
-        return this;
-    }
-
-    /**
-     * Events triggering.
-     * @param {string} evt Name of the event being triggered.
-     * @returns {boolean} if the event was listened or not.
-     */
-    trigger(evt) {
-        const callbacks = this.evtHandlers[evt];
-        if (callbacks === undefined) {
-            return false;
-        }
-        const args = Array.prototype.slice.call(arguments, 1);
-        let i = 0;
-        const callbacksLength = callbacks.length;
-        const respArr = [];
-        let resp;
-        for (; i < callbacksLength; i++) {
-            resp = callbacks[i].apply(this, args);
-            respArr.push(resp);
-        }
-        for (; i < callbacksLength; i++) {
-            if (respArr[i] === false) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Manually bind a single named route to a callback.
-     * The route argument may be a routing string or regular expression, each matching capture
-     * from the route or regular expression will be passed as an argument to the onCallback.
-     * @param {string|RegExp} routeExp The route
-     * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
-     * @param {Function} onCallback function to call when the new fragment match a route.
-     * @returns {EasyRouter} this
-     */
-    route(routeExp, name, onCallback) {
-        if (!(Object.prototype.toString.call(routeExp) === '[object RegExp]')) {
-            routeExp = EasyRouter._routeToRegExp(routeExp);
-        }
-        if (Object.prototype.toString.call(name) === '[object Function]') {
-            onCallback = name;
-            name = '';
-        }
-        if (!onCallback) {
-            onCallback = this[name];
-        }
-        const self = this;
-        EasyRouter.history.route(routeExp, function (fragment) {
-            const args = EasyRouter._extractParameters(routeExp, fragment);
-            self.execute(onCallback, args);
-            self.trigger.apply(self, ['route:' + name].concat(args));
-            self.trigger('route', name, args);
-            EasyRouter.history.trigger('route', self, name, args);
-        });
-        return this;
-    }
-
-    /**
-     * Execute a route handler with the provided parameters.  This is an
-     * excellent place to do pre-route setup or post-route cleanup.
-     * @param {Function} callback The method to execute.
-     * @param {Array} args The parameters to pass to the method.
-     */
-    execute(callback, args) {
-        if (callback) {
-            callback.apply(this, args);
-        }
-    }
-
-    /**
-     * Simple proxy to `EasyRouter.history` to save a fragment into the history.
-     * @param {string} fragment Route to navigate to.
-     * @param {Object} options parameters
-     * @returns {EasyRouter} this
-     */
-    navigate(fragment, options) {
-        EasyRouter.history.navigate(fragment, options);
-        return this;
-    }
-
-    /**
-     * Bind all defined routes to `EasyRouter.history`. We have to reverse the
-     * order of the routes here to support behavior where the most general
-     * routes can be defined at the bottom of the route map.
-     * @private
-     */
-    _bindRoutes() {
-        if (!this.routes) {
-            return;
-        }
-        const routes = Object.keys(this.routes);
-        const routesN = routes.length - 1;
-        for (let i = routesN, route; i >= 0; i--) {
-            route = routes[i];
-            this.route(route, this.routes[route]);
-        }
-    }
-
-    /**
-     * Convert a route string into a regular expression, suitable for matching
-     * against the current location fragment.
-     * @param {string} route The route
-     * @returns {RegExp} the obtained regex
-     * @private
-     */
-    static _routeToRegExp(route) {
-        route = route.replace(escapeRegExp, '\\$&')
-            .replace(optionalParam, '(?:$1)?')
-            .replace(namedParam, function (match, optional) {
-                return optional ? match : '([^/?]+)';
-            })
-            .replace(splatParam, '([^?]*?)');
-        return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
-    }
-
-    /**
-     * Given a route, and a URL fragment that it matches, return the array of
-     * extracted decoded parameters. Empty or unmatched parameters will be
-     * treated as `null` to normalize cross-browser behavior.
-     * @param {RegExp} route The alias
-     * @param {string} fragment The url part
-     * @returns {Array} the extracted parameters
-     * @private
-     */
-    static _extractParameters(route, fragment) {
-        const params = route.exec(fragment).slice(1);
-        return params.map(function (param, i) {
-            // Don't decode the search params.
-            if (i === params.length - 1) {
-                return param || null;
-            }
-            return param ? decodeURIComponent(param) : null;
-        });
-    }
-
-}
 
 /**
  * Handles cross-browser history management, based on either
@@ -247,7 +67,7 @@ class History {
      * @returns {boolean} if we are in the root.
      */
     atRoot() {
-        return location.pathname.replace(isRoot, '$&/') === this.root;
+        return History.location.pathname.replace(isRoot, '$&/') === this.root;
     }
 
     /**
@@ -255,8 +75,8 @@ class History {
      * in Firefox where location.hash will always be decoded.
      * @returns {string} The hash.
      */
-    getHash() {
-        const match = location.href.match(trueHash);
+    static getHash() {
+        const match = History.location.href.match(trueHash);
         return match ? match[1] : '';
     }
 
@@ -270,13 +90,13 @@ class History {
     getFragment(fragment, forcePushState) {
         if (fragment === undefined) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                fragment = decodeURI(location.pathname + location.search);
+                fragment = decodeURI(History.location.pathname + History.location.search);
                 const rootUrl = this.root.replace(trailingSlash, '');
                 if (!fragment.indexOf(rootUrl)) {
                     fragment = fragment.slice(rootUrl.length);
                 }
             } else {
-                fragment = this.getHash();
+                fragment = History.getHash();
             }
         }
         return fragment.replace(routeStripper, '');
@@ -297,12 +117,12 @@ class History {
         History.started = true;
 
         // Figure out the initial configuration. Is pushState desired ... is it available?
-        this.options = options || {};
-        this.options.root = options.root || '/';
-        this.root = this.options.root;
-        this._wantsHashChange = this.options.hashChange !== false;
-        this._wantsPushState = !!this.options.pushState;
-        this._hasPushState = !!(this.options.pushState && history && history.pushState);
+        this.opts = options || {};
+        this.opts.root = options.root || '/';
+        this.root = this.opts.root;
+        this._wantsHashChange = this.opts.hashChange !== false;
+        this._wantsPushState = !!this.opts.pushState;
+        this._hasPushState = !!(this.opts.pushState && History.history && History.history.pushState);
 
         // Determine if we need to change the base url, for a pushState link
         // opened by a non-pushState browser.
@@ -327,19 +147,19 @@ class History {
             // browser, but we're currently in a browser that doesn't support it...
             if (!this._hasPushState && !this.atRoot()) {
                 this.fragment = this.getFragment(null, true);
-                location.replace(this.root + '#' + this.fragment);
+                History.location.replace(this.root + '#' + this.fragment);
                 // Return immediately as browser will do redirect to new url
                 return true;
                 // Or if we've started out with a hash-based route, but we're currently
                 // in a browser where it could be `pushState`-based instead...
-            } else if (this._hasPushState && this.atRoot() && location.hash) {
+            } else if (this._hasPushState && this.atRoot() && History.location.hash) {
                 this.fragment = History.getHash().replace(routeStripper, '');
-                history.replaceState({}, document.title, this.root + this.fragment);
+                History.history.replaceState({}, document.title, this.root + this.fragment);
             }
 
         }
 
-        if (!this.options.silent) {
+        if (!this.opts.silent) {
             return this.loadUrl();
         }
     }
@@ -405,7 +225,7 @@ class History {
      *
      * The options object can contain `trigger: true` if you wish to have the
      * route callback be fired (not usually desirable), or `replace: true`, if
-     * you wish to modify the current URL without adding an entry to the history.
+     * you wish to modify the current URL without adding an entry to the History.history.
      * @param {string} fragment Fragment to navigate to
      * @param {Object} options Options object
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
@@ -442,18 +262,82 @@ class History {
         if (this._hasPushState) {
             history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
             // If hash changes haven't been explicitly disabled, update the hash
-            // fragment to store history.
+            // fragment to store History.history.
         } else if (this._wantsHashChange) {
             History._updateHash(fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
-            return location.assign(url);
+            return History.location.assign(url);
         }
         if (options.trigger) {
             return this.loadUrl(fragmentAux);
         }
         return false;
+    }
+
+    /**
+     * Add event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {EasyRouter} this
+     */
+    on(evt, callback) {
+        if (this.evtHandlers[evt] === undefined) {
+            this.evtHandlers[evt] = [];
+        }
+        this.evtHandlers[evt].push(callback);
+        return this;
+    }
+
+    /**
+     * Remove event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {EasyRouter} this
+     */
+    off(evt, callback) {
+        if (this.evtHandlers[evt]) {
+            const callbacks = this.evtHandlers[evt];
+            const n = callbacks.length;
+            for (let i = 0; i < n; i++) {
+                if (callbacks[i] === callback) {
+                    callbacks.splice(i, 1);
+                    if (callbacks.length === 0) {
+                        delete this.evtHandlers[evt];
+                    }
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Events triggering.
+     * @param {string} evt Name of the event being triggered.
+     * @returns {boolean} if the event was listened or not.
+     */
+    trigger(evt) {
+        const callbacks = this.evtHandlers[evt];
+        if (callbacks === undefined) {
+            return false;
+        }
+        const args = Array.prototype.slice.call(arguments, 1);
+        let i = 0;
+        const callbacksLength = callbacks.length;
+        const respArr = [];
+        let resp;
+        for (; i < callbacksLength; i++) {
+            resp = callbacks[i].apply(this, args);
+            respArr.push(resp);
+        }
+        for (; i < callbacksLength; i++) {
+            if (respArr[i] === false) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -465,27 +349,171 @@ class History {
      */
     static _updateHash(fragment, replace) {
         if (replace) {
-            const href = location.href.replace(/(javascript:|#).*$/, '');
-            location.replace(href + '#' + fragment);
+            const href = History.location.href.replace(/(javascript:|#).*$/, '');
+            History.location.replace(href + '#' + fragment);
         } else {
             // Some browsers require that `hash` contains a leading #.
-            location.hash = '#' + fragment;
+            History.location.hash = '#' + fragment;
         }
     }
 }
 
+
+History.location = root.location;
+History.history = root.history;
+
+
+class EasyRouter {
+
+    /**
+     * Constructor for the router.
+     * Routers map faux-URLs to actions, and fire events when routes are
+     * matched. Creating a new one sets its `routes` hash, if not set statically.
+     * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
+     * @constructor
+     */
+    constructor(options = {}) {
+        this.evtHandlers = {};
+        this.opts = options;
+        this._bindRoutes();
+        if (this.opts.initialize) {
+            this.opts.initialize.apply(this, arguments);
+        }
+    }
+
+    /**
+     * Manually bind a single named route to a callback.
+     * The route argument may be a routing string or regular expression, each matching capture
+     * from the route or regular expression will be passed as an argument to the onCallback.
+     * @param {string|RegExp} routeExp The route
+     * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
+     * @param {Function} onCallback function to call when the new fragment match a route.
+     * @returns {EasyRouter} this
+     */
+    route(routeExp, name, onCallback) {
+
+        const routeAux = (Object.prototype.toString.call(routeExp) === '[object RegExp]') ? routeExp : EasyRouter._routeToRegExp(routeExp);
+
+        if (Object.prototype.toString.call(name) === '[object Function]') {
+            onCallback = name;
+            name = '';
+        }
+
+        if (!onCallback) {
+            onCallback = this.opts[name];
+            if (routeExp === 'implicit' && name === 'implicit') {
+                console.log('onCallback', name, onCallback);
+            }
+        }
+
+        const self = this;
+
+        EasyRouter.history.route(routeAux, function (fragment) {
+            const args = EasyRouter._extractParameters(routeAux, fragment);
+            self.execute(onCallback, args);
+            self.trigger.apply(self, ['route:' + name].concat(args));
+            self.trigger('route', name, args);
+            EasyRouter.history.trigger('route', self, name, args);
+        });
+
+        return this;
+    }
+
+    /**
+     * Execute a route handler with the provided parameters.  This is an
+     * excellent place to do pre-route setup or post-route cleanup.
+     * @param {Function} callback The method to execute.
+     * @param {Array} args The parameters to pass to the method.
+     */
+    execute(callback, args) {
+        if (callback) {
+            callback.apply(this, args);
+        }
+    }
+
+    /**
+     * Simple proxy to `EasyRouter.history` to save a fragment into the history.
+     * @param {string} fragment Route to navigate to.
+     * @param {Object} options parameters
+     * @returns {EasyRouter} this
+     */
+    navigate(fragment, options) {
+        EasyRouter.history.navigate(fragment, options);
+        return this;
+    }
+
+    /**
+     * Bind all defined routes to `EasyRouter.history`. We have to reverse the
+     * order of the routes here to support behavior where the most general
+     * routes can be defined at the bottom of the route map.
+     * @private
+     */
+    _bindRoutes() {
+        if (!this.opts.routes) {
+            return;
+        }
+        const routes = Object.keys(this.opts.routes);
+        const routesN = routes.length - 1;
+        for (let i = routesN, route; i >= 0; i--) {
+            route = routes[i];
+            this.route(route, this.opts.routes[route]);
+        }
+    }
+
+    /**
+     * Convert a route string into a regular expression, suitable for matching
+     * against the current location fragment.
+     * @param {string} route The route
+     * @returns {RegExp} the obtained regex
+     * @private
+     */
+    static _routeToRegExp(route) {
+        route = route.replace(escapeRegExp, '\\$&')
+            .replace(optionalParam, '(?:$1)?')
+            .replace(namedParam, function (match, optional) {
+                return optional ? match : '([^/?]+)';
+            })
+            .replace(splatParam, '([^?]*?)');
+        return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
+    }
+
+    /**
+     * Given a route, and a URL fragment that it matches, return the array of
+     * extracted decoded parameters. Empty or unmatched parameters will be
+     * treated as `null` to normalize cross-browser behavior.
+     * @param {RegExp} route The alias
+     * @param {string} fragment The url part
+     * @returns {Array} the extracted parameters
+     * @private
+     */
+    static _extractParameters(route, fragment) {
+        const params = route.exec(fragment).slice(1);
+        return params.map(function (param, i) {
+            // Don't decode the search params.
+            if (i === params.length - 1) {
+                return param || null;
+            }
+            return param ? decodeURIComponent(param) : null;
+        });
+    }
+
+}
+
+
+EasyRouter.History = History;
+
 /**
  * Copy event bus listeners.
  */
-History.prototype.trigger = EasyRouter.prototype.trigger;
-History.prototype.on = EasyRouter.prototype.on;
-
+EasyRouter.prototype.trigger = History.prototype.trigger;
+EasyRouter.prototype.on = History.prototype.on;
+EasyRouter.prototype.off = History.prototype.off;
 
 /**
- * Create the default EasyRouter.history.
+ * Create the default EasyRouter.History.
  * @type {History}
  */
-EasyRouter.history = new History();
+EasyRouter.history = new EasyRouter.History();
 
 
 export {EasyRouter as EasyRouter};
