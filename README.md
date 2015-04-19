@@ -1,11 +1,11 @@
 # easy-router
 Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes,
-while providing the following advantages:
-* __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
-* __Great performance__, only native functions are used.
+while providing the following differences:
 * __Small footprint__, 5kb for the [minified](https://developers.google.com/closure/compiler/) version.
+* __Great performance__, only native functions are used.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
-* __Unit testing__ included in the build process.
+* __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
+* Unit testing included in the build process.
 * Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format, thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
 * Tested in every common browser: Chrome, Firefox, IE9+.
