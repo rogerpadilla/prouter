@@ -31,6 +31,12 @@ module.exports = function (config) {
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: true
+        singleRun: true,
+
+        files: [
+            'test/setup/*.js',
+            'dist/*.js',
+            'test/*.spec.js'
+        ]
     });
 };

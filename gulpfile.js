@@ -6,17 +6,10 @@ var babel = require('gulp-babel');
 var closureCompiler = require('gulp-closure-compiler');
 var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
-var karma = require('gulp-karma');
+var karma = require('karma').server;
 
 var mainFileName = 'easy-router';
 var mainFile = 'js/' + mainFileName + '.js';
-
-// list of files / patterns to load in the browser
-var testFiles = [
-    'test/setup/*.js',
-    'dist/easy-router.js',
-    'test/*.js'
-];
 
 /*** Tasks ***/
 
@@ -26,15 +19,16 @@ gulp.task('lint', function () {
         .pipe(eslint.format());
 });
 
-gulp.task('test', ['script:build'], function () {
-    return gulp.src(testFiles)
-        .pipe(karma({
-            configFile: 'karma.conf.js',
-            action: 'run'
-        }))
-        .on('error', function (err) {
-            throw err;
-        });
+/**
+ * Run tests once and exit.
+ */
+gulp.task('test', ['script:build'], function (done) {
+    karma.start({
+        configFile: __dirname + '/karma.conf.js',
+        action: 'run',
+        autoWatch: false,
+        singleRun: true
+    }, done);
 });
 
 gulp.task('clean', function (cb) {
