@@ -35,7 +35,7 @@ gulp.task('clean', function (cb) {
     del(['dist/**/*'], cb);
 });
 
-gulp.task('script:build', ['clean'], function () {
+gulp.task('script:build', ['clean', 'lint'], function () {
     return gulp.src(mainFile)
         .pipe(sourcemaps.init())
         .pipe(babel())
