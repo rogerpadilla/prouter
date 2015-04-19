@@ -20,7 +20,7 @@ Install it via [Bower](http://bower.io/) (or just download it [here](https://git
 bower install easy-router -S
 ```
 
-Just use it like the [Backbone.Router](http://backbonejs.org/#Router):
+Just use it in the same way than the [Backbone.Router](http://backbonejs.org/#Router) component:
 
 ```javascript
 var appRouter = new EasyRouter({
