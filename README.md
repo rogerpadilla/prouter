@@ -10,11 +10,7 @@ while providing the following advantages:
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
 * Tested in every common browser: Chrome, Firefox, IE9+.
 
-* Want to create a modern hibrid-mobile-app or website using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), and of course, vanilla JS, etc.?
-* Want to render in both sides, the backend and the front-end?
-* Have an existing Backbone project and want to migrate? Good news?
-
-EasyRouter integrates perfectly fine in all of those use cases!
+Want to create a modern hibrid-mobile-app or website using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing Backbone project and want to migrate? Good news, EasyRouter integrates perfectly fine in all of those use cases!
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries, each one with a route an a callback, and done!
 
