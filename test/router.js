@@ -551,7 +551,7 @@
         EasyRouter.history.stop();
         location.replace('http://example.com/root/x/y?a=b');
         location.replace = function (url) {
-            strictEqual(url, '/root#x/y?a=b');
+            strictEqual(url, '/root/#x/y?a=b');
         };
         EasyRouter.history = new EasyRouter.History();
         EasyRouter.history.location = location;
@@ -704,7 +704,7 @@
         EasyRouter.history.location = location;
         EasyRouter.history.history = {
             pushState: function (state, title, url) {
-                strictEqual(url, '/root?x=1');
+                strictEqual(url, '/root/?x=1');
             }
         };
         location.replace('http://example.com/root/path');
@@ -887,7 +887,6 @@
         EasyRouter.history.stop();
         location.replace('/root?foo=bar');
         location.replace = function (url) {
-            console.log('AAAAAAAAAAAAAAA', url);
             strictEqual(url, '/root#?foo=bar');
         };
         EasyRouter.history = new EasyRouter.History();
