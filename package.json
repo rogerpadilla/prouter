@@ -1,6 +1,6 @@
 {
   "name": "EasyRouter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes",
   "main": [
     "js/easy-router.js"
