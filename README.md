@@ -15,7 +15,7 @@ while providing the following advantages:
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries, each one with a route an a callback, and done!
 
-Install it via [Bower](http://bower.io/) (or download it [here](https://github.com/rogerpadilla/easy-router/tree/master/dist)):
+Install it via [Bower](http://bower.io/) (or just download it [here](https://github.com/rogerpadilla/easy-router/tree/master/dist)):
 ``` bash
 bower install easy-router -S
 ```
