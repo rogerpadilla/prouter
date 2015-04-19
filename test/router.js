@@ -48,6 +48,7 @@
 
             location = new Location('http://example.com');
             EasyRouter.History.location = location;
+            EasyRouter.history = new EasyRouter.History();
 
             router = new EasyRouter({
 
@@ -258,7 +259,7 @@
         equal(router.count, 1);
     });
 
-    /*test("routes via navigate with {replace: true}", 1, function () {
+    test("routes via navigate with {replace: true}", 1, function () {
         location.replace('http://example.com#start_here');
         EasyRouter.history.checkUrl();
         location.replace = function (href) {
@@ -964,6 +965,6 @@
             }
         });
         EasyRouter.history.start({root: '/root', pushState: true});
-    });*/
+    });
 
 })();
