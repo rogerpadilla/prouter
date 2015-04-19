@@ -266,7 +266,7 @@ class History {
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
-            this._updateHash(this.location, fragmentAux, options.replace);
+            this._updateHash(fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
