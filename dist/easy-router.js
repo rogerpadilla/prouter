@@ -417,7 +417,7 @@
         return History;
     })();
 
-    var EasyRouter = (function () {
+    var Router = (function () {
 
         /**
          * Constructor for the router.
@@ -427,10 +427,10 @@
          * @constructor
          */
 
-        function EasyRouter() {
+        function Router() {
             var options = arguments[0] === undefined ? {} : arguments[0];
 
-            _classCallCheck(this, EasyRouter);
+            _classCallCheck(this, Router);
 
             this.evtHandlers = {};
             this.opts = options;
@@ -440,7 +440,7 @@
             }
         }
 
-        _createClass(EasyRouter, [{
+        _createClass(Router, [{
             key: 'route',
 
             /**
@@ -450,11 +450,11 @@
              * @param {string|RegExp} routeExp The route
              * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
              * @param {Function} onCallback function to call when the new fragment match a route.
-             * @returns {EasyRouter} this
+             * @returns {Router} this
              */
             value: function route(routeExp, name, onCallback) {
 
-                var routeAux = Object.prototype.toString.call(routeExp) === '[object RegExp]' ? routeExp : EasyRouter._routeToRegExp(routeExp);
+                var routeAux = Object.prototype.toString.call(routeExp) === '[object RegExp]' ? routeExp : Router._routeToRegExp(routeExp);
 
                 if (Object.prototype.toString.call(name) === '[object Function]') {
                     onCallback = name;
@@ -467,12 +467,12 @@
 
                 var self = this;
 
-                EasyRouter.history.route(routeAux, function (fragment) {
-                    var args = EasyRouter._extractParameters(routeAux, fragment);
+                Router.history.route(routeAux, function (fragment) {
+                    var args = Router._extractParameters(routeAux, fragment);
                     self.execute(onCallback, args);
                     self.trigger.apply(self, ['route:' + name].concat(args));
                     self.trigger('route', name, args);
-                    EasyRouter.history.trigger('route', self, name, args);
+                    Router.history.trigger('route', self, name, args);
                 });
 
                 return this;
@@ -495,20 +495,20 @@
             key: 'navigate',
 
             /**
-             * Simple proxy to `EasyRouter.history` to save a fragment into the history.
+             * Simple proxy to `Router.history` to save a fragment into the history.
              * @param {string} fragment Route to navigate to.
              * @param {Object} options parameters
-             * @returns {EasyRouter} this
+             * @returns {Router} this
              */
             value: function navigate(fragment, options) {
-                EasyRouter.history.navigate(fragment, options);
+                Router.history.navigate(fragment, options);
                 return this;
             }
         }, {
             key: '_bindRoutes',
 
             /**
-             * Bind all defined routes to `EasyRouter.history`. We have to reverse the
+             * Bind all defined routes to `Router.history`. We have to reverse the
              * order of the routes here to support behavior where the most general
              * routes can be defined at the bottom of the route map.
              * @private
@@ -564,24 +564,24 @@
             }
         }]);
 
-        return EasyRouter;
+        return Router;
     })();
 
-    EasyRouter.History = History;
+    Router.History = History;
 
     /**
      * Copy event bus listeners.
      */
-    EasyRouter.prototype.trigger = History.prototype.trigger;
-    EasyRouter.prototype.on = History.prototype.on;
-    EasyRouter.prototype.off = History.prototype.off;
+    Router.prototype.trigger = History.prototype.trigger;
+    Router.prototype.on = History.prototype.on;
+    Router.prototype.off = History.prototype.off;
 
     /**
-     * Create the default EasyRouter.History.
+     * Create the default Router.History.
      * @type {History}
      */
-    EasyRouter.history = new EasyRouter.History();
+    Router.history = new Router.History();
 
-    exports.EasyRouter = EasyRouter;
+    exports.Router = Router;
 });
 //# sourceMappingURL=easy-router.js.map

@@ -366,7 +366,7 @@ class History {
 }
 
 
-class EasyRouter {
+class Router {
 
     /**
      * Constructor for the router.
@@ -391,11 +391,11 @@ class EasyRouter {
      * @param {string|RegExp} routeExp The route
      * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
      * @param {Function} onCallback function to call when the new fragment match a route.
-     * @returns {EasyRouter} this
+     * @returns {Router} this
      */
     route(routeExp, name, onCallback) {
 
-        const routeAux = (Object.prototype.toString.call(routeExp) === '[object RegExp]') ? routeExp : EasyRouter._routeToRegExp(routeExp);
+        const routeAux = (Object.prototype.toString.call(routeExp) === '[object RegExp]') ? routeExp : Router._routeToRegExp(routeExp);
 
         if (Object.prototype.toString.call(name) === '[object Function]') {
             onCallback = name;
@@ -408,12 +408,12 @@ class EasyRouter {
 
         const self = this;
 
-        EasyRouter.history.route(routeAux, function (fragment) {
-            const args = EasyRouter._extractParameters(routeAux, fragment);
+        Router.history.route(routeAux, function (fragment) {
+            const args = Router._extractParameters(routeAux, fragment);
             self.execute(onCallback, args);
             self.trigger.apply(self, ['route:' + name].concat(args));
             self.trigger('route', name, args);
-            EasyRouter.history.trigger('route', self, name, args);
+            Router.history.trigger('route', self, name, args);
         });
 
         return this;
@@ -432,18 +432,18 @@ class EasyRouter {
     }
 
     /**
-     * Simple proxy to `EasyRouter.history` to save a fragment into the history.
+     * Simple proxy to `Router.history` to save a fragment into the history.
      * @param {string} fragment Route to navigate to.
      * @param {Object} options parameters
-     * @returns {EasyRouter} this
+     * @returns {Router} this
      */
     navigate(fragment, options) {
-        EasyRouter.history.navigate(fragment, options);
+        Router.history.navigate(fragment, options);
         return this;
     }
 
     /**
-     * Bind all defined routes to `EasyRouter.history`. We have to reverse the
+     * Bind all defined routes to `Router.history`. We have to reverse the
      * order of the routes here to support behavior where the most general
      * routes can be defined at the bottom of the route map.
      * @private
@@ -500,20 +500,20 @@ class EasyRouter {
 }
 
 
-EasyRouter.History = History;
+Router.History = History;
 
 /**
  * Copy event bus listeners.
  */
-EasyRouter.prototype.trigger = History.prototype.trigger;
-EasyRouter.prototype.on = History.prototype.on;
-EasyRouter.prototype.off = History.prototype.off;
+Router.prototype.trigger = History.prototype.trigger;
+Router.prototype.on = History.prototype.on;
+Router.prototype.off = History.prototype.off;
 
 /**
- * Create the default EasyRouter.History.
+ * Create the default Router.History.
  * @type {History}
  */
-EasyRouter.history = new EasyRouter.History();
+Router.history = new Router.History();
 
 
-export {EasyRouter as EasyRouter};
+export {Router};

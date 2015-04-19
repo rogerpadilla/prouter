@@ -15,7 +15,7 @@ var mainFile = 'js/' + mainFileName + '.js';
 var testFiles = [
     'test/setup/*.js',
     'dist/easy-router.js',
-    'node_modules/underscore/underscore.js',
+    'dist/easy-router.js.map',
     'test/*.js'
 ];
 
