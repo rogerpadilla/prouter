@@ -115,7 +115,7 @@ class History {
     start(options = {}) {
 
         if (History.started) {
-            throw new Error('EasyRouter.history has already been started');
+            throw new Error('Router.history has already been started');
         }
 
         History.started = true;
@@ -170,7 +170,7 @@ class History {
     }
 
     /**
-     * Disable EasyRouter.history, perhaps temporarily. Not useful in a real app,
+     * Disable Router.history, perhaps temporarily. Not useful in a real app,
      * but possibly useful for unit testing Routers.
      */
     stop() {
@@ -287,7 +287,7 @@ class History {
      * Add event listener.
      * @param {string} evt Name of the event.
      * @param {Function} callback Method.
-     * @returns {EasyRouter} this
+     * @returns {Router} this
      */
     on(evt, callback) {
         if (this.evtHandlers[evt] === undefined) {
@@ -301,7 +301,7 @@ class History {
      * Remove event listener.
      * @param {string} evt Name of the event.
      * @param {Function} callback Method.
-     * @returns {EasyRouter} this
+     * @returns {Router} this
      */
     off(evt, callback) {
         if (this.evtHandlers[evt]) {

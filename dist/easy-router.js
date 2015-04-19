@@ -147,7 +147,7 @@
                 var options = arguments[0] === undefined ? {} : arguments[0];
 
                 if (History.started) {
-                    throw new Error('EasyRouter.history has already been started');
+                    throw new Error('Router.history has already been started');
                 }
 
                 History.started = true;
@@ -203,7 +203,7 @@
             key: 'stop',
 
             /**
-             * Disable EasyRouter.history, perhaps temporarily. Not useful in a real app,
+             * Disable Router.history, perhaps temporarily. Not useful in a real app,
              * but possibly useful for unit testing Routers.
              */
             value: function stop() {
@@ -330,7 +330,7 @@
              * Add event listener.
              * @param {string} evt Name of the event.
              * @param {Function} callback Method.
-             * @returns {EasyRouter} this
+             * @returns {Router} this
              */
             value: function on(evt, callback) {
                 if (this.evtHandlers[evt] === undefined) {
@@ -346,7 +346,7 @@
              * Remove event listener.
              * @param {string} evt Name of the event.
              * @param {Function} callback Method.
-             * @returns {EasyRouter} this
+             * @returns {Router} this
              */
             value: function off(evt, callback) {
                 if (this.evtHandlers[evt]) {
