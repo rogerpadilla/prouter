@@ -60,6 +60,8 @@ class History {
         this.checkUrl = this.checkUrl.bind(this);
         this.handlers = [];
         this.evtHandlers = {};
+        this.location = root.location;
+        this.history = root.history;
     }
 
     /**
@@ -67,7 +69,7 @@ class History {
      * @returns {boolean} if we are in the root.
      */
     atRoot() {
-        return History.location.pathname.replace(isRoot, '$&/') === this.root;
+        return this.location.pathname.replace(isRoot, '$&/') === this.root;
     }
 
     /**
@@ -75,8 +77,8 @@ class History {
      * in Firefox where location.hash will always be decoded.
      * @returns {string} The hash.
      */
-    static getHash() {
-        const match = History.location.href.match(trueHash);
+    getHash() {
+        const match = this.location.href.match(trueHash);
         return match ? match[1] : '';
     }
 
@@ -90,13 +92,13 @@ class History {
     getFragment(fragment, forcePushState) {
         if (fragment === undefined) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                fragment = decodeURI(History.location.pathname + History.location.search);
+                fragment = decodeURI(this.location.pathname + this.location.search);
                 const rootUrl = this.root.replace(trailingSlash, '');
                 if (!fragment.indexOf(rootUrl)) {
                     fragment = fragment.slice(rootUrl.length);
                 }
             } else {
-                fragment = History.getHash();
+                fragment = this.getHash();
             }
         }
         return fragment.replace(routeStripper, '');
@@ -108,7 +110,7 @@ class History {
      * @param {Object} options Options
      * @returns {boolean} true if the current fragment matched some handler, false otherwise.
      */
-    start(options) {
+    start(options = {}) {
 
         if (History.started) {
             throw new Error('EasyRouter.history has already been started');
@@ -117,12 +119,12 @@ class History {
         History.started = true;
 
         // Figure out the initial configuration. Is pushState desired ... is it available?
-        this.opts = options || {};
+        this.opts = options;
         this.opts.root = options.root || '/';
         this.root = this.opts.root;
         this._wantsHashChange = this.opts.hashChange !== false;
         this._wantsPushState = !!this.opts.pushState;
-        this._hasPushState = !!(this.opts.pushState && History.history && History.history.pushState);
+        this._hasPushState = !!(this.opts.pushState && this.history && this.history.pushState);
 
         // Determine if we need to change the base url, for a pushState link
         // opened by a non-pushState browser.
@@ -147,14 +149,14 @@ class History {
             // browser, but we're currently in a browser that doesn't support it...
             if (!this._hasPushState && !this.atRoot()) {
                 this.fragment = this.getFragment(null, true);
-                History.location.replace(this.root + '#' + this.fragment);
+                this.location.replace(this.root + '#' + this.fragment);
                 // Return immediately as browser will do redirect to new url
                 return true;
                 // Or if we've started out with a hash-based route, but we're currently
                 // in a browser where it could be `pushState`-based instead...
-            } else if (this._hasPushState && this.atRoot() && History.location.hash) {
-                this.fragment = History.getHash().replace(routeStripper, '');
-                History.history.replaceState({}, document.title, this.root + this.fragment);
+            } else if (this._hasPushState && this.atRoot() && this.location.hash) {
+                this.fragment = this.getHash().replace(routeStripper, '');
+                this.history.replaceState({}, document.title, this.root + this.fragment);
             }
 
         }
@@ -225,7 +227,7 @@ class History {
      *
      * The options object can contain `trigger: true` if you wish to have the
      * route callback be fired (not usually desirable), or `replace: true`, if
-     * you wish to modify the current URL without adding an entry to the History.history.
+     * you wish to modify the current URL without adding an entry to the history.
      * @param {string} fragment Fragment to navigate to
      * @param {Object} options Options object
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
@@ -262,13 +264,13 @@ class History {
         if (this._hasPushState) {
             history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
             // If hash changes haven't been explicitly disabled, update the hash
-            // fragment to store History.history.
+            // fragment to store history.
         } else if (this._wantsHashChange) {
-            History._updateHash(fragmentAux, options.replace);
+            this._updateHash(fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
-            return History.location.assign(url);
+            return this.location.assign(url);
         }
         if (options.trigger) {
             return this.loadUrl(fragmentAux);
@@ -347,20 +349,16 @@ class History {
      * @param {boolean} replace flag
      * @private
      */
-    static _updateHash(fragment, replace) {
+    _updateHash(fragment, replace) {
         if (replace) {
-            const href = History.location.href.replace(/(javascript:|#).*$/, '');
-            History.location.replace(href + '#' + fragment);
+            const href = this.location.href.replace(/(javascript:|#).*$/, '');
+            this.location.replace(href + '#' + fragment);
         } else {
             // Some browsers require that `hash` contains a leading #.
-            History.location.hash = '#' + fragment;
+            this.location.hash = '#' + fragment;
         }
     }
 }
-
-
-History.location = root.location;
-History.history = root.history;
 
 
 class EasyRouter {
@@ -401,9 +399,6 @@ class EasyRouter {
 
         if (!onCallback) {
             onCallback = this.opts[name];
-            if (routeExp === 'implicit' && name === 'implicit') {
-                console.log('onCallback', name, onCallback);
-            }
         }
 
         const self = this;

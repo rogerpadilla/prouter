@@ -47,8 +47,8 @@
         setup: function () {
 
             location = new Location('http://example.com');
-            EasyRouter.History.location = location;
             EasyRouter.history = new EasyRouter.History();
+            EasyRouter.history.location = location;
 
             router = new EasyRouter({
 
@@ -337,36 +337,6 @@
             ok(true);
         });
         location.replace('http://example.com#noCallback');
-        EasyRouter.history.checkUrl();
-    });
-
-    test("No events are triggered if #execute returns false.", 1, function () {
-        var Router = EasyRouter.Router.extend({
-
-            routes: {
-                foo: function () {
-                    ok(true);
-                }
-            },
-
-            execute: function (callback, args) {
-                callback.apply(this, args);
-                return false;
-            }
-
-        });
-
-        var router = new Router;
-
-        router.on('route route:foo', function () {
-            ok(false);
-        });
-
-        EasyRouter.history.on('route', function () {
-            ok(false);
-        });
-
-        location.replace('http://example.com#foo');
         EasyRouter.history.checkUrl();
     });
 
@@ -957,13 +927,12 @@
         location.replace = function (url) {
             strictEqual(url, '/root#?foo=bar');
         };
-        EasyRouter.history = _.extend(new EasyRouter.History, {
-            location: location,
-            history: {
-                pushState: undefined,
-                replaceState: undefined
-            }
-        });
+        EasyRouter.history = new EasyRouter.History();
+        EasyRouter.history.location = location;
+        EasyRouter.history.history = {
+            pushState: undefined,
+            replaceState: undefined
+        };
         EasyRouter.history.start({root: '/root', pushState: true});
     });
 
