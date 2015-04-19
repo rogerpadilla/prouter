@@ -3,16 +3,16 @@ Unobtrusive and ultra-lightweight router library 100% compatible with the Backbo
 while providing the following advantages:
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla).
 * __Great performance__, only native functions are used.
-* __Small footprint__, 5kb for minified version.
+* __Small footprint__, 5kb for the [minified](https://developers.google.com/closure/compiler/) version.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
-* __Supports both routes' styles__, hash and the pushState of History API.
-* __Unit tested__.
-* Written in ESNext and transpiled to ES5 with UMD format: then it supports: es6, commonJs, AMD, and normal browser.
-* Proper JSDoc used in the source code.
+* __Supports both routes' styles__, hash and the [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history) of History API.
+* __Unit testing__ included in the build process.
+* Written in [ESNext](https://babeljs.io/) for the future, and transpiled to ES5 with UMD format, thus it transparently supports almost every modules' style out there: [es6](https://babeljs.io/docs/learn-es6/), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
+* Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in the source code.
 
-EasyRouter provides methods for routing client-side pages, and connecting them to actions.
+EasyRouter provides methods for routing client-side pages, and connecting them to actions. Basically, you configure it by providing a list of entries, each one with a route an a callback, and your are done!
 
-¿Want to create a modern hibrid-mobile-app or website using something like React, Web Components, Handlebars, vanilla JS, etc.?
+¿Want to create a modern hibrid-mobile-app or website using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](handlebarsjs.com/), and of course, vanilla JS, etc.?
 ¿Have an existing Backbone project and want to migrate to a more modern framework? Good news, EasyRouter will integrates perfectly with all of those!
 
 Install it via [Bower](http://bower.io/):
