@@ -65,3 +65,4 @@ gulp.task('watch', ['build'], function () {
 
 gulp.task('build', ['lint', 'script']);
 gulp.task('default', ['watch']);
+
