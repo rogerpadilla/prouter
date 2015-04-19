@@ -6,12 +6,13 @@ while providing the following advantages:
 * __Small footprint__, 5kb for minified version.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
 * __Supports both routes' styles__, hash and the pushState of History API.
+* __Unit tested__.
+* Written in ESNext and transpiled to ES5 with UMD format: then it supports: es6, commonJs, AMD, and normal browser.
 * Proper JSDoc used in the source code.
-* Works with normal script include and as well in CommonJS style.
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions.
 
-¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
+¿Want to create a modern hibrid-mobile-app or website using something like React, Web Components, Handlebars, vanilla JS, etc.?
 ¿Have an existing Backbone project and want to migrate to a more modern framework? Good news, EasyRouter will integrates perfectly with all of those!
 
 Install it via [Bower](http://bower.io/):
