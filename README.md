@@ -7,7 +7,7 @@ while providing the following advantages:
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
 * __Supports both routes' styles__, [hash](https://developer.mozilla.org/en-US/docs/Web/API/Window/location) and the [pushState](https://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Manipulating_the_browser_history) of History API.
 * __Unit testing__ included in the build process.
-* Written in [ESNext](https://babeljs.io/) for the future, and transpiled to ES5 with UMD format, thus it transparently supports almost every modules' style out there: [es6](https://babeljs.io/docs/learn-es6/), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
+* Written in [ESNext](https://babeljs.io/) for the future, and transpiled to ES5 with UMD format, thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in the source code.
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions. Basically, you configure it by providing a list of entries, each one with a route an a callback, and your are done!
