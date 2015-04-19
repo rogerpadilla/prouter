@@ -1,14 +1,10 @@
 {
   "name": "EasyRouter",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes",
   "main": [
     "js/easy-router.js"
   ],
-  "author": "Roger Padilla <rogerjose81@gmail.com>",
-  "homepage": "https://github.com/rogerpadilla/easy-router",
-  "bugs": "https://github.com/rogerpadilla/easy-router/issues",
-  "license": "MIT",
   "keywords": [
     "js",
     "router",
@@ -17,14 +13,20 @@
     "mobile",
     "web"
   ],
+  "author": "Roger Padilla <rogerjose81@gmail.com>",
+  "homepage": "https://github.com/rogerpadilla/easy-router",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/rogerpadilla/easy-router.git"
   },
+  "bugs": "https://github.com/rogerpadilla/easy-router/issues",
+  "scripts": {
+    "test": "gulp test"
+  },
   "dependencies": {},
   "devDependencies": {
     "babel": "^5.1.10",
-    "backbone": "^1.1.2",
     "closure-compiler": "^0.2.6",
     "del": "^1.1.1",
     "gulp": "^3.8.11",
@@ -36,8 +38,8 @@
     "karma": "^0.12.31",
     "karma-chrome-launcher": "^0.1",
     "karma-firefox-launcher": "^0.1.4",
+    "karma-phantomjs-launcher": "^0.1.4",
     "karma-qunit": "^0.1.4",
     "underscore": "^1.8.3"
   }
 }
-

@@ -121,14 +121,16 @@
             value: function getFragment(fragment, forcePushState) {
                 if (fragment === undefined || fragment === null) {
                     if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                        fragment = decodeURI(this.location.pathname + this.location.search);
+                        fragment = root.decodeURI(this.location.pathname + this.location.search);
                         var rootUrl = this.root.replace(trailingSlash, '');
-                        if (!fragment.indexOf(rootUrl)) {
+                        if (fragment.lastIndexOf(rootUrl, 0) === 0) {
                             fragment = fragment.slice(rootUrl.length);
                         }
                     } else {
                         fragment = this.getHash();
                     }
+                } else {
+                    fragment = root.decodeURI(fragment);
                 }
                 return fragment.replace(routeStripper, '');
             }
@@ -157,10 +159,7 @@
                 this._wantsHashChange = this.opts.hashChange !== false;
                 this._wantsPushState = !!this.opts.pushState;
                 this._hasPushState = !!(this.opts.pushState && this.history && this.history.pushState);
-
-                // Determine if we need to change the base url, for a pushState link
-                // opened by a non-pushState browser.
-                this.fragment = this.getFragment();
+                var fragment = this.getFragment();
 
                 // Normalize root to always include a leading and trailing slash.
                 this.root = ('/' + this.root + '/').replace(rootStripper, '/');
@@ -172,6 +171,10 @@
                 } else if (this._wantsHashChange && 'onhashchange' in root) {
                     root.addEventListener('hashchange', this.checkUrl);
                 }
+
+                // Determine if we need to change the base url, for a pushState link
+                // opened by a non-pushState browser.
+                this.fragment = fragment;
 
                 // Transition from hashChange to pushState or vice versa if both are
                 // requested.
@@ -556,7 +559,7 @@
                     if (i === params.length - 1) {
                         return param || null;
                     }
-                    return param ? decodeURIComponent(param) : null;
+                    return param ? root.decodeURIComponent(param) : null;
                 });
             }
         }]);

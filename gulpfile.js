@@ -13,9 +13,9 @@ var mainFile = 'js/' + mainFileName + '.js';
 
 // list of files / patterns to load in the browser
 var testFiles = [
+    'test/setup/*.js',
     'dist/easy-router.js',
     'node_modules/underscore/underscore.js',
-    'test/setup/*.js',
     'test/*.js'
 ];
 

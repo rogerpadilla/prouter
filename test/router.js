@@ -792,22 +792,6 @@
         EasyRouter.history.start({pushState: true});
     });
 
-    test('unicode pathname with % in a parameter', 1, function () {
-        location.replace('http://example.com/myyjä/foo%20%25%3F%2f%40%25%20bar');
-        location.pathname = '/myyj%C3%A4/foo%20%25%3F%2f%40%25%20bar';
-        EasyRouter.history.stop();
-        EasyRouter.history = new EasyRouter.History();
-        EasyRouter.history.location = location;
-        new EasyRouter({
-            routes: {
-                'myyjä/:query': function (query) {
-                    strictEqual(query, 'foo %?/@% bar');
-                }
-            }
-        });
-        EasyRouter.history.start({pushState: true});
-    });
-
     test('newline in route', 1, function () {
         location.replace('http://example.com/stuff%0Anonsense?param=foo%0Abar');
         EasyRouter.history.stop();
@@ -820,36 +804,6 @@
                 }
             }
         });
-        EasyRouter.history.start({pushState: true});
-    });
-
-    test('Router#execute receives callback, args, name.', 3, function () {
-        location.replace('http://example.com#foo/123/bar?x=y');
-        EasyRouter.history.stop();
-        EasyRouter.history = new EasyRouter.History();
-        EasyRouter.history.location = location;
-        new EasyRouter({
-            routes: {'foo/:id/bar': 'foo'},
-            foo: function () {
-            },
-            execute: function (callback, args, name) {
-                strictEqual(callback, this.foo);
-                deepEqual(args, ['123', 'x=y']);
-                strictEqual(name, 'foo');
-            }
-        });
-        EasyRouter.history.start();
-    });
-
-    test("pushState to hashChange with only search params.", 1, function () {
-        EasyRouter.history.stop();
-        location.replace('http://example.com?a=b');
-        location.replace = function (url) {
-            strictEqual(url, '/#?a=b');
-        };
-        EasyRouter.history = new EasyRouter.History();
-        EasyRouter.history.location = location;
-        EasyRouter.history.history = null;
         EasyRouter.history.start({pushState: true});
     });
 
@@ -881,21 +835,6 @@
             strictEqual(params, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
         });
         EasyRouter.history.start();
-    });
-
-    test('#3358 - pushState to hashChange transition with search params', 1, function () {
-        EasyRouter.history.stop();
-        location.replace('/root?foo=bar');
-        location.replace = function (url) {
-            strictEqual(url, '/root#?foo=bar');
-        };
-        EasyRouter.history = new EasyRouter.History();
-        EasyRouter.history.location = location;
-        EasyRouter.history.history = {
-            pushState: undefined,
-            replaceState: undefined
-        };
-        EasyRouter.history.start({root: '/root', pushState: true});
     });
 
 })();
