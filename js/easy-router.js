@@ -120,7 +120,7 @@ class History {
 
         // Figure out the initial configuration. Is pushState desired ... is it available?
         this.opts = options;
-        this.opts.root = options.root || '/';
+        this.opts.root = this.opts.root || '/';
         this.root = this.opts.root;
         this._wantsHashChange = this.opts.hashChange !== false;
         this._wantsPushState = !!this.opts.pushState;
@@ -244,10 +244,10 @@ class History {
 
         let fragmentAux = this.getFragment(fragment || '');
 
+        let url = this.root + fragmentAux;
+
         // Strip the hash for matching.
         fragmentAux = fragmentAux.replace(pathStripper, '');
-
-        let url = this.root + fragmentAux;
 
         if (this.fragment === fragmentAux) {
             return false;
@@ -262,19 +262,21 @@ class History {
 
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._hasPushState) {
-            history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+            this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
-            this._updateHash(fragmentAux, options.replace);
+            this._updateHash(this.location, fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
             return this.location.assign(url);
         }
+
         if (options.trigger) {
             return this.loadUrl(fragmentAux);
         }
+
         return false;
     }
 
