@@ -15,7 +15,6 @@ var mainFile = 'js/' + mainFileName + '.js';
 var testFiles = [
     'test/setup/*.js',
     'dist/easy-router.js',
-    'dist/easy-router.js.map',
     'test/*.js'
 ];
 
@@ -27,7 +26,7 @@ gulp.task('lint', function () {
         .pipe(eslint.format());
 });
 
-gulp.task('test', function () {
+gulp.task('test', ['script:build'], function () {
     return gulp.src(testFiles)
         .pipe(karma({
             configFile: 'karma.conf.js',
