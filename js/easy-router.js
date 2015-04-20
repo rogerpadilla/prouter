@@ -516,4 +516,4 @@ Router.prototype.off = History.prototype.off;
 Router.history = new Router.History();
 
 
-export default Router;
+export {Router};

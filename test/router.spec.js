@@ -5,7 +5,7 @@
     var lastRoute = null;
     var lastArgs = [];
 
-    const Router = this.easyRouter;
+    const Router = this.easyRouter.Router;
 
     var onRoute = function (router, route, args) {
         lastRoute = route;
