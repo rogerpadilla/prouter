@@ -119,20 +119,21 @@
              * @returns {string} The fragment.
              */
             value: function getFragment(fragment, forcePushState) {
-                if (fragment === undefined || fragment === null) {
+                var fragmentAux = fragment;
+                if (fragmentAux === undefined || fragmentAux === null) {
                     if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                        fragment = root.decodeURI(this.location.pathname + this.location.search);
+                        fragmentAux = root.decodeURI(this.location.pathname + this.location.search);
                         var rootUrl = this.root.replace(trailingSlash, '');
-                        if (fragment.lastIndexOf(rootUrl, 0) === 0) {
-                            fragment = fragment.slice(rootUrl.length);
+                        if (fragmentAux.lastIndexOf(rootUrl, 0) === 0) {
+                            fragmentAux = fragmentAux.slice(rootUrl.length);
                         }
                     } else {
-                        fragment = this.getHash();
+                        fragmentAux = this.getHash();
                     }
                 } else {
-                    fragment = root.decodeURI(fragment);
+                    fragmentAux = root.decodeURI(fragmentAux);
                 }
-                return fragment.replace(routeStripper, '');
+                return fragmentAux.replace(routeStripper, '');
             }
         }, {
             key: 'start',
@@ -276,15 +277,14 @@
              * @param {Object} options Options object
              * @returns {boolean} true if the fragment matched some handler, false otherwise.
              */
-            value: function navigate(fragment, options) {
+            value: function navigate(fragment) {
+                var options = arguments[1] === undefined ? { trigger: false } : arguments[1];
 
                 if (!History.started) {
                     return false;
                 }
 
-                if (!options || options === true) {
-                    options = { trigger: !!options };
-                }
+                var optionsAux = options === true ? { trigger: true } : options;
 
                 var fragmentAux = this.getFragment(fragment || '');
 
@@ -306,18 +306,18 @@
 
                 // If pushState is available, we use it to set the fragment as a real URL.
                 if (this._hasPushState) {
-                    this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+                    this.history[optionsAux.replace ? 'replaceState' : 'pushState']({}, document.title, url);
                     // If hash changes haven't been explicitly disabled, update the hash
                     // fragment to store history.
                 } else if (this._wantsHashChange) {
-                    this._updateHash(fragmentAux, options.replace);
+                    this._updateHash(fragmentAux, optionsAux.replace);
                     // If you've told us that you explicitly don't want fallback hashchange-
                     // based history, then `navigate` becomes a page refresh.
                 } else {
                     return this.location.assign(url);
                 }
 
-                if (options.trigger) {
+                if (optionsAux.trigger) {
                     return this.loadUrl(fragmentAux);
                 }
 
@@ -454,25 +454,25 @@
              */
             value: function route(routeExp, name, onCallback) {
 
-                var routeAux = Object.prototype.toString.call(routeExp) === '[object RegExp]' ? routeExp : Router._routeToRegExp(routeExp);
+                var routeAux = typeof routeExp === 'string' || routeExp instanceof String ? Router._routeToRegExp(routeExp) : routeExp;
+                var onCallbackAux = undefined;
+                var nameAux = name;
 
-                if (Object.prototype.toString.call(name) === '[object Function]') {
-                    onCallback = name;
-                    name = '';
-                }
-
-                if (!onCallback) {
-                    onCallback = this.opts[name];
+                if (Object.prototype.toString.call(nameAux) === '[object Function]') {
+                    onCallbackAux = nameAux;
+                    nameAux = '';
+                } else if (!onCallback) {
+                    onCallbackAux = this.opts[nameAux];
                 }
 
                 var self = this;
 
                 Router.history.route(routeAux, function (fragment) {
                     var args = Router._extractParameters(routeAux, fragment);
-                    self.execute(onCallback, args);
-                    self.trigger.apply(self, ['route:' + name].concat(args));
-                    self.trigger('route', name, args);
-                    Router.history.trigger('route', self, name, args);
+                    self.execute(onCallbackAux, args);
+                    self.trigger.apply(self, ['route:' + nameAux].concat(args));
+                    self.trigger('route', nameAux, args);
+                    Router.history.trigger('route', self, nameAux, args);
                 });
 
                 return this;
@@ -535,10 +535,10 @@
              * @private
              */
             value: function _routeToRegExp(route) {
-                route = route.replace(escapeRegExp, '\\$&').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
+                var routeAux = route.replace(escapeRegExp, '\\$&').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
                     return optional ? match : '([^/?]+)';
                 }).replace(splatParam, '([^?]*?)');
-                return new RegExp('^' + route + '(?:\\?([\\s\\S]*))?$');
+                return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
             }
         }, {
             key: '_extractParameters',

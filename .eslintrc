@@ -32,6 +32,7 @@
     "valid-jsdoc": [1, {"requireReturn": false}],
     "no-else-return": [1, "always"],
     "no-eq-null": [1, "always"],
+    "no-param-reassign": [1, "always"],
     "spaced-line-comment": [1, "always"],
     "max-statements": [1, 30],
     "max-params": [1, 3],
