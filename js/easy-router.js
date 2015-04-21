@@ -409,15 +409,16 @@ class Router {
 
             if (self._oldCtrl) {
                 evtRoute.old = {fragment: self._oldCtrl.fragment, params: self._oldCtrl.params};
-                if (self._oldCtrl.off) {
-                    self._oldCtrl.off.apply(self._oldCtrl);
-                }
             }
-
-            ctrl.on.apply(ctrl, params);
 
             self.trigger('route', evtRoute);
             Router.history.trigger('route', self, evtRoute);
+
+            if (self._oldCtrl && self._oldCtrl.off) {
+                self._oldCtrl.off.apply(self._oldCtrl);
+            }
+
+            ctrl.on.apply(ctrl, params);
 
             self._oldCtrl = {off: ctrl.off, fragment: fragment, params: params};
         });
