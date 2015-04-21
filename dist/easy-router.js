@@ -233,8 +233,8 @@
              * @returns {boolean} true if navigated, false otherwise.
              */
             value: function checkUrl() {
-                var current = this.getFragment();
-                if (current === this.fragment) {
+                var fragment = this.getFragment();
+                if (fragment === this.fragment) {
                     return false;
                 }
                 this.loadUrl();
@@ -247,16 +247,17 @@
              * match, returns `true`. If no defined routes matches the fragment,
              * returns `false`.
              * @param {string} fragment E.g.: 'user/pepito'
+             * @param {Object} args E.g.: {message: 'Password changed'}
              * @returns {boolean} true if the fragment matched some handler, false otherwise.
              */
-            value: function loadUrl(fragment) {
+            value: function loadUrl(fragment, args) {
                 this.fragment = this.getFragment(fragment);
                 var n = this.handlers.length;
                 var handler = undefined;
                 for (var i = 0; i < n; i++) {
                     handler = this.handlers[i];
                     if (handler.route.test(this.fragment)) {
-                        handler.callback(this.fragment);
+                        handler.callback(this.fragment, args);
                         return true;
                     }
                 }
@@ -318,7 +319,7 @@
                 }
 
                 if (optionsAux.trigger) {
-                    return this.loadUrl(fragmentAux);
+                    return this.loadUrl(fragmentAux, optionsAux.args);
                 }
 
                 return false;
@@ -447,49 +448,41 @@
              * Manually bind a single named route to a callback.
              * The route argument may be a routing string or regular expression, each matching capture
              * from the route or regular expression will be passed as an argument to the onCallback.
-             * @param {string|RegExp} routeExp The route
-             * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
-             * @param {Function} onCallback function to call when the new fragment match a route.
+             * @param {string} routeExp The route.
+             * @param {Object} ctrl Controller, E.g.: {on: onCallback(){...}, off: offCallback(){...}} object within functions to call.
              * @returns {Router} this
              */
-            value: function route(routeExp, name, onCallback) {
+            value: function route(routeExp, ctrl) {
 
-                var routeAux = typeof routeExp === 'string' || routeExp instanceof String ? Router._routeToRegExp(routeExp) : routeExp;
-                var onCallbackAux = undefined;
-                var nameAux = name;
-
-                if (Object.prototype.toString.call(nameAux) === '[object Function]') {
-                    onCallbackAux = nameAux;
-                    nameAux = '';
-                } else if (!onCallback) {
-                    onCallbackAux = this.opts[nameAux];
-                }
-
+                var routeAux = Router._routeToRegExp(routeExp);
                 var self = this;
 
-                Router.history.route(routeAux, function (fragment) {
-                    var args = Router._extractParameters(routeAux, fragment);
-                    self.execute(onCallbackAux, args);
-                    self.trigger.apply(self, ['route:' + nameAux].concat(args));
-                    self.trigger('route', nameAux, args);
-                    Router.history.trigger('route', self, nameAux, args);
+                Router.history.route(routeAux, function (fragment, args) {
+
+                    var params = Router._extractParameters(routeAux, fragment);
+
+                    if (args) {
+                        params.push(args);
+                    }
+
+                    var evtRoute = { 'new': { fragment: fragment, params: params } };
+
+                    if (self._oldCtrl) {
+                        evtRoute.old = { fragment: self._oldCtrl.fragment, params: self._oldCtrl.params };
+                        if (self._oldCtrl.off) {
+                            self._oldCtrl.off.apply(self._oldCtrl);
+                        }
+                    }
+
+                    ctrl.on.apply(ctrl, params);
+
+                    self.trigger('route', evtRoute);
+                    Router.history.trigger('route', self, evtRoute);
+
+                    self._oldCtrl = { off: ctrl.off, fragment: fragment, params: params };
                 });
 
                 return this;
-            }
-        }, {
-            key: 'execute',
-
-            /**
-             * Execute a route handler with the provided parameters.  This is an
-             * excellent place to do pre-route setup or post-route cleanup.
-             * @param {Function} callback The method to execute.
-             * @param {Array} args The parameters to pass to the method.
-             */
-            value: function execute(callback, args) {
-                if (callback) {
-                    callback.apply(this, args);
-                }
             }
         }, {
             key: 'navigate',
@@ -554,13 +547,18 @@
              */
             value: function _extractParameters(route, fragment) {
                 var params = route.exec(fragment).slice(1);
-                return params.map(function (param, i) {
+                var paramsLength = params.length;
+                var args = [];
+                for (var i = 0, param = undefined; i < paramsLength; i++) {
+                    param = params[i];
                     // Don't decode the search params.
                     if (i === params.length - 1) {
-                        return param || null;
+                        args.push(param || null);
+                    } else {
+                        args.push(param ? root.decodeURIComponent(param) : null);
                     }
-                    return param ? root.decodeURIComponent(param) : null;
-                });
+                }
+                return args;
             }
         }]);
 

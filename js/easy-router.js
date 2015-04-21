@@ -196,8 +196,8 @@ class History {
      * @returns {boolean} true if navigated, false otherwise.
      */
     checkUrl() {
-        const current = this.getFragment();
-        if (current === this.fragment) {
+        const fragment = this.getFragment();
+        if (fragment === this.fragment) {
             return false;
         }
         this.loadUrl();
@@ -208,16 +208,17 @@ class History {
      * match, returns `true`. If no defined routes matches the fragment,
      * returns `false`.
      * @param {string} fragment E.g.: 'user/pepito'
+     * @param {Object} args E.g.: {message: 'Password changed'}
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    loadUrl(fragment) {
+    loadUrl(fragment, args) {
         this.fragment = this.getFragment(fragment);
         const n = this.handlers.length;
         let handler;
         for (let i = 0; i < n; i++) {
             handler = this.handlers[i];
             if (handler.route.test(this.fragment)) {
-                handler.callback(this.fragment);
+                handler.callback(this.fragment, args);
                 return true;
             }
         }
@@ -276,7 +277,7 @@ class History {
         }
 
         if (optionsAux.trigger) {
-            return this.loadUrl(fragmentAux);
+            return this.loadUrl(fragmentAux, optionsAux.args);
         }
 
         return false;
@@ -387,47 +388,41 @@ class Router {
      * Manually bind a single named route to a callback.
      * The route argument may be a routing string or regular expression, each matching capture
      * from the route or regular expression will be passed as an argument to the onCallback.
-     * @param {string|RegExp} routeExp The route
-     * @param {string|Function} name If string, alias for the entry; if Function, behaves like 'onCallback'.
-     * @param {Function} onCallback function to call when the new fragment match a route.
+     * @param {string} routeExp The route.
+     * @param {Object} ctrl Controller, E.g.: {on: onCallback(){...}, off: offCallback(){...}} object within functions to call.
      * @returns {Router} this
      */
-    route(routeExp, name, onCallback) {
+    route(routeExp, ctrl) {
 
-        const routeAux = (typeof routeExp === 'string' || routeExp instanceof String) ? Router._routeToRegExp(routeExp) : routeExp;
-        let onCallbackAux;
-        let nameAux = name;
-
-        if (Object.prototype.toString.call(nameAux) === '[object Function]') {
-            onCallbackAux = nameAux;
-            nameAux = '';
-        } else if (!onCallback) {
-            onCallbackAux = this.opts[nameAux];
-        }
-
+        const routeAux = Router._routeToRegExp(routeExp);
         const self = this;
 
-        Router.history.route(routeAux, function (fragment) {
-            const args = Router._extractParameters(routeAux, fragment);
-            self.execute(onCallbackAux, args);
-            self.trigger.apply(self, ['route:' + nameAux].concat(args));
-            self.trigger('route', nameAux, args);
-            Router.history.trigger('route', self, nameAux, args);
+        Router.history.route(routeAux, function (fragment, args) {
+
+            const params = Router._extractParameters(routeAux, fragment);
+
+            if (args) {
+                params.push(args);
+            }
+
+            const evtRoute = {new: {fragment: fragment, params: params}};
+
+            if (self._oldCtrl) {
+                evtRoute.old = {fragment: self._oldCtrl.fragment, params: self._oldCtrl.params};
+                if (self._oldCtrl.off) {
+                    self._oldCtrl.off.apply(self._oldCtrl);
+                }
+            }
+
+            ctrl.on.apply(ctrl, params);
+
+            self.trigger('route', evtRoute);
+            Router.history.trigger('route', self, evtRoute);
+
+            self._oldCtrl = {off: ctrl.off, fragment: fragment, params: params};
         });
 
         return this;
-    }
-
-    /**
-     * Execute a route handler with the provided parameters.  This is an
-     * excellent place to do pre-route setup or post-route cleanup.
-     * @param {Function} callback The method to execute.
-     * @param {Array} args The parameters to pass to the method.
-     */
-    execute(callback, args) {
-        if (callback) {
-            callback.apply(this, args);
-        }
     }
 
     /**
@@ -487,13 +482,18 @@ class Router {
      */
     static _extractParameters(route, fragment) {
         const params = route.exec(fragment).slice(1);
-        return params.map(function (param, i) {
+        const paramsLength = params.length;
+        const args = [];
+        for (let i = 0, param; i < paramsLength; i++) {
+            param = params[i];
             // Don't decode the search params.
             if (i === params.length - 1) {
-                return param || null;
+                args.push(param || null);
+            } else {
+                args.push(param ? root.decodeURIComponent(param) : null);
             }
-            return param ? root.decodeURIComponent(param) : null;
-        });
+        }
+        return args;
     }
 
 }
