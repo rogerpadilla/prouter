@@ -56,12 +56,12 @@ class History {
 
     constructor() {
         // Has the history handling already been started?
-        this.started = false;
-        this.checkUrl = this.checkUrl.bind(this);
-        this.handlers = [];
-        this.evtHandlers = {};
-        this.location = root.location;
-        this.history = root.history;
+        this._started = false;
+        this._checkUrl = this._checkUrl.bind(this);
+        this._handlers = [];
+        this._evtHandlers = {};
+        this._location = root.location;
+        this._history = root.history;
     }
 
     /**
@@ -69,7 +69,7 @@ class History {
      * @returns {boolean} if we are in the root.
      */
     atRoot() {
-        return this.location.pathname.replace(isRoot, '$&/') === this.root;
+        return this._location.pathname.replace(isRoot, '$&/') === this._root;
     }
 
     /**
@@ -78,7 +78,7 @@ class History {
      * @returns {string} The hash.
      */
     getHash() {
-        const match = this.location.href.match(trueHash);
+        const match = this._location.href.match(trueHash);
         return match ? match[1] : '';
     }
 
@@ -93,8 +93,8 @@ class History {
         let fragmentAux = fragment;
         if (fragmentAux === undefined || fragmentAux === null) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                fragmentAux = root.decodeURI(this.location.pathname + this.location.search);
-                const rootUrl = this.root.replace(trailingSlash, '');
+                fragmentAux = root.decodeURI(this._location.pathname + this._location.search);
+                const rootUrl = this._root.replace(trailingSlash, '');
                 if (fragmentAux.lastIndexOf(rootUrl, 0) === 0) {
                     fragmentAux = fragmentAux.slice(rootUrl.length);
                 }
@@ -115,23 +115,23 @@ class History {
      */
     start(options = {}) {
 
-        if (History.started) {
+        if (History._started) {
             throw new Error('Router.history has already been started');
         }
 
-        History.started = true;
+        History._started = true;
 
         // Figure out the initial configuration. Is pushState desired ... is it available?
-        this.opts = options;
-        this.opts.root = this.opts.root || '/';
-        this.root = this.opts.root;
-        this._wantsHashChange = this.opts.hashChange !== false;
-        this._wantsPushState = !!this.opts.pushState;
-        this._hasPushState = !!(this.opts.pushState && this.history && this.history.pushState);
+        this._opts = options;
+        this._opts.root = this._opts.root || '/';
+        this._root = this._opts.root;
+        this._wantsHashChange = this._opts.hashChange !== false;
+        this._wantsPushState = !!this._opts.pushState;
+        this._hasPushState = !!(this._opts.pushState && this._history && this._history.pushState);
         const fragment = this.getFragment();
 
         // Normalize root to always include a leading and trailing slash.
-        this.root = ('/' + this.root + '/').replace(rootStripper, '/');
+        this._root = ('/' + this._root + '/').replace(rootStripper, '/');
 
         // Depending on whether we're using pushState or hashes, and whether
         // 'onhashchange' is supported, determine how we check the URL state.
@@ -143,7 +143,7 @@ class History {
 
         // Determine if we need to change the base url, for a pushState link
         // opened by a non-pushState browser.
-        this.fragment = fragment;
+        this._fragment = fragment;
 
         // Transition from hashChange to pushState or vice versa if both are
         // requested.
@@ -152,21 +152,21 @@ class History {
             // If we've started off with a route from a `pushState`-enabled
             // browser, but we're currently in a browser that doesn't support it...
             if (!this._hasPushState && !this.atRoot()) {
-                this.fragment = this.getFragment(null, true);
-                this.location.replace(this.root + '#' + this.fragment);
+                this._fragment = this.getFragment(null, true);
+                this._location.replace(this._root + '#' + this._fragment);
                 // Return immediately as browser will do redirect to new url
                 return true;
                 // Or if we've started out with a hash-based route, but we're currently
                 // in a browser where it could be `pushState`-based instead...
-            } else if (this._hasPushState && this.atRoot() && this.location.hash) {
-                this.fragment = this.getHash().replace(routeStripper, '');
-                this.history.replaceState({}, document.title, this.root + this.fragment);
+            } else if (this._hasPushState && this.atRoot() && this._location.hash) {
+                this._fragment = this.getHash().replace(routeStripper, '');
+                this._history.replaceState({}, document.title, this._root + this._fragment);
             }
 
         }
 
-        if (!this.opts.silent) {
-            return this.loadUrl();
+        if (!this._opts.silent) {
+            return this._loadUrl();
         }
     }
 
@@ -175,9 +175,9 @@ class History {
      * but possibly useful for unit testing Routers.
      */
     stop() {
-        root.removeEventListener('popstate', this.checkUrl);
-        root.removeEventListener('hashchange', this.checkUrl);
-        History.started = false;
+        root.removeEventListener('popstate', this._checkUrl);
+        root.removeEventListener('hashchange', this._checkUrl);
+        History._started = false;
     }
 
     /**
@@ -187,20 +187,21 @@ class History {
      * @param {Function} callback Method to be executed.
      */
     route(routeExp, callback) {
-        this.handlers.unshift({route: routeExp, callback: callback});
+        this._handlers.unshift({route: routeExp, callback: callback});
     }
 
     /**
      * Checks the current URL to see if it has changed, and if it has,
      * calls `loadUrl`.
      * @returns {boolean} true if navigated, false otherwise.
+     * @private
      */
-    checkUrl() {
+    _checkUrl() {
         const fragment = this.getFragment();
-        if (fragment === this.fragment) {
+        if (fragment === this._fragment) {
             return false;
         }
-        this.loadUrl();
+        this._loadUrl();
     }
 
     /**
@@ -210,15 +211,16 @@ class History {
      * @param {string} fragment E.g.: 'user/pepito'
      * @param {Object} args E.g.: {message: 'Password changed'}
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
+     * @private
      */
-    loadUrl(fragment, args) {
-        this.fragment = this.getFragment(fragment);
-        const n = this.handlers.length;
+    _loadUrl(fragment, args) {
+        this._fragment = this.getFragment(fragment);
+        const n = this._handlers.length;
         let handler;
         for (let i = 0; i < n; i++) {
-            handler = this.handlers[i];
-            if (handler.route.test(this.fragment)) {
-                handler.callback(this.fragment, args);
+            handler = this._handlers[i];
+            if (handler.route.test(this._fragment)) {
+                handler.callback(this._fragment, args);
                 return true;
             }
         }
@@ -239,7 +241,7 @@ class History {
      */
     navigate(fragment, options = {trigger: false}) {
 
-        if (!History.started) {
+        if (!History._started) {
             return false;
         }
 
@@ -247,16 +249,16 @@ class History {
 
         let fragmentAux = this.getFragment(fragment || '');
 
-        let url = this.root + fragmentAux;
+        let url = this._root + fragmentAux;
 
         // Strip the hash for matching.
         fragmentAux = fragmentAux.replace(pathStripper, '');
 
-        if (this.fragment === fragmentAux) {
+        if (this._fragment === fragmentAux) {
             return false;
         }
 
-        this.fragment = fragmentAux;
+        this._fragment = fragmentAux;
 
         // Don't include a trailing slash on the root.
         if (fragmentAux === '' && url !== '/') {
@@ -265,7 +267,7 @@ class History {
 
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._hasPushState) {
-            this.history[optionsAux.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+            this._history[optionsAux.replace ? 'replaceState' : 'pushState']({}, document.title, url);
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
@@ -273,11 +275,11 @@ class History {
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
-            return this.location.assign(url);
+            return this._location.assign(url);
         }
 
         if (optionsAux.trigger) {
-            return this.loadUrl(fragmentAux, optionsAux.args);
+            return this._loadUrl(fragmentAux, optionsAux.args);
         }
 
         return false;
@@ -287,13 +289,13 @@ class History {
      * Add event listener.
      * @param {string} evt Name of the event.
      * @param {Function} callback Method.
-     * @returns {Router} this
+     * @returns {History} this history
      */
     on(evt, callback) {
-        if (this.evtHandlers[evt] === undefined) {
-            this.evtHandlers[evt] = [];
+        if (this._evtHandlers[evt] === undefined) {
+            this._evtHandlers[evt] = [];
         }
-        this.evtHandlers[evt].push(callback);
+        this._evtHandlers[evt].push(callback);
         return this;
     }
 
@@ -304,14 +306,14 @@ class History {
      * @returns {Router} this
      */
     off(evt, callback) {
-        if (this.evtHandlers[evt]) {
-            const callbacks = this.evtHandlers[evt];
+        if (this._evtHandlers[evt]) {
+            const callbacks = this._evtHandlers[evt];
             const n = callbacks.length;
             for (let i = 0; i < n; i++) {
                 if (callbacks[i] === callback) {
                     callbacks.splice(i, 1);
                     if (callbacks.length === 0) {
-                        delete this.evtHandlers[evt];
+                        delete this._evtHandlers[evt];
                     }
                     break;
                 }
@@ -324,9 +326,10 @@ class History {
      * Events triggering.
      * @param {string} evt Name of the event being triggered.
      * @returns {boolean} if the event was listened or not.
+     * @private
      */
-    trigger(evt) {
-        const callbacks = this.evtHandlers[evt];
+    _trigger(evt) {
+        const callbacks = this._evtHandlers[evt];
         if (callbacks === undefined) {
             return false;
         }
@@ -356,11 +359,11 @@ class History {
      */
     _updateHash(fragment, replace) {
         if (replace) {
-            const href = this.location.href.replace(/(javascript:|#).*$/, '');
-            this.location.replace(href + '#' + fragment);
+            const href = this._location.href.replace(/(javascript:|#).*$/, '');
+            this._location.replace(href + '#' + fragment);
         } else {
             // Some browsers require that `hash` contains a leading #.
-            this.location.hash = '#' + fragment;
+            this._location.hash = '#' + fragment;
         }
     }
 }
@@ -376,12 +379,9 @@ class Router {
      * @constructor
      */
     constructor(options = {}) {
-        this.evtHandlers = {};
-        this.opts = options;
+        this._evtHandlers = {};
+        this._opts = options;
         this._bindRoutes();
-        if (this.opts.initialize) {
-            this.opts.initialize.apply(this, arguments);
-        }
     }
 
     /**
@@ -411,8 +411,8 @@ class Router {
                 evtRoute.old = {fragment: self._oldCtrl.fragment, params: self._oldCtrl.params};
             }
 
-            self.trigger('route', evtRoute);
-            Router.history.trigger('route', self, evtRoute);
+            self._trigger('route', evtRoute);
+            Router.history._trigger('route', self, evtRoute);
 
             if (self._oldCtrl && self._oldCtrl.off) {
                 self._oldCtrl.off.apply(self._oldCtrl);
@@ -444,14 +444,14 @@ class Router {
      * @private
      */
     _bindRoutes() {
-        if (!this.opts.routes) {
+        if (!this._opts.routes) {
             return;
         }
-        const routes = Object.keys(this.opts.routes);
+        const routes = Object.keys(this._opts.routes);
         const routesN = routes.length - 1;
         for (let i = routesN, route; i >= 0; i--) {
             route = routes[i];
-            this.route(route, this.opts.routes[route]);
+            this.route(route, this._opts.routes[route]);
         }
     }
 
@@ -505,7 +505,7 @@ Router.History = History;
 /**
  * Copy event bus listeners.
  */
-Router.prototype.trigger = History.prototype.trigger;
+Router.prototype._trigger = History.prototype._trigger;
 Router.prototype.on = History.prototype.on;
 Router.prototype.off = History.prototype.off;
 
