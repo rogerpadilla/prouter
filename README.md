@@ -61,7 +61,7 @@ var appRouter = new Router({
 
 
 // you can alternatively use the function "addHandler" for adding handlers:
-router.addHandler({
+appRouter.addHandler({
     route: 'item/:id',
     on: function (id, queryString, message) {
         // prints {msg: 'Item saved'}
@@ -75,7 +75,7 @@ router.addHandler({
 
 
 // Listen when navigation happens in this router.
-router.on('route', function (evt) {
+appRouter.on('route', function (evt) {
     // prints information about the previous handler (if so)
     console.log(args.old);
     // prints information about the new handler
