@@ -30,6 +30,7 @@
      * - Supports both routes' styles, hash and the pushState of History API.
      * - Proper JSDoc used in the source code.
      * - Works with normal script include and as well in CommonJS style.
+     * - Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for right now.
      *
      * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
      * ¿Have an existing Backbone project and want to migrate to a more modern framework?
@@ -213,15 +214,25 @@
                 History._started = false;
             }
         }, {
-            key: 'route',
+            key: 'navigateBack',
+
+            /**
+             * Go to previous route.
+             */
+            value: function navigateBack() {
+                this._history.navigateBack();
+            }
+        }, {
+            key: '_addHandler',
 
             /**
              * Add a route to be tested when the fragment changes. Routes added later
              * may override previous routes.
              * @param {string} routeExp The route.
              * @param {Function} callback Method to be executed.
+             * @private
              */
-            value: function route(routeExp, callback) {
+            value: function _addHandler(routeExp, callback) {
                 this._handlers.unshift({ route: routeExp, callback: callback });
             }
         }, {
@@ -438,26 +449,25 @@
 
             this._evtHandlers = {};
             this._opts = options;
-            this._bindRoutes();
+            this._bindHandlers();
         }
 
         _createClass(Router, [{
-            key: 'route',
+            key: 'addHandler',
 
             /**
              * Manually bind a single named route to a callback.
              * The route argument may be a routing string or regular expression, each matching capture
              * from the route or regular expression will be passed as an argument to the onCallback.
-             * @param {string} routeExp The route.
-             * @param {Object} ctrl Controller, E.g.: {on: onCallback(){...}, off: offCallback(){...}} object within functions to call.
-             * @returns {Router} this
+             * @param {Object} handler The handler entry.
+             * @returns {Router} this router
              */
-            value: function route(routeExp, ctrl) {
+            value: function addHandler(handler) {
 
-                var routeAux = Router._routeToRegExp(routeExp);
+                var routeAux = Router._routeToRegExp(handler.route);
                 var self = this;
 
-                Router.history.route(routeAux, function (fragment, args) {
+                Router.history._addHandler(routeAux, function (fragment, args) {
 
                     var params = Router._extractParameters(routeAux, fragment);
 
@@ -478,9 +488,9 @@
                         self._oldCtrl.off.apply(self._oldCtrl);
                     }
 
-                    ctrl.on.apply(ctrl, params);
+                    handler.on.apply(handler, params);
 
-                    self._oldCtrl = { off: ctrl.off, fragment: fragment, params: params };
+                    self._oldCtrl = { off: handler.off, fragment: fragment, params: params };
                 });
 
                 return this;
@@ -499,7 +509,7 @@
                 return this;
             }
         }, {
-            key: '_bindRoutes',
+            key: '_bindHandlers',
 
             /**
              * Bind all defined routes to `Router.history`. We have to reverse the
@@ -507,15 +517,14 @@
              * routes can be defined at the bottom of the route map.
              * @private
              */
-            value: function _bindRoutes() {
-                if (!this._opts.routes) {
+            value: function _bindHandlers() {
+                if (!this._opts.map) {
                     return;
                 }
-                var routes = Object.keys(this._opts.routes);
+                var routes = this._opts.map;
                 var routesN = routes.length - 1;
-                for (var i = routesN, route = undefined; i >= 0; i--) {
-                    route = routes[i];
-                    this.route(route, this._opts.routes[route]);
+                for (var i = routesN; i >= 0; i--) {
+                    this.addHandler(routes[i]);
                 }
             }
         }], [{
@@ -566,8 +575,6 @@
         return Router;
     })();
 
-    Router.History = History;
-
     /**
      * Copy event bus listeners.
      */
@@ -579,8 +586,9 @@
      * Create the default Router.History.
      * @type {History}
      */
-    Router.history = new Router.History();
+    Router.history = new History();
 
+    exports.History = History;
     exports.Router = Router;
 });
 //# sourceMappingURL=easy-router.js.map

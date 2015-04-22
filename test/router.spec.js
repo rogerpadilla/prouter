@@ -6,6 +6,7 @@
     var lastArgs = [];
 
     const Router = this.easyRouter.Router;
+    const History = this.easyRouter.History;
 
     var onRoute = function (router, args) {
         lastArgs = args.new.params;
@@ -38,108 +39,125 @@
 
             holder = {count: 0};
             location = new Location('http://example.com');
-            Router.history = new Router.History();
+            Router.history = new History();
             Router.history._location = location;
 
             router = new Router({
-                routes: {
-                    "noCallback": "noCallback",
-                    "search/:query": {
+                map: [
+                    {
+                        route: "search/:query",
                         on: function (query, page) {
                             holder.query = query;
                             holder.page = page;
                         }
                     },
-                    "search/:query/p:page": {
+                    {
+                        route: "search/:query/p:page",
                         on: function (query, page) {
                             holder.query = query;
                             holder.page = page;
                         }
                     },
-                    "charñ": {
+                    {
+                        route: "charñ",
                         on: function () {
                             holder.charType = 'UTF';
                         }
                     },
-                    "char%C3%B1": {
+                    {
+                        route: "char%C3%B1",
                         on: function () {
                             holder.charType = 'escaped';
                         }
                     },
-                    "contacts": {
+                    {
+                        route: "contacts",
                         on: function () {
                             holder.contact = 'index';
                         }
                     },
-                    "contacts/new": {
+                    {
+                        route: "contacts/new",
                         on: function () {
                             holder.contact = 'new';
                         }
                     },
-                    "contacts/:id": {
+                    {
+                        route: "contacts/:id",
                         on: function () {
                             holder.contact = 'load';
                         }
                     },
-                    "route-event/:arg": {
+                    {
+                        route: "route-event/:arg",
                         on: function (arg) {
                         }
                     },
-                    "optional(/:item)": {
+                    {
+                        route: "optional(/:item)",
                         on: function (arg) {
                             holder.arg = arg != void 0 ? arg : null;
                         }
                     },
-                    "named/optional/(y:z)": {
+                    {
+                        route: "named/optional/(y:z)",
                         on: function (z) {
                             holder.z = z;
                         }
                     },
-                    "splat/*args/end": {
+                    {
+                        route: "splat/*args/end",
                         on: function (args) {
                             holder.args = args;
                         }
                     },
-                    ":repo/compare/*from...*to": {
+                    {
+                        route: ":repo/compare/*from...*to",
                         on: function (repo, from, to) {
                             holder.repo = repo;
                             holder.from = from;
                             holder.to = to;
                         }
                     },
-                    "decode/:named/*splat": {
+                    {
+                        route: "decode/:named/*splat",
                         on: function (named, path) {
                             holder.named = named;
                             holder.path = path;
                         }
                     },
-                    "*first/complex-*part/*rest": {
+                    {
+                        route: "*first/complex-*part/*rest",
                         on: function (first, part, rest) {
                             holder.first = first;
                             holder.part = part;
                             holder.rest = rest;
                         }
                     },
-                    "query/:entity": {
+                    {
+                        route: "query/:entity",
                         on: function (entity, args) {
                             holder.entity = entity;
                             holder.queryArgs = args;
                         }
                     },
-                    "function/:value": {
+                    {
+                        route: "function/:value",
                         on: externalObject.routingFunction
                     },
-                    "implicit": {
+                    {
+                        route: "implicit",
                         on: function () {
                             holder.count++;
                         }
                     },
-                    "*anything": {
+                    {
+                        route: "*anything",
                         on: function (whatever) {
                             holder.anything = whatever;
                         }
                     }
-                }
+                ]
             });
 
             Router.history.start({pushState: false});
@@ -318,16 +336,17 @@
         Router.history.stop();
         location.replace('http://example.com/path/123');
         router = new Router({
-            routes: {
-                'path/:val': {
+            map: [
+                {
+                    route: 'path/:val',
                     on: function () {
                         ok(true);
                     },
-                    off: function() {
+                    off: function () {
                         ok(true);
                     }
                 }
-            }
+            ]
         });
         Router.history.start({
             pushState: true,
@@ -352,7 +371,7 @@
         strictEqual(Router.history.getFragment(), 'foo');
 
         Router.history.stop();
-        Router.history = new Router.History();
+        Router.history = new History();
         Router.history._location = location;
         Router.history.start({root: '/root/', hashChange: false, silent: true});
         strictEqual(Router.history.getFragment(), 'foo');
@@ -560,12 +579,12 @@
     });
 
     test("Trailing space in fragments.", 1, function () {
-        var history = new Router.History();
+        var history = new History();
         strictEqual(history.getFragment('fragment   '), 'fragment');
     });
 
     test("Leading slash and trailing space.", 1, function () {
-        var history = new Router.History();
+        var history = new History();
         strictEqual(history.getFragment('/fragment '), 'fragment');
     });
 
@@ -612,13 +631,14 @@
             }
         };
         new Router({
-            routes: {
-                hash: {
+            map: [
+                {
+                    route: "hash",
                     on: function () {
                         ok(false);
                     }
                 }
-            }
+            ]
         });
         location.replace('http://example.com/');
         Router.history.start({
@@ -673,14 +693,16 @@
             }
         };
         new Router({
-            routes: {
-                path: {
-                    on: function () {
-                        ok(true);
+                map: [
+                    {
+                        route: "path",
+                        on: function () {
+                            ok(true);
+                        }
                     }
-                }
+                ]
             }
-        });
+        );
         location.replace('http://example.com/');
         Router.history.start({pushState: true, hashChange: false});
         Router.history.navigate('path?query#hash', true);
@@ -688,14 +710,16 @@
 
     test('Do not decode the search params.', function () {
         new Router({
-            routes: {
-                path: {
-                    on: function (params) {
-                        strictEqual(params, 'x=y%3Fz');
+                map: [
+                    {
+                        route: "path",
+                        on: function (params) {
+                            strictEqual(params, 'x=y%3Fz');
+                        }
                     }
-                }
+                ]
             }
-        });
+        );
         Router.history.navigate('path?x=y%3Fz', true);
     });
 
@@ -703,14 +727,16 @@
         Router.history.stop();
         Router.history.start({pushState: true});
         new Router({
-            routes: {
-                path: {
-                    on: function (params) {
-                        strictEqual(params, 'x=y');
+                map: [
+                    {
+                        route: "path",
+                        on: function (params) {
+                            strictEqual(params, 'x=y');
+                        }
                     }
-                }
+                ]
             }
-        });
+        );
         location.replace('http://example.com/path?x=y#hash');
         Router.history._checkUrl();
     });
@@ -719,14 +745,15 @@
         Router.history.stop();
         Router.history.start({pushState: true});
         new Router({
-            routes: {
-                path: {
-                    on: function (params) {
-                        strictEqual(params, 'x=y');
-                    }
-                }
+                map: [
+                    {
+                        route: "path",
+                        on: function (params) {
+                            strictEqual(params, 'x=y');
+                        }
+                    }]
             }
-        });
+        );
         Router.history.navigate('path?x=y#hash', true);
     });
 
@@ -734,14 +761,16 @@
         location.replace('http://example.com/myyjä');
         Router.history.stop();
         new Router({
-            routes: {
-                myyjä: {
-                    on: function () {
-                        ok(true);
+                map: [
+                    {
+                        route: "myyjä",
+                        on: function () {
+                            ok(true);
+                        }
                     }
-                }
+                ]
             }
-        });
+        );
         Router.history.start({pushState: true});
     });
 
@@ -749,14 +778,36 @@
         location.replace('http://example.com/stuff%0Anonsense?param=foo%0Abar');
         Router.history.stop();
         new Router({
-            routes: {
-                'stuff\nnonsense': {
-                    on: function () {
-                        ok(true);
+                map: [
+                    {
+                        route: 'stuff\nnonsense',
+                        on: function () {
+                            ok(true);
+                        }
                     }
-                }
+                ]
             }
-        });
+        );
+        Router.history.start({pushState: true});
+    });
+
+    test('preserve context (this)', 2, function () {
+        location.replace('http://example.com/search/some-text');
+        Router.history.stop();
+        const someVal = Math.random();
+        new Router({
+                map: [
+                    {
+                        route: 'search/:text',
+                        someAttr: someVal,
+                        on: function (text) {
+                            strictEqual(text, 'some-text');
+                            strictEqual(this.someAttr, someVal);
+                        }
+                    }
+                ]
+            }
+        );
         Router.history.start({pushState: true});
     });
 
@@ -780,7 +831,8 @@
         Router.history.stop();
         location.replace('http://example.com#login?a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
         var router = new Router();
-        router.route('login', {
+        router.addHandler({
+            route: 'login',
             on: function (params) {
                 strictEqual(params, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
             }

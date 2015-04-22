@@ -8,6 +8,7 @@
  * - Supports both routes' styles, hash and the pushState of History API.
  * - Proper JSDoc used in the source code.
  * - Works with normal script include and as well in CommonJS style.
+ * - Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for right now.
  *
  * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
  * ¿Have an existing Backbone project and want to migrate to a more modern framework?
@@ -181,12 +182,20 @@ class History {
     }
 
     /**
+     * Go to previous route.
+     */
+    navigateBack() {
+        this._history.navigateBack();
+    }
+
+    /**
      * Add a route to be tested when the fragment changes. Routes added later
      * may override previous routes.
      * @param {string} routeExp The route.
      * @param {Function} callback Method to be executed.
+     * @private
      */
-    route(routeExp, callback) {
+    _addHandler(routeExp, callback) {
         this._handlers.unshift({route: routeExp, callback: callback});
     }
 
@@ -381,23 +390,22 @@ class Router {
     constructor(options = {}) {
         this._evtHandlers = {};
         this._opts = options;
-        this._bindRoutes();
+        this._bindHandlers();
     }
 
     /**
      * Manually bind a single named route to a callback.
      * The route argument may be a routing string or regular expression, each matching capture
      * from the route or regular expression will be passed as an argument to the onCallback.
-     * @param {string} routeExp The route.
-     * @param {Object} ctrl Controller, E.g.: {on: onCallback(){...}, off: offCallback(){...}} object within functions to call.
-     * @returns {Router} this
+     * @param {Object} handler The handler entry.
+     * @returns {Router} this router
      */
-    route(routeExp, ctrl) {
+    addHandler(handler) {
 
-        const routeAux = Router._routeToRegExp(routeExp);
+        const routeAux = Router._routeToRegExp(handler.route);
         const self = this;
 
-        Router.history.route(routeAux, function (fragment, args) {
+        Router.history._addHandler(routeAux, function (fragment, args) {
 
             const params = Router._extractParameters(routeAux, fragment);
 
@@ -418,9 +426,9 @@ class Router {
                 self._oldCtrl.off.apply(self._oldCtrl);
             }
 
-            ctrl.on.apply(ctrl, params);
+            handler.on.apply(handler, params);
 
-            self._oldCtrl = {off: ctrl.off, fragment: fragment, params: params};
+            self._oldCtrl = {off: handler.off, fragment: fragment, params: params};
         });
 
         return this;
@@ -443,15 +451,14 @@ class Router {
      * routes can be defined at the bottom of the route map.
      * @private
      */
-    _bindRoutes() {
-        if (!this._opts.routes) {
+    _bindHandlers() {
+        if (!this._opts.map) {
             return;
         }
-        const routes = Object.keys(this._opts.routes);
+        const routes = this._opts.map;
         const routesN = routes.length - 1;
-        for (let i = routesN, route; i >= 0; i--) {
-            route = routes[i];
-            this.route(route, this._opts.routes[route]);
+        for (let i = routesN; i >= 0; i--) {
+            this.addHandler(routes[i]);
         }
     }
 
@@ -500,8 +507,6 @@ class Router {
 }
 
 
-Router.History = History;
-
 /**
  * Copy event bus listeners.
  */
@@ -513,7 +518,7 @@ Router.prototype.off = History.prototype.off;
  * Create the default Router.History.
  * @type {History}
  */
-Router.history = new Router.History();
+Router.history = new History();
 
 
-export {Router};
+export {History, Router};
