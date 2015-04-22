@@ -169,9 +169,9 @@
                 // Depending on whether we're using pushState or hashes, and whether
                 // 'onhashchange' is supported, determine how we check the URL state.
                 if (this._hasPushState) {
-                    root.addEventListener('popstate', this.checkUrl);
+                    root.addEventListener('popstate', this._checkUrl);
                 } else if (this._wantsHashChange && 'onhashchange' in root) {
-                    root.addEventListener('hashchange', this.checkUrl);
+                    root.addEventListener('hashchange', this._checkUrl);
                 }
 
                 // Determine if we need to change the base url, for a pushState link
