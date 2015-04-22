@@ -1,5 +1,5 @@
 # easy-router
-Unobtrusive, forward-thinking and ultra-lightweight client-side router.
+Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Small footprint__, 6kb for the [minified](https://developers.google.com/closure/compiler/) version.
 * __Great performance__, only native functions are used.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
