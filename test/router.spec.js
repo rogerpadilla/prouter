@@ -340,6 +340,17 @@
         deepEqual(externalObject.value, 'set');
     });
 
+    test("routes cancel navigation", 1, function () {
+        router.on('route:before', function (evt) {
+            ok(true);
+            evt.canceled = true;
+        });
+        router.on('route:after', function (evt) {
+            ok(false);
+        });
+        router.navigate('path');
+    });
+
     test("routes (function) on off", 3, function () {
         Router.history.stop();
         location.replace('http://example.com/path/123');
