@@ -13,7 +13,7 @@ Unique features:
 * Register listeners before and after the routes changes.
 * Cancel navigation by setting evt.canceled to true inside the callback for the event 'route:before'.
 
-Want to create a modern hibrid-mobile-app or web-app using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing Backbone project and want to migrate? Want a router component for integrated it on your own framework? Good news, EasyRouter was created with all of those use cases in mind!
+Want to create a modern hibrid-mobile-app or web-app using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrated it on your own framework? Good news, EasyRouter was created with all of those use cases in mind!
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. EasyRouter also includes unit testing in the build process and is tested in every common browser: Chrome, Firefox, IE9+.
 
