@@ -182,13 +182,6 @@ class History {
     }
 
     /**
-     * Go to previous route.
-     */
-    navigateBack() {
-        this._history.navigateBack();
-    }
-
-    /**
      * Add a route to be tested when the fragment changes. Routes added later
      * may override previous routes.
      * @param {string} routeExp The route.
@@ -313,7 +306,7 @@ class History {
      * Remove event listener.
      * @param {string} evt Name of the event.
      * @param {Function} callback Method.
-     * @returns {Router} this
+     * @returns {History} this history
      */
     off(evt, callback) {
         if (this._evtHandlers[evt]) {
@@ -335,29 +328,19 @@ class History {
     /**
      * Events triggering.
      * @param {string} evt Name of the event being triggered.
-     * @returns {boolean} if the event was listened or not.
      * @private
      */
     _trigger(evt) {
         const callbacks = this._evtHandlers[evt];
         if (callbacks === undefined) {
-            return false;
+            return;
         }
         const args = Array.prototype.slice.call(arguments, 1);
         let i = 0;
         const callbacksLength = callbacks.length;
-        const respArr = [];
-        let resp;
         for (; i < callbacksLength; i++) {
-            resp = callbacks[i].apply(this, args);
-            respArr.push(resp);
+            callbacks[i].apply(this, args);
         }
-        for (; i < callbacksLength; i++) {
-            if (respArr[i] === false) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -423,6 +406,10 @@ class Router {
             self._trigger('route:before', evtRoute);
             Router.history._trigger('route:before', self, evtRoute);
 
+            if (evtRoute.canceled) {
+                return;
+            }
+
             if (self._oldCtrl && self._oldCtrl.off) {
                 self._oldCtrl.off.apply(self._oldCtrl);
             }
@@ -443,7 +430,7 @@ class Router {
      * @param {string} fragment Route to navigate to.
      * @param {Object=} message custom parameters to pass to the handler.
      * @param {Object} options parameters
-     * @returns {Router} this
+     * @returns {Router} this router
      */
     navigate(fragment, message, options) {
         Router.history.navigate(fragment, message, options);

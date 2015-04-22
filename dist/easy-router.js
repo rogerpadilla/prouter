@@ -214,15 +214,6 @@
                 History._started = false;
             }
         }, {
-            key: 'navigateBack',
-
-            /**
-             * Go to previous route.
-             */
-            value: function navigateBack() {
-                this._history.navigateBack();
-            }
-        }, {
             key: '_addHandler',
 
             /**
@@ -360,7 +351,7 @@
              * Remove event listener.
              * @param {string} evt Name of the event.
              * @param {Function} callback Method.
-             * @returns {Router} this
+             * @returns {History} this history
              */
             value: function off(evt, callback) {
                 if (this._evtHandlers[evt]) {
@@ -384,29 +375,19 @@
             /**
              * Events triggering.
              * @param {string} evt Name of the event being triggered.
-             * @returns {boolean} if the event was listened or not.
              * @private
              */
             value: function _trigger(evt) {
                 var callbacks = this._evtHandlers[evt];
                 if (callbacks === undefined) {
-                    return false;
+                    return;
                 }
                 var args = Array.prototype.slice.call(arguments, 1);
                 var i = 0;
                 var callbacksLength = callbacks.length;
-                var respArr = [];
-                var resp = undefined;
                 for (; i < callbacksLength; i++) {
-                    resp = callbacks[i].apply(this, args);
-                    respArr.push(resp);
+                    callbacks[i].apply(this, args);
                 }
-                for (; i < callbacksLength; i++) {
-                    if (respArr[i] === false) {
-                        return false;
-                    }
-                }
-                return true;
             }
         }, {
             key: '_updateHash',
@@ -484,6 +465,10 @@
                     self._trigger('route:before', evtRoute);
                     Router.history._trigger('route:before', self, evtRoute);
 
+                    if (evtRoute.canceled) {
+                        return;
+                    }
+
                     if (self._oldCtrl && self._oldCtrl.off) {
                         self._oldCtrl.off.apply(self._oldCtrl);
                     }
@@ -506,7 +491,7 @@
              * @param {string} fragment Route to navigate to.
              * @param {Object=} message custom parameters to pass to the handler.
              * @param {Object} options parameters
-             * @returns {Router} this
+             * @returns {Router} this router
              */
             value: function navigate(fragment, message, options) {
                 Router.history.navigate(fragment, message, options);
