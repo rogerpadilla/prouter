@@ -8,7 +8,7 @@
     const Router = this.easyRouter.Router;
     const History = this.easyRouter.History;
 
-    var onRoute = function (router, args) {
+    var beforeRoute = function (router, args) {
         lastArgs = args.new.params;
     };
 
@@ -169,12 +169,12 @@
 
             Router.history.start({pushState: false});
             lastArgs = [];
-            Router.history.on('route', onRoute);
+            Router.history.on('route:before', beforeRoute);
         },
 
         teardown: function () {
             Router.history.stop();
-            Router.history.off('route', onRoute);
+            Router.history.off('route:before', beforeRoute);
         }
 
     });
@@ -317,7 +317,7 @@
     });
 
     test("routes (function)", 3, function () {
-        router.on('route', function (args) {
+        router.on('route:after', function (args) {
             ok(args.new.params[0] === 'set');
         });
         equal(externalObject.value, 'unset');
@@ -329,7 +329,7 @@
     test("routes (function) new & old event", 5, function () {
         location.replace('http://example.com#path/old?a=2');
         Router.history._checkUrl();
-        router.on('route', function (args) {
+        router.on('route:after', function (args) {
             strictEqual(args.old.fragment, 'path/old?a=2');
             deepEqual(args.old.params, ['path/old', 'a=2']);
             strictEqual(args.new.fragment, 'function/set');
@@ -606,7 +606,7 @@
     });
 
     test("Trigger 'route' event on router instance.", 1, function () {
-        router.on('route', function (args) {
+        router.on('route:before', function (args) {
             deepEqual(args.new.params, ['x']);
         });
         location.replace('http://example.com#route-event/x');

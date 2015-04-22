@@ -481,14 +481,17 @@
                         evtRoute.old = { fragment: self._oldCtrl.fragment, params: self._oldCtrl.params };
                     }
 
-                    self._trigger('route', evtRoute);
-                    Router.history._trigger('route', self, evtRoute);
+                    self._trigger('route:before', evtRoute);
+                    Router.history._trigger('route:before', self, evtRoute);
 
                     if (self._oldCtrl && self._oldCtrl.off) {
                         self._oldCtrl.off.apply(self._oldCtrl);
                     }
 
                     handler.on.apply(handler, params);
+
+                    self._trigger('route:after', evtRoute);
+                    Router.history._trigger('route:after', self, evtRoute);
 
                     self._oldCtrl = { off: handler.off, fragment: fragment, params: params };
                 });

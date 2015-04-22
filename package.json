@@ -1,6 +1,6 @@
 {
   "name": "EasyRouter",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
   "main": [
     "js/easy-router.js"

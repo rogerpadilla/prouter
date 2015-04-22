@@ -22,7 +22,7 @@ gulp.task('lint', function () {
 /**
  * Run tests once and exit.
  */
-gulp.task('test', ['script:build'], function (done) {
+gulp.task('test', ['script'], function (done) {
     karma.start({
         configFile: __dirname + '/karma.conf.js',
         action: 'run',

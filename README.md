@@ -74,8 +74,8 @@ appRouter.addHandler({
 });
 
 
-// Listen when navigation happens in this router.
-appRouter.on('route', function (evt) {
+// Listen before navigation happens in this router.
+appRouter.on('route:before', function (evt) {
     // prints information about the previous handler (if so)
     console.log(args.old);
     // prints information about the new handler
@@ -83,8 +83,8 @@ appRouter.on('route', function (evt) {
 });
 
 
-// Listen when navigation happens in any router.
-Router.history.on('route', function (router, evt) {
+// Listen after navigation happens in any router.
+Router.history.on('route:after', function (router, evt) {
     // prints information about the involved router.
     console.log(router);
     // prints information about the previous handler (if so)
