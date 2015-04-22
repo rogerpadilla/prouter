@@ -74,6 +74,15 @@ router.addHandler({
 });
 
 
+// Listen when routes changes
+Router.history.on('route', function (evt) {
+    // prints information about the previous handler (if so)
+    console.log(args.old);
+    // prints information about the new handler
+    console.log(args.new);    
+});
+
+
 // initialize the routers.
 Router.history.start({pushState: true});
 
