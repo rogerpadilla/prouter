@@ -6,9 +6,12 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
 * __Forward-thinking__, written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
-* Supports passing "flash" parameters between routes when navigating.
+
+Unique features:
+* Send "flash" parameters between routes when navigating.
 * Supports "off" optional-callback, called when leaving the current route.
-* Supports registering listeners when routes changes.
+* Register listeners before and after the routes changes.
+* Cancel navigation by setting evt.canceled to true inside the callback for the event 'route:before'.
 
 Want to create a modern hibrid-mobile-app or web-app using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing Backbone project and want to migrate? Want a router component for integrated it on your own framework? Good news, EasyRouter was created with all of those use cases in mind!
 
@@ -80,6 +83,12 @@ appRouter.on('route:before', function (evt) {
     console.log(args.old);
     // prints information about the new handler
     console.log(args.new);    
+    var cancelNavigation = ...
+    if (cancelNavigation) {
+        evt.canceled = true;
+        return;
+    }
+    ...
 });
 
 
