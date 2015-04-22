@@ -563,10 +563,10 @@
                 for (var i = 0, param = undefined; i < paramsLength; i++) {
                     param = params[i];
                     // Don't decode the search params.
-                    if (i === params.length - 1) {
+                    if (i === params.length - 1 && param) {
                         args.push(param || null);
-                    } else {
-                        args.push(param ? root.decodeURIComponent(param) : null);
+                    } else if (param) {
+                        args.push(root.decodeURIComponent(param));
                     }
                 }
                 return args;

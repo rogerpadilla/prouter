@@ -66,7 +66,7 @@
                     },
                     {
                         route: "items/:id",
-                        on: function (id, qs, message) {
+                        on: function (id, message) {
                             holder.id = id;
                             holder.message = message;
                         }
@@ -333,7 +333,7 @@
             strictEqual(args.old.fragment, 'path/old?a=2');
             deepEqual(args.old.params, ['path/old', 'a=2']);
             strictEqual(args.new.fragment, 'function/set');
-            deepEqual(args.new.params, ['set', null]);
+            deepEqual(args.new.params, ['set']);
         });
         location.replace('http://example.com#function/set');
         Router.history._checkUrl();
@@ -607,7 +607,7 @@
 
     test("Trigger 'route' event on router instance.", 1, function () {
         router.on('route', function (args) {
-            deepEqual(args.new.params, ['x', null]);
+            deepEqual(args.new.params, ['x']);
         });
         location.replace('http://example.com#route-event/x');
         Router.history._checkUrl();

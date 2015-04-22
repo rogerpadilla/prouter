@@ -63,7 +63,7 @@ var appRouter = new Router({
 // you can alternatively use the function "addHandler" for adding handlers:
 appRouter.addHandler({
     route: 'item/:id',
-    on: function (id, queryString, message) {
+    on: function (id, message) {
         // prints {msg: 'Item saved'}
         console.log(message);
         ...
