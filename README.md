@@ -82,7 +82,8 @@ appRouter.on('route:before', function (evt) {
     // prints information about the previous handler (if so)
     console.log(evt.old);
     // prints information about the new handler
-    console.log(evt.new);    
+    console.log(evt.new);  
+    // Check if the current user can access the route; if not, cancel navigation and redirect to 'login'.
     var isAuthenticatedRoute = checkIfRouteNeedsAuthenticatedUser(evt.new.fragment);
     var isAnonymousUser = checkIfAnonymousUser();
     if (isAuthenticatedRoute && isAnonymousUser) {
