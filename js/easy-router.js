@@ -218,18 +218,18 @@ class History {
      * match, returns `true`. If no defined routes matches the fragment,
      * returns `false`.
      * @param {string} fragment E.g.: 'user/pepito'
-     * @param {Object} args E.g.: {message: 'Password changed'}
+     * @param {Object} message E.g.: {msg: 'Password changed'}
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      * @private
      */
-    _loadUrl(fragment, args) {
+    _loadUrl(fragment, message) {
         this._fragment = this.getFragment(fragment);
         const n = this._handlers.length;
         let handler;
         for (let i = 0; i < n; i++) {
             handler = this._handlers[i];
             if (handler.route.test(this._fragment)) {
-                handler.callback(this._fragment, args);
+                handler.callback(this._fragment, message);
                 return true;
             }
         }
@@ -245,16 +245,17 @@ class History {
      * route callback be fired (not usually desirable), or `replace: true`, if
      * you wish to modify the current URL without adding an entry to the history.
      * @param {string} fragment Fragment to navigate to
-     * @param {Object} options Options object
+     * @param {Object=} message custom parameters to pass to the handler.
+     * @param {Object=} options Options object.
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    navigate(fragment, options = {trigger: false}) {
+    navigate(fragment, message, options) {
 
         if (!History._started) {
             return false;
         }
 
-        const optionsAux = options === true ? {trigger: true} : options;
+        const optionsAux = options === undefined ? {trigger: true} : options;
 
         let fragmentAux = this.getFragment(fragment || '');
 
@@ -288,7 +289,7 @@ class History {
         }
 
         if (optionsAux.trigger) {
-            return this._loadUrl(fragmentAux, optionsAux.args);
+            return this._loadUrl(fragmentAux, message);
         }
 
         return false;
@@ -437,11 +438,12 @@ class Router {
     /**
      * Simple proxy to `Router.history` to save a fragment into the history.
      * @param {string} fragment Route to navigate to.
+     * @param {Object=} message custom parameters to pass to the handler.
      * @param {Object} options parameters
      * @returns {Router} this
      */
-    navigate(fragment, options) {
-        Router.history.navigate(fragment, options);
+    navigate(fragment, message, options) {
+        Router.history.navigate(fragment, message, options);
         return this;
     }
 

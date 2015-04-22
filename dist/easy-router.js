@@ -259,18 +259,18 @@
              * match, returns `true`. If no defined routes matches the fragment,
              * returns `false`.
              * @param {string} fragment E.g.: 'user/pepito'
-             * @param {Object} args E.g.: {message: 'Password changed'}
+             * @param {Object} message E.g.: {msg: 'Password changed'}
              * @returns {boolean} true if the fragment matched some handler, false otherwise.
              * @private
              */
-            value: function _loadUrl(fragment, args) {
+            value: function _loadUrl(fragment, message) {
                 this._fragment = this.getFragment(fragment);
                 var n = this._handlers.length;
                 var handler = undefined;
                 for (var i = 0; i < n; i++) {
                     handler = this._handlers[i];
                     if (handler.route.test(this._fragment)) {
-                        handler.callback(this._fragment, args);
+                        handler.callback(this._fragment, message);
                         return true;
                     }
                 }
@@ -288,17 +288,17 @@
              * route callback be fired (not usually desirable), or `replace: true`, if
              * you wish to modify the current URL without adding an entry to the history.
              * @param {string} fragment Fragment to navigate to
-             * @param {Object} options Options object
+             * @param {Object=} message custom parameters to pass to the handler.
+             * @param {Object=} options Options object.
              * @returns {boolean} true if the fragment matched some handler, false otherwise.
              */
-            value: function navigate(fragment) {
-                var options = arguments[1] === undefined ? { trigger: false } : arguments[1];
+            value: function navigate(fragment, message, options) {
 
                 if (!History._started) {
                     return false;
                 }
 
-                var optionsAux = options === true ? { trigger: true } : options;
+                var optionsAux = options === undefined ? { trigger: true } : options;
 
                 var fragmentAux = this.getFragment(fragment || '');
 
@@ -332,7 +332,7 @@
                 }
 
                 if (optionsAux.trigger) {
-                    return this._loadUrl(fragmentAux, optionsAux.args);
+                    return this._loadUrl(fragmentAux, message);
                 }
 
                 return false;
@@ -501,11 +501,12 @@
             /**
              * Simple proxy to `Router.history` to save a fragment into the history.
              * @param {string} fragment Route to navigate to.
+             * @param {Object=} message custom parameters to pass to the handler.
              * @param {Object} options parameters
              * @returns {Router} this
              */
-            value: function navigate(fragment, options) {
-                Router.history.navigate(fragment, options);
+            value: function navigate(fragment, message, options) {
+                Router.history.navigate(fragment, message, options);
                 return this;
             }
         }, {

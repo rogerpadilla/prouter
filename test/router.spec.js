@@ -65,6 +65,13 @@
                         }
                     },
                     {
+                        route: "items/:id",
+                        on: function (id, qs, message) {
+                            holder.id = id;
+                            holder.message = message;
+                        }
+                    },
+                    {
                         route: "char%C3%B1",
                         on: function () {
                             holder.charType = 'escaped';
@@ -205,51 +212,52 @@
     });
 
     test("routes via navigate", 2, function () {
-        Router.history.navigate('search/manhattan/p20', {trigger: true});
+        Router.history.navigate('search/manhattan/p20');
         equal(holder.query, 'manhattan');
         equal(holder.page, '20');
     });
 
     test("routes via navigate with params", 1, function () {
-        Router.history.navigate('query/test?a=b', {trigger: true});
+        Router.history.navigate('query/test?a=b');
         equal(holder.queryArgs, 'a=b');
     });
 
     test("routes via navigate for backwards-compatibility", 2, function () {
-        Router.history.navigate('search/manhattan/p20', true);
+        Router.history.navigate('search/manhattan/p20');
         equal(holder.query, 'manhattan');
         equal(holder.page, '20');
     });
 
     test("reports matched route via nagivate", 1, function () {
-        ok(Router.history.navigate('search/manhattan/p20', true));
+        ok(Router.history.navigate('search/manhattan/p20'));
     });
 
-    test("route precedence via navigate", 4, function () {
+    test("route precedence via navigate", 2, function () {
         // check both 0.9.x and backwards-compatibility options
-        [{trigger: true}, true].forEach(function (options) {
-            Router.history.navigate('contacts', options);
-            equal(holder.contact, 'index');
-            Router.history.navigate('contacts/new', options);
-            equal(holder.contact, 'new');
-        });
+        Router.history.navigate('contacts');
+        equal(holder.contact, 'index');
+        Router.history.navigate('contacts/new');
+        equal(holder.contact, 'new');
     });
 
     test("loadUrl is not called for identical routes.", 0, function () {
-        Router.history.loadUrl = function () {
+        Router.history._loadUrl = function () {
             ok(false);
         };
         location.replace('http://example.com#route');
-        Router.history.navigate('route');
-        Router.history.navigate('/route');
-        Router.history.navigate('/route');
-        Router.history.navigate('/route/');
-        Router.history.navigate('route/');
+        Router.history.navigate('route', null, {trigger: false});
+        Router.history.navigate('route', null, {trigger: false});
+    });
+
+    test("pass message parameter to handler when navigating.", 2, function () {
+        Router.history.navigate('items/a12b', {msg: 'Item saved'});
+        strictEqual('a12b', holder.id);
+        strictEqual('Item saved', holder.message.msg);
     });
 
     test("use implicit callback if none provided", 1, function () {
         router.count = 0;
-        router.navigate('implicit', {trigger: true});
+        router.navigate('implicit');
         equal(holder.count, 1);
     });
 
@@ -259,7 +267,7 @@
         location.replace = function (href) {
             strictEqual(href, new Location('http://example.com#end_here').href);
         };
-        Router.history.navigate('end_here', {replace: true});
+        Router.history.navigate('end_here', null, {replace: true});
     });
 
     test("routes (splats)", 1, function () {
@@ -352,8 +360,8 @@
             pushState: true,
             hashChange: false
         });
-        Router.history.navigate('shop/search', true);
-        Router.history.navigate('path/abc', true);
+        Router.history.navigate('shop/search');
+        Router.history.navigate('path/abc');
     });
 
     test("Decode named parameters, not splats.", 2, function () {
@@ -379,7 +387,7 @@
 
     test("Route callback gets passed encoded values.", 3, function () {
         var route = 'has%2Fslash/complex-has%23hash/has%20space';
-        Router.history.navigate(route, {trigger: true});
+        Router.history.navigate(route);
         strictEqual(holder.first, 'has/slash');
         strictEqual(holder.part, 'has#hash');
         strictEqual(holder.rest, 'has space');
@@ -395,9 +403,9 @@
     });
 
     test("Hashes with UTF8 in them.", 2, function () {
-        Router.history.navigate('charñ', {trigger: true});
+        Router.history.navigate('charñ');
         equal(holder.charType, 'UTF');
-        Router.history.navigate('char%C3%B1', {trigger: true});
+        Router.history.navigate('char%C3%B1');
         equal(holder.charType, 'UTF');
     });
 
@@ -705,7 +713,7 @@
         );
         location.replace('http://example.com/');
         Router.history.start({pushState: true, hashChange: false});
-        Router.history.navigate('path?query#hash', true);
+        Router.history.navigate('path?query#hash');
     });
 
     test('Do not decode the search params.', function () {
@@ -720,7 +728,7 @@
                 ]
             }
         );
-        Router.history.navigate('path?x=y%3Fz', true);
+        Router.history.navigate('path?x=y%3Fz');
     });
 
     test('Navigate to a hash url.', function () {
@@ -754,7 +762,7 @@
                     }]
             }
         );
-        Router.history.navigate('path?x=y#hash', true);
+        Router.history.navigate('path?x=y#hash');
     });
 
     test('unicode pathname', 1, function () {
@@ -823,7 +831,7 @@
             }
         };
         Router.history.start({pushState: true});
-        Router.history.navigate('shop/search?keyword=short%20dress', true);
+        Router.history.navigate('shop/search?keyword=short%20dress');
         strictEqual(Router.history.getFragment(), 'shop/search?keyword=short dress');
     });
 
