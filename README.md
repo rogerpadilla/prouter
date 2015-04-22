@@ -60,7 +60,7 @@ var appRouter = new Router({
 });
 
 
-// after instantiating the Router, you can alternatively use the function "addHandler" for adding handlers:
+// you can alternatively use the function "addHandler" for adding handlers:
 router.addHandler({
     route: 'item/:id',
     on: function (id, queryString, message) {
