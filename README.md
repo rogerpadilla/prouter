@@ -74,11 +74,22 @@ router.addHandler({
 });
 
 
-// Listen when routes changes
+// Listen when navigation happens in this router.
 router.on('route', function (evt) {
     // prints information about the previous handler (if so)
     console.log(args.old);
     // prints information about the new handler
+    console.log(args.new);    
+});
+
+
+// Listen when navigation happens in any router.
+Router.history.on('route', function (router, evt) {
+    // prints information about the involved router.
+    console.log(router);
+    // prints information about the previous handler (if so)
+    console.log(args.old);
+    // prints information about the new handler (if so)
     console.log(args.new);    
 });
 
