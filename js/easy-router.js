@@ -166,9 +166,7 @@ class History {
 
         }
 
-        if (!this._opts.silent) {
-            return this._loadUrl();
-        }
+        return this._loadUrl();
     }
 
     /**
@@ -211,7 +209,7 @@ class History {
      * match, returns `true`. If no defined routes matches the fragment,
      * returns `false`.
      * @param {string} fragment E.g.: 'user/pepito'
-     * @param {Object} message E.g.: {msg: 'Password changed'}
+     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      * @private
      */
@@ -238,17 +236,15 @@ class History {
      * route callback be fired (not usually desirable), or `replace: true`, if
      * you wish to modify the current URL without adding an entry to the history.
      * @param {string} fragment Fragment to navigate to
-     * @param {Object=} message custom parameters to pass to the handler.
+     * @param {Object=} message Options object.
      * @param {Object=} options Options object.
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    navigate(fragment, message, options) {
+    navigate(fragment, message, options = {}) {
 
         if (!History._started) {
             return false;
         }
-
-        const optionsAux = options === undefined ? {trigger: true} : options;
 
         let fragmentAux = this.getFragment(fragment || '');
 
@@ -270,18 +266,18 @@ class History {
 
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._hasPushState) {
-            this._history[optionsAux.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+            this._history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
-            this._updateHash(fragmentAux, optionsAux.replace);
+            this._updateHash(fragmentAux, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
             return this._location.assign(url);
         }
 
-        if (optionsAux.trigger) {
+        if (options.trigger !== false) {
             return this._loadUrl(fragmentAux, message);
         }
 
@@ -389,18 +385,17 @@ class Router {
         const routeAux = Router._routeToRegExp(handler.route);
         const self = this;
 
-        Router.history._addHandler(routeAux, function (fragment, args) {
+        Router.history._addHandler(routeAux, function (fragment, message) {
 
             const params = Router._extractParameters(routeAux, fragment);
 
-            if (args) {
-                params.push(args);
-            }
+            const paramsAux = params.slice(0);
 
-            const evtRoute = {new: {fragment: fragment, params: params}};
+            const evtRoute = {};
+            evtRoute.new = {fragment: fragment, params: paramsAux, message: message};
 
-            if (self._oldCtrl) {
-                evtRoute.old = {fragment: self._oldCtrl.fragment, params: self._oldCtrl.params};
+            if (self._old) {
+                evtRoute.old = {fragment: self._old.fragment, params: self._old.params};
             }
 
             self._trigger('route:before', evtRoute);
@@ -410,16 +405,18 @@ class Router {
                 return;
             }
 
-            if (self._oldCtrl && self._oldCtrl.off) {
-                self._oldCtrl.off.apply(self._oldCtrl);
+            params.push(evtRoute);
+
+            if (self._old && self._old.handler.off) {
+                self._old.handler.off.apply(self._old.handler);
             }
 
             handler.on.apply(handler, params);
 
             self._trigger('route:after', evtRoute);
             Router.history._trigger('route:after', self, evtRoute);
-
-            self._oldCtrl = {off: handler.off, fragment: fragment, params: params};
+            
+            self._old = {fragment: fragment, params: paramsAux, handler: handler};
         });
 
         return this;
@@ -428,8 +425,8 @@ class Router {
     /**
      * Simple proxy to `Router.history` to save a fragment into the history.
      * @param {string} fragment Route to navigate to.
-     * @param {Object=} message custom parameters to pass to the handler.
-     * @param {Object} options parameters
+     * @param {Object=} message parameters
+     * @param {Object=} options parameters
      * @returns {Router} this router
      */
     navigate(fragment, message, options) {
@@ -482,18 +479,13 @@ class Router {
      */
     static _extractParameters(route, fragment) {
         const params = route.exec(fragment).slice(1);
-        const paramsLength = params.length;
-        const args = [];
-        for (let i = 0, param; i < paramsLength; i++) {
-            param = params[i];
+        return params.map(function (param, i) {
             // Don't decode the search params.
-            if (i === params.length - 1 && param) {
-                args.push(param || null);
-            } else if (param) {
-                args.push(root.decodeURIComponent(param));
+            if (i === params.length - 1) {
+                return param;
             }
-        }
-        return args;
+            return param === undefined ? undefined : decodeURIComponent(param);
+        });
     }
 
 }

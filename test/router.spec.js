@@ -65,13 +65,6 @@
                         }
                     },
                     {
-                        route: "items/:id",
-                        on: function (id, message) {
-                            holder.id = id;
-                            holder.message = message;
-                        }
-                    },
-                    {
                         route: "char%C3%B1",
                         on: function () {
                             holder.charType = 'escaped';
@@ -249,10 +242,50 @@
         Router.history.navigate('route', null, {trigger: false});
     });
 
-    test("pass message parameter to handler when navigating.", 2, function () {
-        Router.history.navigate('items/a12b', {msg: 'Item saved'});
-        strictEqual('a12b', holder.id);
-        strictEqual('Item saved', holder.message.msg);
+    test("event parameter.", 6, function () {
+        Router.history.stop();
+        router = new Router({
+            map: [
+                {
+                    route: 'items/:id',
+                    on: function (id, queryString, evt) {
+                        strictEqual(id, 'a12b');
+                        strictEqual(queryString, 'param1=val1&param2=val2');
+                        strictEqual(evt.new.fragment, 'items/a12b?param1=val1&param2=val2');
+                        strictEqual(evt.new.params[0], id);
+                        strictEqual(evt.new.params[1], queryString);
+                        strictEqual(evt.new.message, 'Item saved');
+                    }
+                }
+            ]
+        });
+        Router.history.start({
+            pushState: true,
+            hashChange: false
+        });
+        Router.history.navigate('items/a12b?param1=val1&param2=val2', 'Item saved');
+    });
+
+    test("query string.", 4, function () {
+        Router.history.stop();
+        router = new Router({
+            map: [
+                {
+                    route: 'login',
+                    on: function (queryString, evt) {
+                        strictEqual(queryString, 'param1=val1&param2=val2');
+                        strictEqual(evt.new.fragment, 'login?param1=val1&param2=val2');
+                        strictEqual(evt.new.params[0], queryString);
+                        deepEqual(evt.new.message, {msg: 'Password changed', type: 'success'});
+                    }
+                }
+            ]
+        });
+        Router.history.start({
+            pushState: true,
+            hashChange: false
+        });
+        Router.history.navigate('login?param1=val1&param2=val2', {msg: 'Password changed', type: 'success'});
     });
 
     test("use implicit callback if none provided", 1, function () {
@@ -333,7 +366,7 @@
             strictEqual(args.old.fragment, 'path/old?a=2');
             deepEqual(args.old.params, ['path/old', 'a=2']);
             strictEqual(args.new.fragment, 'function/set');
-            deepEqual(args.new.params, ['set']);
+            deepEqual(args.new.params, ['set', undefined]);
         });
         location.replace('http://example.com#function/set');
         Router.history._checkUrl();
@@ -351,7 +384,7 @@
         router.navigate('path');
     });
 
-    test("routes (function) on off", 3, function () {
+    test("routes (function) on off", 2, function () {
         Router.history.stop();
         location.replace('http://example.com/path/123');
         router = new Router({
@@ -364,6 +397,12 @@
                     off: function () {
                         ok(true);
                     }
+                },
+                {
+                    route: 'other',
+                    on: function() {
+
+                    }
                 }
             ]
         });
@@ -371,8 +410,7 @@
             pushState: true,
             hashChange: false
         });
-        Router.history.navigate('shop/search');
-        Router.history.navigate('path/abc');
+        Router.history.navigate('other');
     });
 
     test("Decode named parameters, not splats.", 2, function () {
@@ -618,7 +656,7 @@
 
     test("Trigger 'route' event on router instance.", 1, function () {
         router.on('route:before', function (args) {
-            deepEqual(args.new.params, ['x']);
+            deepEqual(args.new.params, ['x', undefined]);
         });
         location.replace('http://example.com#route-event/x');
         Router.history._checkUrl();
@@ -811,23 +849,35 @@
     });
 
     test('preserve context (this)', 2, function () {
-        location.replace('http://example.com/search/some-text');
         Router.history.stop();
         const someVal = Math.random();
-        new Router({
+        router = new Router({
                 map: [
                     {
-                        route: 'search/:text',
+                        route: 'one',
                         someAttr: someVal,
-                        on: function (text) {
-                            strictEqual(text, 'some-text');
+                        on: function () {
                             strictEqual(this.someAttr, someVal);
+                        },
+                        off: function () {
+                            strictEqual(this.someAttr, someVal);
+                        }
+                    },
+                    {
+                        route: 'two',
+                        on: function() {
+
                         }
                     }
                 ]
             }
         );
-        Router.history.start({pushState: true});
+        Router.history.start({
+            pushState: true,
+            hashChange: false
+        });
+        Router.history.navigate('one');
+        Router.history.navigate('two');
     });
 
     test("History#navigate decodes before comparison.", 1, function () {

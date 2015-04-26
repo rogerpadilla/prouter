@@ -8,7 +8,7 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
 
 Unique features:
-* Send "flash" parameters between routes when navigating.
+* Send "flash" messages between routes when navigating.
 * Supports "off" optional-callback, called when leaving the current route.
 * Register listeners before and after the routes changes.
 * Cancel navigation by setting evt.canceled to true inside the callback for the event 'route:before'.
@@ -66,8 +66,8 @@ var appRouter = new Router({
 // you can alternatively use the function "addHandler" for adding handlers:
 appRouter.addHandler({
     route: 'item/:id',
-    on: function (id, message) {
-        // prints {msg: 'Item saved'}
+    on: function (id, queryString, message) {
+        // prints {msg: 'Item saved', type: 'success'}
         console.log(message);
         ...
     },
@@ -112,6 +112,6 @@ Router.history.start({pushState: true});
 
 
 // client-side redirect to the 'items/:id' handler, it will receive this custom message.
-Router.history.navigate('items/a12b', {msg: 'Item saved'});
+Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
 
 ```
