@@ -9,7 +9,7 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 
 Unique features:
 * Send "flash" messages between routes when navigating.
-* Supports "off" optional-callback, called when leaving the current route.
+* Supports "deactivate" optional-callback, called when leaving the current route.
 * Register listeners before and after the routes changes.
 * Cancel navigation by setting evt.canceled to true inside the callback for the event 'route:before'.
 
@@ -22,7 +22,7 @@ Install it via [Bower](http://bower.io/) (npm support coming soon):
 bower install easy-router -S
 ```
 
-Use it like the future Angular 2 Router component or the Aurelia's [Router](http://aurelia.io/get-started.html) components:
+Routes declaration is inspired from the upcoming Angular 2's Router and the Aurelia's [Router](http://aurelia.io/get-started.html) components:
 
 ```javascript
 var Router = easyRouter.Router;
@@ -31,49 +31,36 @@ var appRouter = new Router({
     map: [
         {
             route: '',
-            on: function () {
+            activate: function () {
                 console.log('Entering home page);
                 ...
             },
-            off: function() {
+            deactivate: function() {
+                // note you can optionally declare an 'deactivate' callback (called before leaving) for each handler.
                 console.log('Leaving home page);   
                 ...
             }
         },
         {
             route: 'companies/new',
-            on: function () {
+            activate: function () {
                 ...
             }
         },
         {
             route: 'companies/:id',
-            on: function (id) {
+            activate: function (id) {
                 ...
             }
         },
         {
             route: 'signup',
-            on: function () {
+            activate: function () {
                 ...
             }
         },
 		...
     ]
-});
-
-
-// you can alternatively use the function "addHandler" for adding handlers:
-appRouter.addHandler({
-    route: 'item/:id',
-    on: function (id, queryString, message) {
-        // prints {msg: 'Item saved', type: 'success'}
-        console.log(message);
-        ...
-    },
-    off: function() {
-        // note you can optionally declare an 'off' callback (called on exit) for each handler.
-    }
 });
 
 
@@ -100,10 +87,18 @@ appRouter.on('route:before', function (evt) {
 Router.history.on('route:after', function (router, evt) {
     // prints information about the involved router.
     console.log(router);
-    // prints information about the previous handler (if so)
-    console.log(evt.old);
-    // prints information about the new handler (if so)
-    console.log(evt.new);    
+    ...
+});
+
+
+// you can alternatively use the function "addHandler" for adding handlers:
+appRouter.addHandler({
+    route: 'item/:id',
+    activate: function (id, queryString, message) {
+        // prints {msg: 'Item saved', type: 'success'}
+        console.log(message);
+        ...
+    }
 });
 
 
@@ -113,5 +108,3 @@ Router.history.start({pushState: true});
 
 // client-side redirect to the 'items/:id' handler, it will receive this custom message.
 Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
-
-```

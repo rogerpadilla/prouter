@@ -166,7 +166,11 @@ class History {
 
         }
 
-        return this._loadUrl();
+        if (this._opts.silent !== false) {
+            return this._loadUrl();
+        }
+
+        return false;
     }
 
     /**
@@ -407,15 +411,15 @@ class Router {
 
             params.push(evtRoute);
 
-            if (self._old && self._old.handler.off) {
-                self._old.handler.off.apply(self._old.handler);
+            if (self._old && self._old.handler.deactivate) {
+                self._old.handler.deactivate.apply(self._old.handler);
             }
 
-            handler.on.apply(handler, params);
+            handler.activate.apply(handler, params);
 
             self._trigger('route:after', evtRoute);
             Router.history._trigger('route:after', self, evtRoute);
-            
+
             self._old = {fragment: fragment, params: paramsAux, handler: handler};
         });
 

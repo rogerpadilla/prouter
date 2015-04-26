@@ -46,74 +46,74 @@
                 map: [
                     {
                         route: "search/:query",
-                        on: function (query, page) {
+                        activate: function (query, page) {
                             holder.query = query;
                             holder.page = page;
                         }
                     },
                     {
                         route: "search/:query/p:page",
-                        on: function (query, page) {
+                        activate: function (query, page) {
                             holder.query = query;
                             holder.page = page;
                         }
                     },
                     {
                         route: "charñ",
-                        on: function () {
+                        activate: function () {
                             holder.charType = 'UTF';
                         }
                     },
                     {
                         route: "char%C3%B1",
-                        on: function () {
+                        activate: function () {
                             holder.charType = 'escaped';
                         }
                     },
                     {
                         route: "contacts",
-                        on: function () {
+                        activate: function () {
                             holder.contact = 'index';
                         }
                     },
                     {
                         route: "contacts/new",
-                        on: function () {
+                        activate: function () {
                             holder.contact = 'new';
                         }
                     },
                     {
                         route: "contacts/:id",
-                        on: function () {
+                        activate: function () {
                             holder.contact = 'load';
                         }
                     },
                     {
                         route: "route-event/:arg",
-                        on: function (arg) {
+                        activate: function (arg) {
                         }
                     },
                     {
                         route: "optional(/:item)",
-                        on: function (arg) {
+                        activate: function (arg) {
                             holder.arg = arg != void 0 ? arg : null;
                         }
                     },
                     {
                         route: "named/optional/(y:z)",
-                        on: function (z) {
+                        activate: function (z) {
                             holder.z = z;
                         }
                     },
                     {
                         route: "splat/*args/end",
-                        on: function (args) {
+                        activate: function (args) {
                             holder.args = args;
                         }
                     },
                     {
                         route: ":repo/compare/*from...*to",
-                        on: function (repo, from, to) {
+                        activate: function (repo, from, to) {
                             holder.repo = repo;
                             holder.from = from;
                             holder.to = to;
@@ -121,14 +121,14 @@
                     },
                     {
                         route: "decode/:named/*splat",
-                        on: function (named, path) {
+                        activate: function (named, path) {
                             holder.named = named;
                             holder.path = path;
                         }
                     },
                     {
                         route: "*first/complex-*part/*rest",
-                        on: function (first, part, rest) {
+                        activate: function (first, part, rest) {
                             holder.first = first;
                             holder.part = part;
                             holder.rest = rest;
@@ -136,24 +136,24 @@
                     },
                     {
                         route: "query/:entity",
-                        on: function (entity, args) {
+                        activate: function (entity, args) {
                             holder.entity = entity;
                             holder.queryArgs = args;
                         }
                     },
                     {
                         route: "function/:value",
-                        on: externalObject.routingFunction
+                        activate: externalObject.routingFunction
                     },
                     {
                         route: "implicit",
-                        on: function () {
+                        activate: function () {
                             holder.count++;
                         }
                     },
                     {
                         route: "*anything",
-                        on: function (whatever) {
+                        activate: function (whatever) {
                             holder.anything = whatever;
                         }
                     }
@@ -248,7 +248,7 @@
             map: [
                 {
                     route: 'items/:id',
-                    on: function (id, queryString, evt) {
+                    activate: function (id, queryString, evt) {
                         strictEqual(id, 'a12b');
                         strictEqual(queryString, 'param1=val1&param2=val2');
                         strictEqual(evt.new.fragment, 'items/a12b?param1=val1&param2=val2');
@@ -272,7 +272,7 @@
             map: [
                 {
                     route: 'login',
-                    on: function (queryString, evt) {
+                    activate: function (queryString, evt) {
                         strictEqual(queryString, 'param1=val1&param2=val2');
                         strictEqual(evt.new.fragment, 'login?param1=val1&param2=val2');
                         strictEqual(evt.new.params[0], queryString);
@@ -391,16 +391,16 @@
             map: [
                 {
                     route: 'path/:val',
-                    on: function () {
+                    activate: function () {
                         ok(true);
                     },
-                    off: function () {
+                    deactivate: function () {
                         ok(true);
                     }
                 },
                 {
                     route: 'other',
-                    on: function() {
+                    activate: function() {
 
                     }
                 }
@@ -691,7 +691,7 @@
             map: [
                 {
                     route: "hash",
-                    on: function () {
+                    activate: function () {
                         ok(false);
                     }
                 }
@@ -753,7 +753,7 @@
                 map: [
                     {
                         route: "path",
-                        on: function () {
+                        activate: function () {
                             ok(true);
                         }
                     }
@@ -770,7 +770,7 @@
                 map: [
                     {
                         route: "path",
-                        on: function (params) {
+                        activate: function (params) {
                             strictEqual(params, 'x=y%3Fz');
                         }
                     }
@@ -787,7 +787,7 @@
                 map: [
                     {
                         route: "path",
-                        on: function (params) {
+                        activate: function (params) {
                             strictEqual(params, 'x=y');
                         }
                     }
@@ -805,7 +805,7 @@
                 map: [
                     {
                         route: "path",
-                        on: function (params) {
+                        activate: function (params) {
                             strictEqual(params, 'x=y');
                         }
                     }]
@@ -821,7 +821,7 @@
                 map: [
                     {
                         route: "myyjä",
-                        on: function () {
+                        activate: function () {
                             ok(true);
                         }
                     }
@@ -838,7 +838,7 @@
                 map: [
                     {
                         route: 'stuff\nnonsense',
-                        on: function () {
+                        activate: function () {
                             ok(true);
                         }
                     }
@@ -856,16 +856,16 @@
                     {
                         route: 'one',
                         someAttr: someVal,
-                        on: function () {
+                        activate: function () {
                             strictEqual(this.someAttr, someVal);
                         },
-                        off: function () {
+                        deactivate: function () {
                             strictEqual(this.someAttr, someVal);
                         }
                     },
                     {
                         route: 'two',
-                        on: function() {
+                        activate: function() {
 
                         }
                     }
@@ -902,7 +902,7 @@
         var router = new Router();
         router.addHandler({
             route: 'login',
-            on: function (params) {
+            activate: function (params) {
                 strictEqual(params, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
             }
         });
