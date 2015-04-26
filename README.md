@@ -38,7 +38,8 @@ var appRouter = new Router({
                 ...
             },
             deactivate: function() {
-                // note you can optionally declare an 'deactivate' callback (called before leaving) for each handler.
+                // note you can optionally declare an 'deactivate' callback
+                // (called before leaving) for each handler.
                 console.log('Leaving home page);   
                 ...
             }
