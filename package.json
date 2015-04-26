@@ -1,5 +1,5 @@
 {
-  "name": "EasyRouter",
+  "name": "easy-router",
   "version": "1.2.0",
   "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
   "main": [
