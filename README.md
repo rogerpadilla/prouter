@@ -8,7 +8,7 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
 * __Forward-thinking__, written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/js/easy-router.js).
-* Unit testing for each feature is included in the build process.
+* [Unit tests](https://github.com/rogerpadilla/easy-router/blob/master/test/router.spec.js) for each feature is included in the build process.
 
 Unique features:
 * Send "flash" messages between routes when navigating.
