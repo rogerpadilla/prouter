@@ -14,10 +14,11 @@ Unique features:
 * Supports "deactivate" optional-callback, called when leaving the current route.
 * Register listeners before and after the routes changes.
 * Cancel navigation by setting evt.canceled to true inside the callback for the event 'route:before'.
+* Want to create a hibrid-mobile-app, or a web-spa using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/),[Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrated it on your own framework? Good news, easyRouter was created with all of those use cases in mind!
 
-Want to create a modern hibrid-mobile-app or web-app using something like [React](https://facebook.github.io/react/), [Web Components](http://webcomponents.org/), [Handlebars](http://handlebarsjs.com/), or vanilla JS? Want to render in both sides, the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrated it on your own framework? Good news, EasyRouter was created with all of those use cases in mind!
+Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). easyRouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API, the Router handles graceful fallback and transparent translation to the fragment version of the URL. Basically, it's configured by providing a list of entries and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. easyRouter also includes unit testing in the build process and is tested in every common browser: Chrome, Firefox, IE9+.
 
-EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. EasyRouter also includes unit testing in the build process and is tested in every common browser: Chrome, Firefox, IE9+.
+During page load, after your application has finished creating all of its routers, be sure to call Router.history.start(), or Backbone.history.start({pushState: true}) to route the initial URL.
 
 Install it via [Bower](http://bower.io/):
 ``` bash
@@ -29,7 +30,7 @@ Install it via [npm](https://www.npmjs.com/):
 npm install easy-router --save
 ```
 
-Routes declaration is inspired from the upcoming Angular 2's Router and the Aurelia's [Router](http://aurelia.io/get-started.html) components:
+easyRouter is inspired from the [Backbone.Router](http://backbonejs.org/#Router) and Aurelia's [Router](http://aurelia.io/get-started.html) components:
 
 ```javascript
 var Router = easyRouter.Router;
@@ -46,12 +47,6 @@ var appRouter = new Router({
                 // note you can optionally declare an 'deactivate' callback
                 // (called before leaving) for each handler.
                 console.log('Leaving home page);   
-                ...
-            }
-        },
-        {
-            route: 'companies/new',
-            activate: function () {
                 ...
             }
         },
@@ -93,14 +88,6 @@ appRouter.on('route:before', function (evt) {
         appRouter.navigate('login');
         return;
     }
-    ...
-});
-
-
-// Listen after navigation happens in any router.
-Router.history.on('route:after', function (router, evt) {
-    // prints information about the involved router.
-    console.log(router);
     ...
 });
 
