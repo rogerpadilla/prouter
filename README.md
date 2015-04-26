@@ -31,7 +31,7 @@ Install it via [npm](https://www.npmjs.com/):
 npm install easy-router --save
 ```
 
-easyRouter is inspired from the [Backbone.Router](http://backbonejs.org/#Router) and Aurelia's [Router](http://aurelia.io/get-started.html) components:
+easyRouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router) and [Aurelia](http://aurelia.io/get-started.html):
 
 ```javascript
 var Router = easyRouter.Router;
