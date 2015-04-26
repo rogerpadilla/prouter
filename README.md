@@ -19,7 +19,7 @@ Unique features:
 
 Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). easyRouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API, the Router handles graceful fallback and transparent translation to the fragment version of the URL. Basically, it's configured by providing a list of entries and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments.
 
-During page load, after your application has finished creating all of its routers, be sure to call Router.history.start(), or Backbone.history.start({pushState: true}) to route the initial URL.
+During page load, after your application has finished creating all of its routers, be sure to call Router.history.start(), or Router.history.start({pushState: true}) to route the initial URL.
 
 Install it via [Bower](http://bower.io/):
 ``` bash
