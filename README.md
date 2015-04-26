@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master)](https://travis-ci.org/rogerpadilla/easy-router)
 
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
-* __Small footprint__, 6kb for the [minified](https://developers.google.com/closure/compiler/) version.
+* __Small footprint__, 6kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/easy-router/master/dist/easy-router.min.js) version.
 * __Great performance__, only native functions are used.
 * __No dependencies__, no jQuery, no Underscore... zero dependencies.
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
