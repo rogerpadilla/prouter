@@ -19,9 +19,14 @@ Want to create a modern hibrid-mobile-app or web-app using something like [React
 
 EasyRouter provides methods for routing client-side pages, and connecting them to actions; basically, it's configured by providing a list of entries and done! then start handling your routes using cross-browser history management, based on either [pushState](http://diveintohtml5.info/history.html) and real URLs, or [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments. EasyRouter also includes unit testing in the build process and is tested in every common browser: Chrome, Firefox, IE9+.
 
-Install it via [Bower](http://bower.io/) (npm support coming soon):
+Install it via [Bower](http://bower.io/):
 ``` bash
-bower install easy-router -S
+bower install easy-router --save
+```
+
+Install it via [npm](https://www.npmjs.com/):
+``` bash
+npm install easy-router --save
 ```
 
 Routes declaration is inspired from the upcoming Angular 2's Router and the Aurelia's [Router](http://aurelia.io/get-started.html) components:
