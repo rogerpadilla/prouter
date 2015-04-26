@@ -1,4 +1,6 @@
 # easy-router
+[![Build Status](https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master)](https://travis-ci.org/rogerpadilla/easy-router)
+
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Small footprint__, 6kb for the [minified](https://developers.google.com/closure/compiler/) version.
 * __Great performance__, only native functions are used.
