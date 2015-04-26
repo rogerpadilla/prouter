@@ -61,6 +61,12 @@ var appRouter = new Router({
                 ...
             }
         },
+        {
+            route: 'some-path/:param1/sub-path/:param2',
+            activate: function (param1, param2, queryString, evt) {
+                ...
+            }
+        },
 		...
     ]
 });
