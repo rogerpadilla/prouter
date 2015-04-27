@@ -22,7 +22,7 @@
   },
   "bugs": "https://github.com/rogerpadilla/easy-router/issues",
   "scripts": {
-    "test": "gulp coveralls"
+    "test": "gulp test"
   },
   "dependencies": {},
   "devDependencies": {
