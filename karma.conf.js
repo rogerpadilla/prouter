@@ -41,6 +41,11 @@ module.exports = function (config) {
 
         preprocessors: {
             'dist/*.js': 'coverage'
+        },
+
+        coverageReporter: {
+            type: 'html',
+            dir: 'test/reports/unit/coverage'
         }
     });
 };
