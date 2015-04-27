@@ -34,7 +34,7 @@ gulp.task('test', ['script'], function (done) {
 
 
 gulp.task('coveralls', ['test'], function () {
-    return gulp.src('build/reports/coverage/**/lcov.info')
+    gulp.src('build/reports/coverage/**/lcov.info')
         .pipe(coveralls());
 });
 
