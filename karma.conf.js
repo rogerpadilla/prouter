@@ -35,12 +35,12 @@ module.exports = function (config) {
 
         files: [
             'test/setup/*.js',
-            'dist/*.js',
+            'dist/easy-router.js',
             'test/*.spec.js'
         ],
 
         preprocessors: {
-            'dist/*.js': 'coverage'
+            'dist/easy-router.js': 'coverage'
         },
 
         coverageReporter: {
