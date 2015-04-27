@@ -5,8 +5,6 @@
     <a href='https://coveralls.io/r/rogerpadilla/easy-router?branch=master'><img src='https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master' alt='Coverage Status' /></a> 
 </p>
 
-[![Coverage Status](https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master)](https://coveralls.io/r/rogerpadilla/easy-router?branch=master)
-
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Small footprint__, 6kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/easy-router/master/dist/easy-router.min.js) version.
 * __Great performance__, only native functions are used.
