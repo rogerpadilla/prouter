@@ -41,6 +41,7 @@ easyRouter is inspired from the Router components of [Backbone](http://backbonej
 ```javascript
 var Router = easyRouter.Router;
 
+// Instantiate router and declaring some handlers.
 var appRouter = new Router({
     map: [
         {
@@ -79,6 +80,17 @@ var appRouter = new Router({
 });
 
 
+// you can alternatively use the function "addHandler" for adding handlers:
+appRouter.addHandler({
+    route: 'item/:id',
+    activate: function (id, queryString, message) {
+        // prints {msg: 'Item saved', type: 'success'}
+        console.log(message);
+        ...
+    }
+});
+
+
 // Listen before navigation happens in this router.
 appRouter.on('route:before', function (evt) {
     // prints information about the previous handler (if so)
@@ -95,17 +107,6 @@ appRouter.on('route:before', function (evt) {
         return;
     }
     ...
-});
-
-
-// you can alternatively use the function "addHandler" for adding handlers:
-appRouter.addHandler({
-    route: 'item/:id',
-    activate: function (id, queryString, message) {
-        // prints {msg: 'Item saved', type: 'success'}
-        console.log(message);
-        ...
-    }
 });
 
 
