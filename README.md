@@ -1,8 +1,7 @@
 # easy-router
 <p>
-    <a href="https://travis-ci.org/rogerpadilla/easy-router">
-        <img src="https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master" alt="build status">
-    </a>
+    <a href="https://travis-ci.org/rogerpadilla/easy-router"><img src="https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master" alt="build status" /></a>
+    <a href="https://gemnasium.com/rogerpadilla/easy-router"><img src="https://gemnasium.com/rogerpadilla/easy-router.svg" alt="Dependency Status" /></a>
 </p>
 
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
