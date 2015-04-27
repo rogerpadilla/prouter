@@ -16,7 +16,6 @@
     "/.*",
     "CNAME",
     "test",
-    "docs",
-    "js/tests"
+    "docs"
   ]
 }

@@ -28,12 +28,10 @@
   "devDependencies": {
     "babel": "^5.1.13",
     "closure-compiler": "^0.2.6",
-    "coveralls": "^2.11.2",
     "del": "^1.1.1",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-closure-compiler": "^0.2.19",
-    "gulp-coveralls": "^0.1.4",
     "gulp-eslint": "^0.11.1",
     "gulp-sourcemaps": "^1.5.2",
     "karma": "^0.12.31",
@@ -41,6 +39,7 @@
     "karma-coverage": "^0.3.1",
     "karma-firefox-launcher": "^0.1.4",
     "karma-phantomjs-launcher": "^0.1.4",
-    "karma-qunit": "^0.1.4"
+    "karma-qunit": "^0.1.4",
+    "qunitjs": "^1.18.0"
   }
 }
