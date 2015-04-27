@@ -1,5 +1,9 @@
 # easy-router
-[![Build Status](https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master)](https://travis-ci.org/rogerpadilla/easy-router)
+<p>
+    <a href="https://travis-ci.org/rogerpadilla/easy-router">
+        <img src="https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master" alt="build status">
+    </a>
+</p>
 
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Small footprint__, 6kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/easy-router/master/dist/easy-router.min.js) version.
