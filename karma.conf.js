@@ -44,8 +44,12 @@ module.exports = function (config) {
         },
 
         coverageReporter: {
-            type: 'html',
-            dir: 'test/reports/unit/coverage'
+            dir: 'build/reports/coverage',
+            reporters: [
+                // reporters not supporting the `file` property
+                {type: 'html', subdir: 'html'},
+                {type: 'lcov', subdir: 'lcov'}
+            ]
         }
     });
 };
