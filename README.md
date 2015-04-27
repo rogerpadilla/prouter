@@ -1,5 +1,7 @@
 # easy-router
-[![Build Status](https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master)](https://travis-ci.org/rogerpadilla/easy-router)
+<p>
+    [![Build Status](https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master)](https://travis-ci.org/rogerpadilla/easy-router)
+</p>
 <p>
     <a href="https://nodei.co/npm/easy-router/"><img src="https://nodei.co/npm/easy-router.png"></a>
 </p>
