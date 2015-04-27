@@ -1,0 +1,1782 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for ./dist/easy-router.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../prettify.css">
+    <link rel="stylesheet" href="../base.css">
+    <style type='text/css'>
+        div.coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header high">
+    <h1>Code coverage report for <span class="entity">./dist/easy-router.js</span></h1>
+    <h2>
+        Statements: <span class="metric">96.59% <small>(198 / 205)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Branches: <span class="metric">86.96% <small>(100 / 115)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Functions: <span class="metric">100% <small>(31 / 31)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">96.83% <small>(183 / 189)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../index.html">All files</a> &#187; <a href="index.html">./dist/</a> &#187; easy-router.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580</td><td class="line-coverage"><span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">18</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">168</span>
+<span class="cline-any cline-yes">168</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">286</span>
+<span class="cline-any cline-yes">286</span>
+<span class="cline-any cline-yes">229</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">59</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">165</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">57</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">286</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">22</span>
+<span class="cline-any cline-yes">68</span>
+<span class="cline-any cline-yes">63</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">10</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">89</span>
+<span class="cline-any cline-yes">89</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-yes">90</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22</span>
+<span class="cline-any cline-yes">22</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">22</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">135</span>
+<span class="cline-any cline-yes">135</span>
+<span class="cline-any cline-yes">135</span>
+<span class="cline-any cline-yes">135</span>
+<span class="cline-any cline-yes">1955</span>
+<span class="cline-any cline-yes">1955</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">30</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">27</span>
+<span class="cline-any cline-yes">13</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">14</span>
+<span class="cline-any cline-yes">13</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">26</span>
+<span class="cline-any cline-yes">25</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">59</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">58</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">59</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">534</span>
+<span class="cline-any cline-yes">534</span>
+<span class="cline-any cline-yes">455</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">79</span>
+<span class="cline-any cline-yes">79</span>
+<span class="cline-any cline-yes">79</span>
+<span class="cline-any cline-yes">79</span>
+<span class="cline-any cline-yes">79</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">64</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">133</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">71</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">70</span>
+<span class="cline-any cline-yes">70</span>
+<span class="cline-any cline-yes">70</span>
+<span class="cline-any cline-yes">1075</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-yes">710</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1076</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">264</span>
+<span class="cline-any cline-yes">134</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">130</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">(function (global, factory) {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof define === 'function' &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >define.amd)</span> {
+<span class="cstat-no" title="statement not covered" >        define(['exports'], factory);</span>
+    } else <span class="missing-if-branch" title="if path not taken" >I</span>if (typeof exports !== 'undefined') {
+<span class="cstat-no" title="statement not covered" >        factory(exports);</span>
+    } else {
+        var mod = {
+            exports: {}
+        };
+        factory(mod.exports);
+        global.easyRouter = mod.exports;
+    }
+})(this, function (exports) {
+    'use strict';
+&nbsp;
+    var _classCallCheck = function (instance, Constructor) { <span class="missing-if-branch" title="if path not taken" >I</span>if (!(instance instanceof Constructor)) { <span class="cstat-no" title="statement not covered" >throw new TypeError('Cannot call a class as a function'); </span>} };
+&nbsp;
+    var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i &lt; props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; <span class="missing-if-branch" title="else path not taken" >E</span>if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { <span class="missing-if-branch" title="else path not taken" >E</span>if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+&nbsp;
+    Object.defineProperty(exports, '__esModule', {
+        value: true
+    });
+    /**
+     * Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes,
+     * while providing the following advantages:
+     * - Unobtrusive, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla).
+     * - Great performance, only native functions are used.
+     * - Small footprint, 5kb for minified version.
+     * - No dependencies, no jQuery, no Underscore... zero dependencies.
+     * - Supports both routes' styles, hash and the pushState of History API.
+     * - Proper JSDoc used in the source code.
+     * - Works with normal script include and as well in CommonJS style.
+     * - Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for right now.
+     *
+     * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
+     * ¿Have an existing Backbone project and want to migrate to a more modern framework?
+     * Good news, EasyRouter will integrates perfectly with all of those!
+     */
+&nbsp;
+    /**
+     * EasyRouter provides methods for routing client-side pages, and connecting them to actions.
+     *
+     * During page load, after your application has finished creating all of its routers,
+     * be sure to call start() on the router instance to let know him you have already
+     * finished the routing setup.
+     */
+&nbsp;
+    var root = typeof global === 'undefined' ? window : <span class="branch-1 cbranch-no" title="branch not covered" >global;</span>
+    var document = root.document;
+&nbsp;
+    // Cached regular expressions for matching named param parts and splatted
+    // parts of route strings.
+    var optionalParam = /\((.*?)\)/g;
+    var namedParam = /(\(\?)?:\w+/g;
+    var splatParam = /\*\w+/g;
+    var escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+    var trueHash = /#(.*)$/;
+    var isRoot = /[^\/]$/;
+&nbsp;
+    // Cached regex for stripping a leading hash/slash and trailing space.
+    var routeStripper = /^[#\/]|\s+$/g;
+    // Cached regex for stripping leading and trailing slashes.
+    var rootStripper = /^\/+|\/+$/g;
+    // Cached regex for removing a trailing slash.
+    var trailingSlash = /\/$/;
+    // Cached regex for stripping urls of hash.
+    var pathStripper = /#.*$/;
+&nbsp;
+    /**
+     * Handles cross-browser history management, based on either
+     * [pushState](http://diveintohtml5.info/history.html) and real URLs, or
+     * [onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange)
+     * and URL fragments.
+     * @constructor
+     */
+&nbsp;
+    var History = (function () {
+        function History() {
+            _classCallCheck(this, History);
+&nbsp;
+            // Has the history handling already been started?
+            this._started = false;
+            this._checkUrl = this._checkUrl.bind(this);
+            this._handlers = [];
+            this._evtHandlers = {};
+            this._location = root.location;
+            this._history = root.history;
+        }
+&nbsp;
+        _createClass(History, [{
+            key: 'atRoot',
+&nbsp;
+            /**
+             * Are we at the app root?
+             * @returns {boolean} if we are in the root.
+             */
+            value: function atRoot() {
+                return this._location.pathname.replace(isRoot, '$&amp;/') === this._root;
+            }
+        }, {
+            key: 'getHash',
+&nbsp;
+            /**
+             * Gets the true hash value. Cannot use location.hash directly due to bug
+             * in Firefox where location.hash will always be decoded.
+             * @returns {string} The hash.
+             */
+            value: function getHash() {
+                var match = this._location.href.match(trueHash);
+                return match ? match[1] : '';
+            }
+        }, {
+            key: 'getFragment',
+&nbsp;
+            /**
+             * Get the cross-browser normalized URL fragment, either from the URL,
+             * the hash, or the override.
+             * @param {string} fragment The url fragment
+             * @param {boolean} forcePushState flag to force the usage of pushSate
+             * @returns {string} The fragment.
+             */
+            value: function getFragment(fragment, forcePushState) {
+                var fragmentAux = fragment;
+                if (fragmentAux === undefined || fragmentAux === null) {
+                    if (this._hasPushState || !this._wantsHashChange || forcePushState) {
+                        fragmentAux = root.decodeURI(this._location.pathname + this._location.search);
+                        var rootUrl = this._root.replace(trailingSlash, '');
+                        if (fragmentAux.lastIndexOf(rootUrl, 0) === 0) {
+                            fragmentAux = fragmentAux.slice(rootUrl.length);
+                        }
+                    } else {
+                        fragmentAux = this.getHash();
+                    }
+                } else {
+                    fragmentAux = root.decodeURI(fragmentAux);
+                }
+                return fragmentAux.replace(routeStripper, '');
+            }
+        }, {
+            key: 'start',
+&nbsp;
+            /**
+             * Start the route change handling, returning `true` if the current URL matches
+             * an existing route, and `false` otherwise.
+             * @param {Object} options Options
+             * @returns {boolean} true if the current fragment matched some handler, false otherwise.
+             */
+            value: function start() {
+                var options = arguments[0] === undefined ? {} : arguments[0];
+&nbsp;
+                <span class="missing-if-branch" title="if path not taken" >I</span>if (History._started) {
+<span class="cstat-no" title="statement not covered" >                    throw new Error('Router.history has already been started');</span>
+                }
+&nbsp;
+                History._started = true;
+&nbsp;
+                // Figure out the initial configuration. Is pushState desired ... is it available?
+                this._opts = options;
+                this._opts.root = this._opts.root || '/';
+                this._root = this._opts.root;
+                this._wantsHashChange = this._opts.hashChange !== false;
+                this._wantsPushState = !!this._opts.pushState;
+                this._hasPushState = !!(this._opts.pushState &amp;&amp; this._history &amp;&amp; this._history.pushState);
+                var fragment = this.getFragment();
+&nbsp;
+                // Normalize root to always include a leading and trailing slash.
+                this._root = ('/' + this._root + '/').replace(rootStripper, '/');
+&nbsp;
+                // Depending on whether we're using pushState or hashes, and whether
+                // 'onhashchange' is supported, determine how we check the URL state.
+                if (this._hasPushState) {
+                    root.addEventListener('popstate', this._checkUrl);
+                } else if (this._wantsHashChange &amp;&amp; 'onhashchange' in root) {
+                    root.addEventListener('hashchange', this._checkUrl);
+                }
+&nbsp;
+                // Determine if we need to change the base url, for a pushState link
+                // opened by a non-pushState browser.
+                this._fragment = fragment;
+&nbsp;
+                // Transition from hashChange to pushState or vice versa if both are
+                // requested.
+                if (this._wantsHashChange &amp;&amp; this._wantsPushState) {
+&nbsp;
+                    // If we've started off with a route from a `pushState`-enabled
+                    // browser, but we're currently in a browser that doesn't support it...
+                    if (!this._hasPushState &amp;&amp; !this.atRoot()) {
+                        this._fragment = this.getFragment(null, true);
+                        this._location.replace(this._root + '#' + this._fragment);
+                        // Return immediately as browser will do redirect to new url
+                        return true;
+                        // Or if we've started out with a hash-based route, but we're currently
+                        // in a browser where it could be `pushState`-based instead...
+                    } else if (this._hasPushState &amp;&amp; this.atRoot() &amp;&amp; this._location.hash) {
+                        this._fragment = this.getHash().replace(routeStripper, '');
+                        this._history.replaceState({}, document.title, this._root + this._fragment);
+                    }
+                }
+&nbsp;
+                <span class="missing-if-branch" title="else path not taken" >E</span>if (this._opts.silent !== false) {
+                    return this._loadUrl();
+                }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                return false;</span>
+            }
+        }, {
+            key: 'stop',
+&nbsp;
+            /**
+             * Disable Router.history, perhaps temporarily. Not useful in a real app,
+             * but possibly useful for unit testing Routers.
+             */
+            value: function stop() {
+                root.removeEventListener('popstate', this._checkUrl);
+                root.removeEventListener('hashchange', this._checkUrl);
+                History._started = false;
+            }
+        }, {
+            key: '_addHandler',
+&nbsp;
+            /**
+             * Add a route to be tested when the fragment changes. Routes added later
+             * may override previous routes.
+             * @param {string} routeExp The route.
+             * @param {Function} callback Method to be executed.
+             * @private
+             */
+            value: function _addHandler(routeExp, callback) {
+                this._handlers.unshift({ route: routeExp, callback: callback });
+            }
+        }, {
+            key: '_checkUrl',
+&nbsp;
+            /**
+             * Checks the current URL to see if it has changed, and if it has,
+             * calls `loadUrl`.
+             * @returns {boolean} true if navigated, false otherwise.
+             * @private
+             */
+            value: function _checkUrl() {
+                var fragment = this.getFragment();
+                <span class="missing-if-branch" title="if path not taken" >I</span>if (fragment === this._fragment) {
+<span class="cstat-no" title="statement not covered" >                    return false;</span>
+                }
+                this._loadUrl();
+            }
+        }, {
+            key: '_loadUrl',
+&nbsp;
+            /**
+             * Attempt to load the current URL fragment. If a route succeeds with a
+             * match, returns `true`. If no defined routes matches the fragment,
+             * returns `false`.
+             * @param {string} fragment E.g.: 'user/pepito'
+             * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
+             * @returns {boolean} true if the fragment matched some handler, false otherwise.
+             * @private
+             */
+            value: function _loadUrl(fragment, message) {
+                this._fragment = this.getFragment(fragment);
+                var n = this._handlers.length;
+                var handler = undefined;
+                for (var i = 0; i &lt; n; i++) {
+                    handler = this._handlers[i];
+                    if (handler.route.test(this._fragment)) {
+                        handler.callback(this._fragment, message);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }, {
+            key: 'navigate',
+&nbsp;
+            /**
+             * Save a fragment into the hash history, or replace the URL state if the
+             * 'replace' option is passed. You are responsible for properly URL-encoding
+             * the fragment in advance.
+             *
+             * The options object can contain `trigger: true` if you wish to have the
+             * route callback be fired (not usually desirable), or `replace: true`, if
+             * you wish to modify the current URL without adding an entry to the history.
+             * @param {string} fragment Fragment to navigate to
+             * @param {Object=} message Options object.
+             * @param {Object=} options Options object.
+             * @returns {boolean} true if the fragment matched some handler, false otherwise.
+             */
+            value: function navigate(fragment, message) {
+                var options = arguments[2] === undefined ? {} : arguments[2];
+&nbsp;
+                <span class="missing-if-branch" title="if path not taken" >I</span>if (!History._started) {
+<span class="cstat-no" title="statement not covered" >                    return false;</span>
+                }
+&nbsp;
+                var fragmentAux = this.getFragment(fragment || '');
+&nbsp;
+                var url = this._root + fragmentAux;
+&nbsp;
+                // Strip the hash for matching.
+                fragmentAux = fragmentAux.replace(pathStripper, '');
+&nbsp;
+                if (this._fragment === fragmentAux) {
+                    return false;
+                }
+&nbsp;
+                this._fragment = fragmentAux;
+&nbsp;
+                // Don't include a trailing slash on the root.
+                if (fragmentAux === '' &amp;&amp; url !== '/') {
+                    url = url.slice(0, -1);
+                }
+&nbsp;
+                // If pushState is available, we use it to set the fragment as a real URL.
+                if (this._hasPushState) {
+                    this._history[options.replace ? <span class="branch-0 cbranch-no" title="branch not covered" >'replaceState' </span>: 'pushState']({}, document.title, url);
+                    // If hash changes haven't been explicitly disabled, update the hash
+                    // fragment to store history.
+                } else if (this._wantsHashChange) {
+                    this._updateHash(fragmentAux, options.replace);
+                    // If you've told us that you explicitly don't want fallback hashchange-
+                    // based history, then `navigate` becomes a page refresh.
+                } else {
+                    return this._location.assign(url);
+                }
+&nbsp;
+                if (options.trigger !== false) {
+                    return this._loadUrl(fragmentAux, message);
+                }
+&nbsp;
+                return false;
+            }
+        }, {
+            key: 'on',
+&nbsp;
+            /**
+             * Add event listener.
+             * @param {string} evt Name of the event.
+             * @param {Function} callback Method.
+             * @returns {History} this history
+             */
+            value: function on(evt, callback) {
+                <span class="missing-if-branch" title="else path not taken" >E</span>if (this._evtHandlers[evt] === undefined) {
+                    this._evtHandlers[evt] = [];
+                }
+                this._evtHandlers[evt].push(callback);
+                return this;
+            }
+        }, {
+            key: 'off',
+&nbsp;
+            /**
+             * Remove event listener.
+             * @param {string} evt Name of the event.
+             * @param {Function} callback Method.
+             * @returns {History} this history
+             */
+            value: function off(evt, callback) {
+                if (this._evtHandlers[evt]) {
+                    var callbacks = this._evtHandlers[evt];
+                    var n = callbacks.length;
+                    for (var i = 0; i &lt; n; i++) {
+                        <span class="missing-if-branch" title="else path not taken" >E</span>if (callbacks[i] === callback) {
+                            callbacks.splice(i, 1);
+                            <span class="missing-if-branch" title="else path not taken" >E</span>if (callbacks.length === 0) {
+                                delete this._evtHandlers[evt];
+                            }
+                            break;
+                        }
+                    }
+                }
+                return this;
+            }
+        }, {
+            key: '_trigger',
+&nbsp;
+            /**
+             * Events triggering.
+             * @param {string} evt Name of the event being triggered.
+             * @private
+             */
+            value: function _trigger(evt) {
+                var callbacks = this._evtHandlers[evt];
+                if (callbacks === undefined) {
+                    return;
+                }
+                var args = Array.prototype.slice.call(arguments, 1);
+                var i = 0;
+                var callbacksLength = callbacks.length;
+                for (; i &lt; callbacksLength; i++) {
+                    callbacks[i].apply(this, args);
+                }
+            }
+        }, {
+            key: '_updateHash',
+&nbsp;
+            /**
+             * Update the hash location, either replacing the current entry, or adding
+             * a new one to the browser history.
+             * @param {string} fragment URL fragment
+             * @param {boolean} replace flag
+             * @private
+             */
+            value: function _updateHash(fragment, replace) {
+                if (replace) {
+                    var href = this._location.href.replace(/(javascript:|#).*$/, '');
+                    this._location.replace(href + '#' + fragment);
+                } else {
+                    // Some browsers require that `hash` contains a leading #.
+                    this._location.hash = '#' + fragment;
+                }
+            }
+        }]);
+&nbsp;
+        return History;
+    })();
+&nbsp;
+    var Router = (function () {
+&nbsp;
+        /**
+         * Constructor for the router.
+         * Routers map faux-URLs to actions, and fire events when routes are
+         * matched. Creating a new one sets its `routes` hash, if not set statically.
+         * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
+         * @constructor
+         */
+&nbsp;
+        function Router() {
+            var options = arguments[0] === undefined ? {} : arguments[0];
+&nbsp;
+            _classCallCheck(this, Router);
+&nbsp;
+            this._evtHandlers = {};
+            this._opts = options;
+            this._bindHandlers();
+        }
+&nbsp;
+        _createClass(Router, [{
+            key: 'addHandler',
+&nbsp;
+            /**
+             * Manually bind a single named route to a callback.
+             * The route argument may be a routing string or regular expression, each matching capture
+             * from the route or regular expression will be passed as an argument to the onCallback.
+             * @param {Object} handler The handler entry.
+             * @returns {Router} this router
+             */
+            value: function addHandler(handler) {
+&nbsp;
+                var routeAux = Router._routeToRegExp(handler.route);
+                var self = this;
+&nbsp;
+                Router.history._addHandler(routeAux, function (fragment, message) {
+&nbsp;
+                    var params = Router._extractParameters(routeAux, fragment);
+&nbsp;
+                    var paramsAux = params.slice(0);
+&nbsp;
+                    var evtRoute = {};
+                    evtRoute['new'] = { fragment: fragment, params: paramsAux, message: message };
+&nbsp;
+                    if (self._old) {
+                        evtRoute.old = { fragment: self._old.fragment, params: self._old.params };
+                    }
+&nbsp;
+                    self._trigger('route:before', evtRoute);
+                    Router.history._trigger('route:before', self, evtRoute);
+&nbsp;
+                    if (evtRoute.canceled) {
+                        return;
+                    }
+&nbsp;
+                    params.push(evtRoute);
+&nbsp;
+                    if (self._old &amp;&amp; self._old.handler.deactivate) {
+                        self._old.handler.deactivate.apply(self._old.handler);
+                    }
+&nbsp;
+                    handler.activate.apply(handler, params);
+&nbsp;
+                    self._trigger('route:after', evtRoute);
+                    Router.history._trigger('route:after', self, evtRoute);
+&nbsp;
+                    self._old = { fragment: fragment, params: paramsAux, handler: handler };
+                });
+&nbsp;
+                return this;
+            }
+        }, {
+            key: 'navigate',
+&nbsp;
+            /**
+             * Simple proxy to `Router.history` to save a fragment into the history.
+             * @param {string} fragment Route to navigate to.
+             * @param {Object=} message parameters
+             * @param {Object=} options parameters
+             * @returns {Router} this router
+             */
+            value: function navigate(fragment, message, options) {
+                Router.history.navigate(fragment, message, options);
+                return this;
+            }
+        }, {
+            key: '_bindHandlers',
+&nbsp;
+            /**
+             * Bind all defined routes to `Router.history`. We have to reverse the
+             * order of the routes here to support behavior where the most general
+             * routes can be defined at the bottom of the route map.
+             * @private
+             */
+            value: function _bindHandlers() {
+                if (!this._opts.map) {
+                    return;
+                }
+                var routes = this._opts.map;
+                var routesN = routes.length - 1;
+                for (var i = routesN; i &gt;= 0; i--) {
+                    this.addHandler(routes[i]);
+                }
+            }
+        }], [{
+            key: '_routeToRegExp',
+&nbsp;
+            /**
+             * Convert a route string into a regular expression, suitable for matching
+             * against the current location fragment.
+             * @param {string} route The route
+             * @returns {RegExp} the obtained regex
+             * @private
+             */
+            value: function _routeToRegExp(route) {
+                var routeAux = route.replace(escapeRegExp, '\\$&amp;').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
+                    return optional ? match : '([^/?]+)';
+                }).replace(splatParam, '([^?]*?)');
+                return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
+            }
+        }, {
+            key: '_extractParameters',
+&nbsp;
+            /**
+             * Given a route, and a URL fragment that it matches, return the array of
+             * extracted decoded parameters. Empty or unmatched parameters will be
+             * treated as `null` to normalize cross-browser behavior.
+             * @param {RegExp} route The alias
+             * @param {string} fragment The url part
+             * @returns {Array} the extracted parameters
+             * @private
+             */
+            value: function _extractParameters(route, fragment) {
+                var params = route.exec(fragment).slice(1);
+                return params.map(function (param, i) {
+                    // Don't decode the search params.
+                    if (i === params.length - 1) {
+                        return param;
+                    }
+                    return param === undefined ? undefined : decodeURIComponent(param);
+                });
+            }
+        }]);
+&nbsp;
+        return Router;
+    })();
+&nbsp;
+    /**
+     * Copy event bus listeners.
+     */
+    Router.prototype._trigger = History.prototype._trigger;
+    Router.prototype.on = History.prototype.on;
+    Router.prototype.off = History.prototype.off;
+&nbsp;
+    /**
+     * Create the default Router.History.
+     * @type {History}
+     */
+    Router.history = new History();
+&nbsp;
+    exports.History = History;
+    exports.Router = Router;
+});
+//# sourceMappingURL=easy-router.js.map</pre></td></tr>
+</table></pre>
+
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Apr 27 2015 12:36:52 GMT-0500 (Hora est. Pacífico, Sudamérica)</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
