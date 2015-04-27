@@ -2,7 +2,7 @@
 <p>
     <a href="https://travis-ci.org/rogerpadilla/easy-router"><img src="https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master" alt="build status" /></a>
     <a href="https://gemnasium.com/rogerpadilla/easy-router"><img src="https://gemnasium.com/rogerpadilla/easy-router.svg" alt="Dependency Status" /></a>
-    <a href="https://coveralls.io/r/rogerpadilla/easy-router"><img src="https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg" alt="Coverage Status" /></a>
+    <a href='https://coveralls.io/r/rogerpadilla/easy-router?branch=master'><img src='https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master' alt='Coverage Status' /></a> 
 </p>
 
 [![Coverage Status](https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master)](https://coveralls.io/r/rogerpadilla/easy-router?branch=master)
