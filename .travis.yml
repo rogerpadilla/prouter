@@ -3,3 +3,5 @@ node_js:
   - 0.12
 notifications:
   email: false
+after_success:
+  - gulp coveralls

@@ -7,6 +7,7 @@ var closureCompiler = require('gulp-closure-compiler');
 var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
 var karma = require('karma').server;
+var coveralls = require('gulp-coveralls');
 
 var mainFileName = 'easy-router';
 var mainFile = 'js/' + mainFileName + '.js';
@@ -29,6 +30,12 @@ gulp.task('test', ['script'], function (done) {
         autoWatch: false,
         singleRun: true
     }, done);
+});
+
+
+gulp.task('coveralls', ['test'], function (cb) {
+    gulp.src('build/reports/coverage/**/lcov.info')
+        .pipe(coveralls());
 });
 
 gulp.task('clean', function (cb) {

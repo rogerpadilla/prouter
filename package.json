@@ -32,6 +32,7 @@
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
     "gulp-closure-compiler": "^0.2.19",
+    "gulp-coveralls": "^0.1.4",
     "gulp-eslint": "^0.11.1",
     "gulp-sourcemaps": "^1.5.2",
     "karma": "^0.12.31",
