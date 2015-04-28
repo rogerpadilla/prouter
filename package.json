@@ -11,7 +11,8 @@
     "front-end",
     "library",
     "mobile",
-    "web"
+    "web",
+    "spa"
   ],
   "author": "Roger Padilla <rogerjose81@gmail.com>",
   "homepage": "https://github.com/rogerpadilla/easy-router",

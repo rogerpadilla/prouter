@@ -9,7 +9,8 @@
     "front-end",
     "library",
     "mobile",
-    "web"
+    "web",
+    "spa"
   ],
   "dependencies": {},
   "ignore": [
