@@ -266,6 +266,24 @@
         Router.history.navigate('items/a12b?param1=val1&param2=val2', 'Item saved');
     });
 
+    test("silent parameter.", 0, function () {
+        Router.history.stop();
+        location.replace('http://example.com/#items/123');
+        router = new Router({
+            map: [
+                {
+                    route: 'items/:id',
+                    activate: function () {
+                        ok(false);
+                    }
+                }
+            ]
+        });
+        Router.history.start({
+            silent: true
+        });
+    });
+
     test("query string.", 4, function () {
         Router.history.stop();
         router = new Router({

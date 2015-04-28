@@ -10,7 +10,7 @@ var karma = require('karma').server;
 var coveralls = require('gulp-coveralls');
 
 var mainFileName = 'easy-router';
-var mainFile = 'js/' + mainFileName + '.js';
+var mainFile = 'src/' + mainFileName + '.js';
 
 /*** Tasks ***/
 

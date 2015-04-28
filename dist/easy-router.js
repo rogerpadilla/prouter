@@ -197,7 +197,7 @@
                     }
                 }
 
-                if (this._opts.silent !== false) {
+                if (this._opts.silent !== true) {
                     return this._loadUrl();
                 }
 
