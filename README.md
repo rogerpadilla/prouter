@@ -47,13 +47,13 @@ var appRouter = new Router({
         {
             route: '',
             activate: function () {
-                console.log('Entering home page);
+                console.log('Entering home page');
                 ...
             },
             deactivate: function() {
                 // note you can optionally declare an 'deactivate' callback
                 // (called before leaving) for each handler.
-                console.log('Leaving home page);   
+                console.log('Leaving home page');   
                 ...
             }
         },
