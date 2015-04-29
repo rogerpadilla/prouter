@@ -3,11 +3,12 @@
 var gulp = require('gulp');
 var eslint = require('gulp-eslint');
 var babel = require('gulp-babel');
-var closureCompiler = require('gulp-closure-compiler');
 var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
 var karma = require('karma').server;
 var coveralls = require('gulp-coveralls');
+var rename = require('gulp-rename');
+var uglify = require('gulp-uglify');
 
 var mainFileName = 'easy-router';
 var mainFile = 'src/' + mainFileName + '.js';
@@ -52,10 +53,8 @@ gulp.task('script:build', ['clean', 'lint'], function () {
 
 gulp.task('script', ['script:build'], function () {
     return gulp.src('dist/' + mainFileName + '.js')
-        .pipe(closureCompiler({
-            compilerPath: 'node_modules/closure-compiler/lib/vendor/compiler.jar',
-            fileName: mainFileName + '.min.js'
-        }))
+        .pipe(uglify())
+        .pipe(rename(mainFileName + '.min.js'))
         .pipe(gulp.dest('dist'));
 });
 
