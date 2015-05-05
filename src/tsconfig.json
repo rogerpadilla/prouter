@@ -5,8 +5,7 @@
         "module": "commonjs",
         "declaration": true,
         "noImplicitAny": true,
-        "removeComments": false,
-        "noLib": false
+        "removeComments": false
     },
     "filesGlob": [
         "./**/prouter.ts"

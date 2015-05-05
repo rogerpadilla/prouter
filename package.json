@@ -27,7 +27,7 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "babel": "^5.2.12",
+        "babel": "^5.2.15",
         "del": "^1.1.1",
         "gulp": "^3.8.11",
         "gulp-babel": "^5.1.0",
