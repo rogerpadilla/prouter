@@ -2,7 +2,7 @@
 <p>
     <a href="https://travis-ci.org/rogerpadilla/prouter"><img src="https://travis-ci.org/rogerpadilla/prouter.svg?branch=master" alt="build status" /></a>
     <a href="https://gemnasium.com/rogerpadilla/prouter"><img src="https://gemnasium.com/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
-    <a href='https://coveralls.io/r/rogerpadilla/prouter?branch=master'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master' alt='Coverage Status' /></a>
+    <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
