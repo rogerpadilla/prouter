@@ -34,7 +34,7 @@ gulp.task('test', ['script'], function (done) {
 });
 
 
-gulp.task('coveralls', function () {
+gulp.task('coveralls', ['test'], function () {
     gulp.src('build/reports/coverage/**/lcov.info')
         .pipe(coveralls());
 });
