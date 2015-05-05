@@ -23,26 +23,26 @@
  * finished the routing setup.
  */
 
-    const root: any = window;
-    const document = root.document;
+const root: any = window;
+const document = root.document;
 
-    // Cached regular expressions for matching named param parts and splatted
-    // parts of route strings.
-    const optionalParam = /\((.*?)\)/g;
-    const namedParam = /(\(\?)?:\w+/g;
-    const splatParam = /\*\w+/g;
-    const escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
-    const trueHash = /#(.*)$/;
-    const isRoot = /[^\/]$/;
+// Cached regular expressions for matching named param parts and splatted
+// parts of route strings.
+const optionalParam = /\((.*?)\)/g;
+const namedParam = /(\(\?)?:\w+/g;
+const splatParam = /\*\w+/g;
+const escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+const trueHash = /#(.*)$/;
+const isRoot = /[^\/]$/;
 
-    // Cached regex for stripping a leading hash/slash and trailing space.
-    const routeStripper = /^[#\/]|\s+$/g;
-    // Cached regex for stripping leading and trailing slashes.
-    const rootStripper = /^\/+|\/+$/g;
-    // Cached regex for removing a trailing slash.
-    const trailingSlash = /\/$/;
-    // Cached regex for stripping urls of hash.
-    const pathStripper = /#.*$/;
+// Cached regex for stripping a leading hash/slash and trailing space.
+const routeStripper = /^[#\/]|\s+$/g;
+// Cached regex for stripping leading and trailing slashes.
+const rootStripper = /^\/+|\/+$/g;
+// Cached regex for removing a trailing slash.
+const trailingSlash = /\/$/;
+// Cached regex for stripping urls of hash.
+const pathStripper = /#.*$/;
 
 /**
  * Interface for declaring contract of handling requests.
@@ -89,9 +89,9 @@ export class History {
      * @returns {string} The hash.
      */
     getHash(): string {
-            const match = this._location.href.match(trueHash);
+        const match = this._location.href.match(trueHash);
         return match ? match[1] : '';
-        }
+    }
 
     /**
      * Get the cross-browser normalized URL fragment, either from the URL,
@@ -101,11 +101,11 @@ export class History {
      * @returns {string} The fragment.
      */
     getFragment(fragment?: string, forcePushState?: boolean): string {
-            let fragmentAux = fragment;
+        let fragmentAux = fragment;
         if (fragmentAux === undefined || fragmentAux === null) {
             if (this._hasPushState || !this._wantsHashChange || forcePushState) {
                 fragmentAux = root.decodeURI(this._location.pathname + this._location.search);
-                    const rootUrl = this._root.replace(trailingSlash, '');
+                const rootUrl = this._root.replace(trailingSlash, '');
                 if (fragmentAux.lastIndexOf(rootUrl, 0) === 0) {
                     fragmentAux = fragmentAux.slice(rootUrl.length);
                 }
@@ -137,7 +137,7 @@ export class History {
         this._wantsHashChange = options.hashChange !== false;
         this._wantsPushState = !!options.pushState;
         this._hasPushState = !!(options.pushState && this._history && this._history.pushState);
-            const fragment = this.getFragment();
+        const fragment = this.getFragment();
 
         // Normalize root to always include a leading and trailing slash.
         this._root = ('/' + this._root + '/').replace(rootStripper, '/');
@@ -206,12 +206,12 @@ export class History {
      * @private
      */
     private _checkUrl() {
-            const fragment = this.getFragment();
+        const fragment = this.getFragment();
         if (fragment === this._fragment) {
             return false;
         }
         this._loadUrl();
-        }
+    }
 
     /**
      * Attempt to load the current URL fragment. If a route succeeds with a
@@ -224,9 +224,9 @@ export class History {
      */
     private _loadUrl(fragment?: string, message?: string): boolean {
         this._fragment = this.getFragment(fragment);
-            const n = this._handlers.length;
-            for (let i = 0; i < n; i++) {
-                let handler = this._handlers[i];
+        const n = this._handlers.length;
+        for (let i = 0; i < n; i++) {
+            let handler = this._handlers[i];
             if (handler.route.test(this._fragment)) {
                 handler.callback(this._fragment, message);
                 return true;
@@ -254,9 +254,9 @@ export class History {
             return false;
         }
 
-            let fragmentAux = this.getFragment(fragment);
+        let fragmentAux = this.getFragment(fragment);
 
-            let url = this._root + fragmentAux;
+        let url = this._root + fragmentAux;
 
         // Strip the hash for matching.
         fragmentAux = fragmentAux.replace(pathStripper, '');
@@ -314,9 +314,9 @@ export class History {
      */
     off(evt: string, callback: Function): History {
         if (this._evtHandlers[evt]) {
-                const callbacks = this._evtHandlers[evt];
-                const n = callbacks.length;
-                for (let i = 0; i < n; i++) {
+            const callbacks = this._evtHandlers[evt];
+            const n = callbacks.length;
+            for (let i = 0; i < n; i++) {
                 if (callbacks[i] === callback) {
                     callbacks.splice(i, 1);
                     if (callbacks.length === 0) {
@@ -325,7 +325,7 @@ export class History {
                     break;
                 }
             }
-            }
+        }
         return this;
     }
 
@@ -334,15 +334,15 @@ export class History {
      * @param {string} evt Name of the event being triggered.
      */
     trigger(evt: string, ...restParams: any[]) {
-            const callbacks = this._evtHandlers[evt];
+        const callbacks = this._evtHandlers[evt];
         if (callbacks === undefined) {
             return;
-            }
-            const callbacksLength = callbacks.length;
-            for (let i = 0; i < callbacksLength; i++) {
+        }
+        const callbacksLength = callbacks.length;
+        for (let i = 0; i < callbacksLength; i++) {
             callbacks[i].apply(this, restParams);
         }
-        }
+    }
 
     /**
      * Update the hash location, either replacing the current entry, or adding
@@ -353,9 +353,9 @@ export class History {
      */
     private _updateHash(fragment: string, replace?: boolean) {
         if (replace) {
-                const href = this._location.href.replace(/(javascript:|#).*$/, '');
+            const href = this._location.href.replace(/(javascript:|#).*$/, '');
             this._location.replace(href + '#' + fragment);
-            } else {
+        } else {
             // Some browsers require that `hash` contains a leading #.
             this._location.hash = '#' + fragment;
         }
@@ -382,7 +382,7 @@ export class Router {
      */
     constructor(options = {}) {
         this._opts = options
-            this._bindHandlers();
+        this._bindHandlers();
     }
 
     /**
@@ -394,15 +394,15 @@ export class Router {
      */
     addHandler(handler: any) {
 
-            const rRoute = Router._routeToRegExp(handler.route);
+        const rRoute = Router._routeToRegExp(handler.route);
 
         Router.history.addHandler(rRoute, (fragment, message?) => {
 
-                const params = Router._extractParameters(rRoute, fragment);
+            const params = Router._extractParameters(rRoute, fragment);
 
-                const paramsAux = params.slice(0);
+            const paramsAux = params.slice(0);
 
-                const evtRoute: any = {
+            const evtRoute: any = {
                 new: { fragment: fragment, params: paramsAux, message: message }
             };
 
@@ -429,10 +429,10 @@ export class Router {
             Router.history.trigger('route:after', this, evtRoute);
 
             this._old = { fragment: fragment, params: paramsAux, handler: handler };
-            });
+        });
 
         return this;
-        }
+    }
 
     /**
      * Simple proxy to `Router.history` to save a fragment into the history.
@@ -455,10 +455,10 @@ export class Router {
     private _bindHandlers() {
         if (!this._opts.map) {
             return;
-            }
-            const routes = this._opts.map;
-            const routesN = routes.length - 1;
-            for (let i = routesN; i >= 0; i--) {
+        }
+        const routes = this._opts.map;
+        const routesN = routes.length - 1;
+        for (let i = routesN; i >= 0; i--) {
             this.addHandler(routes[i]);
         }
     }
@@ -471,14 +471,14 @@ export class Router {
      * @private
      */
     static _routeToRegExp(route: string): RegExp {
-            const routeAux = route.replace(escapeRegExp, '\\$&')
+        const routeAux = route.replace(escapeRegExp, '\\$&')
             .replace(optionalParam, '(?:$1)?')
             .replace(namedParam, (match, optional) => {
-                return optional ? match : '([^/?]+)';
-            })
+            return optional ? match : '([^/?]+)';
+        })
             .replace(splatParam, '([^?]*?)');
         return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
-        }
+    }
 
     /**
      * Given a route, and a URL fragment that it matches, return the array of
@@ -490,7 +490,7 @@ export class Router {
      * @private
      */
     static _extractParameters(route: RegExp, fragment: string): string[] {
-            const params = route.exec(fragment).slice(1);
+        const params = route.exec(fragment).slice(1);
         return params.map((param, i) => {
             // Don't decode the search params.
             if (i === params.length - 1) {
@@ -498,7 +498,7 @@ export class Router {
             }
             return param === undefined ? undefined : decodeURIComponent(param);
         });
-        }
+    }
 
 }
 
