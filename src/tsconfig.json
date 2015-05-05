@@ -9,11 +9,9 @@
         "noLib": false
     },
     "filesGlob": [
-        "./**/*.ts",
-        "!./node_modules/**/*.ts"
+        "./**/easy-router.ts"
     ],
     "files": [
-        "./easy-router.d.ts",
         "./easy-router.ts"
     ]
 }

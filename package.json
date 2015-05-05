@@ -1,47 +1,47 @@
 {
-  "name": "easy-router",
-  "version": "1.2.6",
-  "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
-  "main": [
-    "src/easy-router.js"
-  ],
-  "keywords": [
-    "js",
-    "router",
-    "front-end",
-    "library",
-    "mobile",
-    "web",
-    "spa"
-  ],
-  "author": "Roger Padilla <rogerjose81@gmail.com>",
-  "homepage": "https://github.com/rogerpadilla/easy-router",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rogerpadilla/easy-router.git"
-  },
-  "bugs": "https://github.com/rogerpadilla/easy-router/issues",
-  "scripts": {
-    "test": "gulp test"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "babel": "^5.2.12",
-    "del": "^1.1.1",
-    "gulp": "^3.8.11",
-    "gulp-babel": "^5.1.0",
-    "gulp-coveralls": "^0.1.4",
-    "gulp-eslint": "^0.11.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^1.5.2",
-    "gulp-uglify": "^1.2.0",
-    "karma": "^0.12.31",
-    "karma-chrome-launcher": "^0.1",
-    "karma-coverage": "^0.3.1",
-    "karma-firefox-launcher": "^0.1.4",
-    "karma-phantomjs-launcher": "^0.1.4",
-    "karma-qunit": "^0.1.4",
-    "qunitjs": "^1.18.0"
-  }
+    "name": "easy-router",
+    "version": "1.2.7",
+    "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
+    "main": [
+        "src/easy-router.ts"
+    ],
+    "keywords": [
+        "js",
+        "router",
+        "front-end",
+        "library",
+        "mobile",
+        "web",
+        "spa"
+    ],
+    "author": "Roger Padilla <rogerjose81@gmail.com>",
+    "homepage": "https://github.com/rogerpadilla/easy-router",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rogerpadilla/easy-router.git"
+    },
+    "bugs": "https://github.com/rogerpadilla/easy-router/issues",
+    "scripts": {
+        "test": "gulp test"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "babel": "^5.2.12",
+        "del": "^1.1.1",
+        "gulp": "^3.8.11",
+        "gulp-babel": "^5.1.0",
+        "gulp-coveralls": "^0.1.4",
+        "gulp-eslint": "^0.11.1",
+        "gulp-rename": "^1.2.2",
+        "gulp-sourcemaps": "^1.5.2",
+        "gulp-uglify": "^1.2.0",
+        "karma": "^0.12.31",
+        "karma-chrome-launcher": "^0.1",
+        "karma-coverage": "^0.3.1",
+        "karma-firefox-launcher": "^0.1.4",
+        "karma-phantomjs-launcher": "^0.1.4",
+        "karma-qunit": "^0.1.4",
+        "qunitjs": "^1.18.0"
+    }
 }

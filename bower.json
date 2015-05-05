@@ -1,22 +1,22 @@
 {
-  "name": "easy-router",
-  "version": "1.2.6",
-  "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
-  "main": ["src/easy-router.js"],
-  "keywords": [
-    "js",
-    "router",
-    "front-end",
-    "library",
-    "mobile",
-    "web",
-    "spa"
-  ],
-  "dependencies": {},
-  "ignore": [
-    "/.*",
-    "CNAME",
-    "test",
-    "docs"
-  ]
+    "name": "easy-router",
+    "version": "1.2.7",
+    "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
+    "main": ["src/easy-router.ts"],
+    "keywords": [
+        "js",
+        "router",
+        "front-end",
+        "library",
+        "mobile",
+        "web",
+        "spa"
+    ],
+    "dependencies": {},
+    "ignore": [
+        "/.*",
+        "CNAME",
+        "test",
+        "docs"
+    ]
 }
