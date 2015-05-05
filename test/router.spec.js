@@ -5,8 +5,8 @@
     var location = null;
     var lastArgs = [];
 
-    const Router = this.easyRouter.Router;
-    const History = this.easyRouter.History;
+    const Router = this.prouter.Router;
+    const History = this.prouter.History;
 
     var beforeRoute = function (router, args) {
         lastArgs = args.new.params;
@@ -33,7 +33,7 @@
         return this.href;
     };
 
-    module("easyRouter.Router", {
+    module("prouter.Router", {
 
         setup: function () {
 

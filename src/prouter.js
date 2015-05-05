@@ -1,41 +1,8 @@
-(function (global, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(['exports'], factory);
-    } else if (typeof exports !== 'undefined') {
-        factory(exports);
-    } else {
-        var mod = {
-            exports: {}
-        };
-        factory(mod.exports);
-        global.easyRouter = mod.exports;
-    }
-})(this, function (exports) {
-    /**
-     * Unobtrusive and ultra-lightweight router library 100% compatible with the Backbone.Router's style for declaring routes,
-     * while providing the following advantages:
-     * - Unobtrusive, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla).
-     * - Great performance, only native functions are used.
-     * - Small footprint, 5kb for minified version.
-     * - No dependencies, no jQuery, no Underscore... zero dependencies.
-     * - Supports both routes' styles, hash and the pushState of History API.
-     * - Proper JSDoc used in the source code.
-     * - Works with normal script include and as well in CommonJS style.
-     * - Written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for right now.
-     *
-     * ¿Want to create a modern hibrid-app or a website using something like React, Web Components, Handlebars, vanilla JS, etc.?
-     * ¿Have an existing Backbone project and want to migrate to a more modern framework?
-     * Good news, EasyRouter will integrates perfectly with all of those!
-     */
-    /**
-     * EasyRouter provides methods for routing client-side pages, and connecting them to actions.
-     *
-     * During page load, after your application has finished creating all of its routers,
-     * be sure to call start() on the router instance to let know him you have already
-     * finished the routing setup.
-     */
-    'use strict';
-
+/**
+ * Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
+ */
+var prouter;
+(function (prouter) {
     var root = window;
     var document = root.document;
     // Cached regular expressions for matching named param parts and splatted
@@ -101,10 +68,12 @@
                     if (fragmentAux.lastIndexOf(rootUrl, 0) === 0) {
                         fragmentAux = fragmentAux.slice(rootUrl.length);
                     }
-                } else {
+                }
+                else {
                     fragmentAux = this.getHash();
                 }
-            } else {
+            }
+            else {
                 fragmentAux = root.decodeURI(fragmentAux);
             }
             return fragmentAux.replace(routeStripper, '');
@@ -116,9 +85,7 @@
          * @returns {boolean} true if the current fragment matched some handler, false otherwise.
          */
         History.prototype.start = function (options) {
-            if (options === void 0) {
-                options = {};
-            }
+            if (options === void 0) { options = {}; }
             if (History._started) {
                 throw new Error('Router.history has already been started');
             }
@@ -135,7 +102,8 @@
             // 'onhashchange' is supported, determine how we check the URL state.
             if (this._hasPushState) {
                 root.addEventListener('popstate', this._checkUrl);
-            } else if (this._wantsHashChange && 'onhashchange' in root) {
+            }
+            else if (this._wantsHashChange && ('onhashchange' in root)) {
                 root.addEventListener('hashchange', this._checkUrl);
             }
             // Determine if we need to change the base url, for a pushState link
@@ -151,7 +119,8 @@
                     this._location.replace(this._root + '#' + this._fragment);
                     // Return immediately as browser will do redirect to new url
                     return true;
-                } else if (this._hasPushState && this.atRoot() && this._location.hash) {
+                }
+                else if (this._hasPushState && this.atRoot() && this._location.hash) {
                     this._fragment = this.getHash().replace(routeStripper, '');
                     this._history.replaceState({}, document.title, this._root + this._fragment);
                 }
@@ -227,9 +196,7 @@
          * @returns {boolean} true if the fragment matched some handler, false otherwise.
          */
         History.prototype.navigate = function (fragment, message, options) {
-            if (options === void 0) {
-                options = {};
-            }
+            if (options === void 0) { options = {}; }
             if (!History._started) {
                 return false;
             }
@@ -248,9 +215,11 @@
             // If pushState is available, we use it to set the fragment as a real URL.
             if (this._hasPushState) {
                 this._history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
-            } else if (this._wantsHashChange) {
+            }
+            else if (this._wantsHashChange) {
                 this._updateHash(fragmentAux, options.replace);
-            } else {
+            }
+            else {
                 return this._location.assign(url);
             }
             if (options.trigger !== false) {
@@ -322,7 +291,8 @@
             if (replace) {
                 var href = this._location.href.replace(/(javascript:|#).*$/, '');
                 this._location.replace(href + '#' + fragment);
-            } else {
+            }
+            else {
                 // Some browsers require that `hash` contains a leading #.
                 this._location.hash = '#' + fragment;
             }
@@ -331,7 +301,7 @@
         History._started = false;
         return History;
     })();
-    exports.History = History;
+    prouter.History = History;
     var Router = (function () {
         /**
          * Constructor for the router.
@@ -341,9 +311,7 @@
          * @constructor
          */
         function Router(options) {
-            if (options === void 0) {
-                options = {};
-            }
+            if (options === void 0) { options = {}; }
             this._evtHandlers = {};
             this.trigger = History.prototype.trigger;
             this.on = History.prototype.on;
@@ -365,7 +333,7 @@
                 var params = Router._extractParameters(rRoute, fragment);
                 var paramsAux = params.slice(0);
                 var evtRoute = {
-                    'new': { fragment: fragment, params: paramsAux, message: message }
+                    new: { fragment: fragment, params: paramsAux, message: message }
                 };
                 if (_this._old) {
                     evtRoute.old = { fragment: _this._old.fragment, params: _this._old.params };
@@ -421,9 +389,12 @@
          * @private
          */
         Router._routeToRegExp = function (route) {
-            var routeAux = route.replace(escapeRegExp, '\\$&').replace(optionalParam, '(?:$1)?').replace(namedParam, function (match, optional) {
+            var routeAux = route.replace(escapeRegExp, '\\$&')
+                .replace(optionalParam, '(?:$1)?')
+                .replace(namedParam, function (match, optional) {
                 return optional ? match : '([^/?]+)';
-            }).replace(splatParam, '([^?]*?)');
+            })
+                .replace(splatParam, '([^?]*?)');
             return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
         };
         /**
@@ -447,11 +418,10 @@
         };
         return Router;
     })();
-    exports.Router = Router;
+    prouter.Router = Router;
     /**
      * Create the default Router.History.
      * @type {History}
      */
     Router.history = new History();
-});
-//# sourceMappingURL=easy-router.js.map
+})(prouter || (prouter = {}));

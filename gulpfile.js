@@ -10,7 +10,7 @@ var coveralls = require('gulp-coveralls');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 
-var mainFileName = 'easy-router';
+var mainFileName = 'prouter';
 var mainFile = 'src/' + mainFileName + '.js';
 
 /*** Tasks ***/

@@ -1,9 +1,9 @@
 {
-    "name": "easy-router",
-    "version": "1.2.7",
+    "name": "prouter",
+    "version": "1.3.0",
     "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
     "main": [
-        "src/easy-router.ts"
+        "src/prouter.ts"
     ],
     "keywords": [
         "js",
@@ -15,13 +15,13 @@
         "spa"
     ],
     "author": "Roger Padilla <rogerjose81@gmail.com>",
-    "homepage": "https://github.com/rogerpadilla/easy-router",
+    "homepage": "https://github.com/rogerpadilla/prouter",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "https://github.com/rogerpadilla/easy-router.git"
+        "url": "https://github.com/rogerpadilla/prouter.git"
     },
-    "bugs": "https://github.com/rogerpadilla/easy-router/issues",
+    "bugs": "https://github.com/rogerpadilla/prouter/issues",
     "scripts": {
         "test": "gulp test"
     },

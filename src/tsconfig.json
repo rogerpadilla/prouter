@@ -9,9 +9,9 @@
         "noLib": false
     },
     "filesGlob": [
-        "./**/easy-router.ts"
+        "./**/prouter.ts"
     ],
     "files": [
-        "./easy-router.ts"
+        "./prouter.ts"
     ]
 }
