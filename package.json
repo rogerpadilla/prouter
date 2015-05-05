@@ -1,6 +1,6 @@
 {
     "name": "prouter",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
     "main": "src/prouter.js",
     "keywords": [
