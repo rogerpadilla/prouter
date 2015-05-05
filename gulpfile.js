@@ -45,7 +45,7 @@ gulp.task('clean', function (cb) {
 
 gulp.task('script:build', ['clean', 'lint'], function () {
     return gulp.src(mainFile)
-        .pipe(sourcemaps.init())
+        .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(babel())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist'));
@@ -64,4 +64,3 @@ gulp.task('watch', ['build'], function () {
 
 gulp.task('build', ['lint', 'script']);
 gulp.task('default', ['watch']);
-

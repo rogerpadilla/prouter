@@ -2,7 +2,7 @@
 <p>
     <a href="https://travis-ci.org/rogerpadilla/easy-router"><img src="https://travis-ci.org/rogerpadilla/easy-router.svg?branch=master" alt="build status" /></a>
     <a href="https://gemnasium.com/rogerpadilla/easy-router"><img src="https://gemnasium.com/rogerpadilla/easy-router.svg" alt="Dependency Status" /></a>
-    <a href='https://coveralls.io/r/rogerpadilla/easy-router?branch=master'><img src='https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master' alt='Coverage Status' /></a> 
+    <a href='https://coveralls.io/r/rogerpadilla/easy-router?branch=master'><img src='https://coveralls.io/repos/rogerpadilla/easy-router/badge.svg?branch=master' alt='Coverage Status' /></a>
 </p>
 
 Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
@@ -10,7 +10,7 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * __Great performance__, only native functions are used.
 * __No dependencies__, no jQuery, no Underscore... no dependencies at all.
 * __Unobtrusive__, it is designed from the beginning to be integrated with other libraries / frameworks (also vanilla JS).
-* __Forward-thinking__, written in [ESNext](https://babeljs.io/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
+* __Forward-thinking__, written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: [es6](https://github.com/lukehoban/es6features#modules), [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and normal browser.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/easy-router/blob/master/src/easy-router.js).
 * [Unit tests](https://github.com/rogerpadilla/easy-router/blob/master/test/router.spec.js) for each feature are included in the build process.
 
@@ -53,7 +53,7 @@ var appRouter = new Router({
             deactivate: function() {
                 // note you can optionally declare an 'deactivate' callback
                 // (called before leaving) for each handler.
-                console.log('Leaving home page');   
+                console.log('Leaving home page');
                 ...
             }
         },

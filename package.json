@@ -1,6 +1,6 @@
 {
   "name": "easy-router",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
   "main": [
     "src/easy-router.js"
@@ -27,7 +27,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "babel": "^5.1.13",
+    "babel": "^5.2.12",
     "del": "^1.1.1",
     "gulp": "^3.8.11",
     "gulp-babel": "^5.1.0",
