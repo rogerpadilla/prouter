@@ -16,7 +16,7 @@
      */
     'use strict';
 
-    var root = typeof window === undefined ? global : window;
+    var root = typeof window !== 'undefined' ? window : global;
     var document = root.document;
     // Cached regular expressions for matching named param parts and splatted
     // parts of route strings.

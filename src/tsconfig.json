@@ -8,7 +8,7 @@
         "removeComments": false
     },
     "filesGlob": [
-        "./**/prouter.ts"
+        "./prouter.ts"
     ],
     "files": [
         "./prouter.ts"

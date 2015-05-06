@@ -4,7 +4,7 @@
 
 declare var global: any;
 
-const root: any = typeof window === undefined ? global : window;
+const root: any = typeof window !== 'undefined' ? window : global;
 const document = root.document;
 
 // Cached regular expressions for matching named param parts and splatted
