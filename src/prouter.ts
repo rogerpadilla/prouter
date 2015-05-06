@@ -2,7 +2,9 @@
  * Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
  */
 
-const root: any = window;
+declare var global: any;
+
+const root: any = typeof window === undefined ? global : window;
 const document = root.document;
 
 // Cached regular expressions for matching named param parts and splatted
