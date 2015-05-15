@@ -15,11 +15,11 @@ Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for each feature are included in the build process.
 
 __Unique features__:
-* Allows to pass "flash" messages when navigating.
-* Supports optionally using a _deactivate_ callback, called when leaving the current route.
-* Allows to register listeners related to navigation's events: _route:before_ and _route:after_.
-* Cancel navigation by setting _event.canceled_ to true inside the callback listener for _route:before_ event.
-* Additional to the routing parameters and queryString extracted from the URL, an _event_ is passed as last parameter to the callbacks when navigating, allowing to obtain complete information about the navigation (_event.old_ and _event.new_ properties).
+* Allows to pass **_flash_ messages** when navigating.
+* Supports optionally using a **_deactivate_ callback**, called when leaving the current route.
+* Allows to **register listeners related to navigation's events**: _route:before_ and _route:after_.
+* **Cancel navigation** by setting _event.canceled_ to true inside the callback listener for _route:before_ event.
+* Additional to the routing parameters and queryString extracted from the URL, **an _event_ is passed as last parameter to the callbacks** when navigating, allowing to obtain complete information about the navigation (_event.old_ and _event.new_ properties).
 * Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Want to render in both sides the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrating it on your own framework? Good news, prouter was created with all of those use cases in mind!
 
 Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
