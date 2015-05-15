@@ -204,6 +204,38 @@
         equal(holder.page, '10');
     });
 
+    test("routes no changes", 6, function () {
+        Router.history.stop();
+        Router.history = new History();
+        Router.history._location = location;
+        router = new Router({
+            map: [
+                {
+                    route: 'login',
+                    activate: function (queryString, evt) {
+                        ok(true);
+                    }
+                }
+            ]
+        });
+        var navigated = Router.history.navigate('login');
+        notOk(navigated);
+        Router.history.start();
+        location.replace('http://example.com#login');
+        var checked = Router.history._checkUrl();
+        ok(checked);
+        checked = Router.history._checkUrl();
+        notOk(checked);
+        throws(
+            Router.history.start,
+            Error,
+            "throws error if already started"
+        );
+        location.replace('http://example.com#not-mapped');
+        var loaded = Router.history._loadUrl();
+        notOk(loaded);
+    });
+
     test("routes via navigate", 2, function () {
         Router.history.navigate('search/manhattan/p20');
         equal(holder.query, 'manhattan');

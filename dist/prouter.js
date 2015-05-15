@@ -103,7 +103,7 @@
                 throw new Error('Router.history has already been started');
             }
             History._started = true;
-            // Figure out the initial configuration. Is pushState desired ... is it available?
+            // Figure out the initial configuration. Is pushState desired ...
             this._root = options.root || '/';
             this._wantsHashChange = options.hashChange !== false;
             this._wantsPushState = !!options.pushState;
@@ -170,7 +170,7 @@
             if (fragment === this._fragment) {
                 return false;
             }
-            this._loadUrl();
+            return this._loadUrl();
         };
         /**
          * Attempt to load the current URL fragment. If a route succeeds with a

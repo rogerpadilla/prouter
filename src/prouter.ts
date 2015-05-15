@@ -113,7 +113,7 @@ export class History {
 
         History._started = true;
 
-        // Figure out the initial configuration. Is pushState desired ... is it available?
+        // Figure out the initial configuration. Is pushState desired ...
         this._root = options.root || '/';
         this._wantsHashChange = options.hashChange !== false;
         this._wantsPushState = !!options.pushState;
@@ -191,7 +191,7 @@ export class History {
         if (fragment === this._fragment) {
             return false;
         }
-        this._loadUrl();
+        return this._loadUrl();
     }
 
     /**
