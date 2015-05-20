@@ -5,7 +5,7 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-This project was born as a fork of the great Backbone's Router-component.
+This project was born as a fork of the great Backbone.js's Router component.
 
 * __Really lightweight__, 5kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/prouter/master/dist/prouter.min.js) version.
 * __Great performance__, only native functions are used.
