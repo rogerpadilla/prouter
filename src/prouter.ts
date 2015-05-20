@@ -24,8 +24,51 @@ const pathStripper = /#.*$/;
 /**
  * Interface for declaring contract of handling requests.
  */
-export interface RequestHandler {
-    (fragment: string, message?: any): void
+export interface RouteCallback {
+    (fragment: string, message?: any, evt?: RouteEvent): void
+}
+
+export interface RouteHandler {
+    route: string;
+    activate: Function;
+    deactivate?: Function;
+}
+
+export interface NavigationOptions {
+    trigger?: boolean;
+    replace?: boolean;
+}
+
+export interface NavigationData {
+    fragment: string;
+    params: any[];
+    handler?: RouteHandler;
+}
+
+export interface RouteEvent {
+    new: NavigationData;
+    old?: NavigationData;
+    canceled?: boolean;
+}
+
+export interface HistoryStartOptions {
+    root?: string;
+    hashChange?: boolean;
+    pushState?: boolean;
+    silent?: boolean;
+}
+
+export interface EntryHandler {
+    route: RegExp;
+    callback: Function;
+}
+
+export interface EventHandler {
+    [index: string]: Function[];
+}
+
+export interface RouterOptions {
+    map?: RouteHandler[];
 }
 
 /**
@@ -36,12 +79,13 @@ export interface RequestHandler {
  * @constructor
  */
 export class History {
+
     // Has the history handling already been started?
     private static _started = false;
     private _location = root.location;
     private _history = root.history;
-    private _handlers: any = [];
-    private _evtHandlers: any = {};
+    private _handlers: EntryHandler[] = [];
+    private _evtHandlers: EventHandler = {};
     private _root: string;
     private _hasPushState: boolean;
     private _wantsHashChange: boolean;
@@ -124,7 +168,7 @@ export class History {
      * @param {Object} options Options
      * @returns {boolean} true if the current fragment matched some handler, false otherwise.
      */
-    start(options: any = {}): boolean {
+    start(options: HistoryStartOptions = {}): boolean {
 
         if (History._started) {
             throw new Error('Router.history has already been started');
@@ -197,7 +241,7 @@ export class History {
      * @param {RegExp} rRoute The route.
      * @param {Function} callback Method to be executed.
      */
-    addHandler(rRoute: RegExp, callback: RequestHandler) {
+    addHandler(rRoute: RegExp, callback: RouteCallback) {
         this._handlers.unshift({ route: rRoute, callback: callback });
     }
 
@@ -207,7 +251,7 @@ export class History {
      * @returns {boolean} true if navigated, false otherwise.
      * @private
      */
-    private _checkUrl() {
+    private _checkUrl(): boolean {
         const fragment = this.getFragment();
         if (fragment === this._fragment) {
             return false;
@@ -250,7 +294,7 @@ export class History {
      * @param {Object=} options Options object.
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    navigate(fragment: string, message?: any, options: any = {}) {
+    navigate(fragment: string, message?: any, options: NavigationOptions = {}): boolean {
 
         if (!History._started) {
             return false;
@@ -371,8 +415,8 @@ export class History {
 export class Router {
 
     static history: History;
-    private _evtHandlers = {};
-    private _old: any;
+    private _evtHandlers: EventHandler = {};
+    private _old: NavigationData;
     // Copy event bus functionality.
     private trigger = History.prototype.trigger;
     private on = History.prototype.on;
@@ -385,7 +429,7 @@ export class Router {
      * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
-    constructor(options: any = {}) {
+    constructor(options: RouterOptions = {}) {
         this._bindHandlers(options.map);
     }
 
@@ -396,18 +440,18 @@ export class Router {
      * @param {Object} handler The handler entry.
      * @returns {Router} this router
      */
-    addHandler(handler: any) {
+    addHandler(handler: RouteHandler) {
 
         const rRoute = Router._routeToRegExp(handler.route);
 
-        Router.history.addHandler(rRoute, (fragment, message?) => {
+        Router.history.addHandler(rRoute, (fragment, message) => {
 
-            const params = Router._extractParameters(rRoute, fragment);
+            const params: any = Router._extractParameters(rRoute, fragment);
 
             const paramsAux = params.slice(0);
 
-            const evtRoute: any = {
-                new: { fragment: fragment, params: paramsAux, message: message }
+            const evtRoute: RouteEvent = {
+                new: { fragment, params: paramsAux, message }
             };
 
             if (this._old) {
@@ -432,7 +476,7 @@ export class Router {
             this.trigger('route:after', evtRoute);
             Router.history.trigger('route:after', this, evtRoute);
 
-            this._old = { fragment: fragment, params: paramsAux, handler: handler };
+            this._old = { fragment, params: paramsAux, handler };
         });
 
         return this;
@@ -445,7 +489,7 @@ export class Router {
      * @param {Object=} options parameters
      * @returns {Router} this router
      */
-    navigate(fragment: string, message?: any, options?: any): Router {
+    navigate(fragment: string, message?: any, options?: NavigationOptions): Router {
         Router.history.navigate(fragment, message, options);
         return this;
     }
@@ -457,7 +501,7 @@ export class Router {
      * @param {string} routes list of routes.
      * @private
      */
-    private _bindHandlers(routes: any[]) {
+    private _bindHandlers(routes: RouteHandler[]) {
         if (!routes) {
             return;
         }

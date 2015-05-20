@@ -1,8 +1,43 @@
 /**
  * Interface for declaring contract of handling requests.
  */
-export interface RequestHandler {
-    (fragment: string, message?: any): void;
+export interface RouteCallback {
+    (fragment: string, message?: any, evt?: RouteEvent): void;
+}
+export interface RouteHandler {
+    route: string;
+    activate: Function;
+    deactivate?: Function;
+}
+export interface NavigationOptions {
+    trigger?: boolean;
+    replace?: boolean;
+}
+export interface NavigationData {
+    fragment: string;
+    params: any[];
+    handler?: RouteHandler;
+}
+export interface RouteEvent {
+    new: NavigationData;
+    old?: NavigationData;
+    canceled?: boolean;
+}
+export interface HistoryStartOptions {
+    root?: string;
+    hashChange?: boolean;
+    pushState?: boolean;
+    silent?: boolean;
+}
+export interface EntryHandler {
+    route: RegExp;
+    callback: Function;
+}
+export interface EventHandler {
+    [index: string]: Function[];
+}
+export interface RouterOptions {
+    map?: RouteHandler[];
 }
 /**
  * Handles cross-browser history management, based on either
@@ -66,7 +101,7 @@ export declare class History {
      * @param {Object} options Options
      * @returns {boolean} true if the current fragment matched some handler, false otherwise.
      */
-    start(options?: any): boolean;
+    start(options?: HistoryStartOptions): boolean;
     /**
      * Disable Router.history, perhaps temporarily. Not useful in a real app,
      * but possibly useful for unit testing Routers.
@@ -78,7 +113,7 @@ export declare class History {
      * @param {RegExp} rRoute The route.
      * @param {Function} callback Method to be executed.
      */
-    addHandler(rRoute: RegExp, callback: RequestHandler): void;
+    addHandler(rRoute: RegExp, callback: RouteCallback): void;
     /**
      * Checks the current URL to see if it has changed, and if it has,
      * calls `loadUrl`.
@@ -109,7 +144,7 @@ export declare class History {
      * @param {Object=} options Options object.
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
-    navigate(fragment: string, message?: any, options?: any): any;
+    navigate(fragment: string, message?: any, options?: NavigationOptions): boolean;
     /**
      * Add event listener.
      * @param {string} evt Name of the event.
@@ -152,7 +187,7 @@ export declare class Router {
      * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
-    constructor(options?: any);
+    constructor(options?: RouterOptions);
     /**
      * Manually bind a single named route to a callback.
      * The route argument may be a routing string or regular expression, each matching capture
@@ -160,7 +195,7 @@ export declare class Router {
      * @param {Object} handler The handler entry.
      * @returns {Router} this router
      */
-    addHandler(handler: any): Router;
+    addHandler(handler: RouteHandler): Router;
     /**
      * Simple proxy to `Router.history` to save a fragment into the history.
      * @param {string} fragment Route to navigate to.
@@ -168,7 +203,7 @@ export declare class Router {
      * @param {Object=} options parameters
      * @returns {Router} this router
      */
-    navigate(fragment: string, message?: any, options?: any): Router;
+    navigate(fragment: string, message?: any, options?: NavigationOptions): Router;
     /**
      * Bind all defined routes to `Router.history`. We have to reverse the
      * order of the routes here to support behavior where the most general
