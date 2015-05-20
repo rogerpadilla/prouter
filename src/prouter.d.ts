@@ -1,41 +1,52 @@
 /**
- * Interface for declaring contract of handling requests.
+ * Contract for route-entry's callback.
  */
 export interface RouteCallback {
-    (fragment: string, message?: any, evt?: RouteEvent): void;
+    (fragment: string, message?: any, evt?: RouteEventParameter): void;
 }
+/**
+ * Contract of route handler.
+ */
 export interface RouteHandler {
     route: string;
-    activate: Function;
-    deactivate?: Function;
+    activate: RouteCallback;
+    deactivate?: RouteCallback;
 }
+/**
+ * Contract for navigation options.
+ */
 export interface NavigationOptions {
     trigger?: boolean;
     replace?: boolean;
 }
+/**
+ * Contract for navigation data.
+ */
 export interface NavigationData {
     fragment: string;
     params: any[];
     handler?: RouteHandler;
 }
-export interface RouteEvent {
+/**
+ * Contract for route event parameter.
+ */
+export interface RouteEventParameter {
     new: NavigationData;
     old?: NavigationData;
     canceled?: boolean;
 }
+/**
+ * Contract for History.start options parameters.
+ */
 export interface HistoryStartOptions {
     root?: string;
     hashChange?: boolean;
     pushState?: boolean;
     silent?: boolean;
 }
-export interface EntryHandler {
-    route: RegExp;
-    callback: Function;
-}
-export interface EventHandler {
-    [index: string]: Function[];
-}
+/**
+ * Contract for Router.constructor options.
+ */
 export interface RouterOptions {
     map?: RouteHandler[];
 }
@@ -64,14 +75,6 @@ export declare class History {
      * @returns {boolean} if we are in the root.
      */
     atRoot(): boolean;
-    /**
-     *  Unicode characters in `location.pathname` are percent encoded so they're
-     *  decoded for comparison. `%25` should not be decoded since it may be part
-     *  of an encoded parameter.
-     *  @param {string} fragment The url fragment to decode
-     *  @returns {string} the decoded fragment.
-     */
-    private static _decodeFragment(fragment);
     /**
      * Obtain the search.
      * @returns {string} the search.
@@ -115,23 +118,6 @@ export declare class History {
      */
     addHandler(rRoute: RegExp, callback: RouteCallback): void;
     /**
-     * Checks the current URL to see if it has changed, and if it has,
-     * calls `loadUrl`.
-     * @returns {boolean} true if navigated, false otherwise.
-     * @private
-     */
-    private _checkUrl();
-    /**
-     * Attempt to load the current URL fragment. If a route succeeds with a
-     * match, returns `true`. If no defined routes matches the fragment,
-     * returns `false`.
-     * @param {string} fragment E.g.: 'user/pepito'
-     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
-     * @returns {boolean} true if the fragment matched some handler, false otherwise.
-     * @private
-     */
-    private _loadUrl(fragment?, message?);
-    /**
      * Save a fragment into the hash history, or replace the URL state if the
      * 'replace' option is passed. You are responsible for properly URL-encoding
      * the fragment in advance.
@@ -165,6 +151,23 @@ export declare class History {
      */
     trigger(evt: string, ...restParams: any[]): void;
     /**
+     * Checks the current URL to see if it has changed, and if it has,
+     * calls `loadUrl`.
+     * @returns {boolean} true if navigated, false otherwise.
+     * @private
+     */
+    private _checkUrl();
+    /**
+     * Attempt to load the current URL fragment. If a route succeeds with a
+     * match, returns `true`. If no defined routes matches the fragment,
+     * returns `false`.
+     * @param {string} fragment E.g.: 'user/pepito'
+     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
+     * @returns {boolean} true if the fragment matched some handler, false otherwise.
+     * @private
+     */
+    private _loadUrl(fragment?, message?);
+    /**
      * Update the hash location, either replacing the current entry, or adding
      * a new one to the browser history.
      * @param {string} fragment URL fragment
@@ -172,6 +175,15 @@ export declare class History {
      * @private
      */
     private _updateHash(fragment, replace?);
+    /**
+     *  Unicode characters in `location.pathname` are percent encoded so they're
+     *  decoded for comparison. `%25` should not be decoded since it may be part
+     *  of an encoded parameter.
+     *  @param {string} fragment The url fragment to decode
+     *  @returns {string} the decoded fragment.
+     *  @private
+     */
+    private static _decodeFragment(fragment);
 }
 export declare class Router {
     static history: History;
@@ -219,7 +231,7 @@ export declare class Router {
      * @returns {RegExp} the obtained regex
      * @private
      */
-    static _routeToRegExp(route: string): RegExp;
+    private static _routeToRegExp(route);
     /**
      * Given a route, and a URL fragment that it matches, return the array of
      * extracted decoded parameters. Empty or unmatched parameters will be
@@ -229,5 +241,5 @@ export declare class Router {
      * @returns {string[]} the extracted parameters
      * @private
      */
-    static _extractParameters(route: RegExp, fragment: string): string[];
+    private static _extractParameters(route, fragment);
 }

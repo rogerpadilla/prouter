@@ -1,8 +1,7 @@
 /**
- * Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
+ * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
 var root = typeof window !== 'undefined' ? window : global;
-var document = root.document;
 // Cached regular expressions for matching named param parts and splatted
 // parts of route strings.
 var optionalParam = /\((.*?)\)/g;
@@ -37,16 +36,6 @@ var History = (function () {
     History.prototype.atRoot = function () {
         var path = this._location.pathname.replace(/[^\/]$/, '$&/');
         return path === this._root && !this.getSearch();
-    };
-    /**
-     *  Unicode characters in `location.pathname` are percent encoded so they're
-     *  decoded for comparison. `%25` should not be decoded since it may be part
-     *  of an encoded parameter.
-     *  @param {string} fragment The url fragment to decode
-     *  @returns {string} the decoded fragment.
-     */
-    History._decodeFragment = function (fragment) {
-        return decodeURI(fragment.replace(/%25/g, '%2525'));
     };
     /**
      * Obtain the search.
@@ -159,40 +148,6 @@ var History = (function () {
         this._handlers.unshift({ route: rRoute, callback: callback });
     };
     /**
-     * Checks the current URL to see if it has changed, and if it has,
-     * calls `loadUrl`.
-     * @returns {boolean} true if navigated, false otherwise.
-     * @private
-     */
-    History.prototype._checkUrl = function () {
-        var fragment = this.getFragment();
-        if (fragment === this._fragment) {
-            return false;
-        }
-        return this._loadUrl();
-    };
-    /**
-     * Attempt to load the current URL fragment. If a route succeeds with a
-     * match, returns `true`. If no defined routes matches the fragment,
-     * returns `false`.
-     * @param {string} fragment E.g.: 'user/pepito'
-     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
-     * @returns {boolean} true if the fragment matched some handler, false otherwise.
-     * @private
-     */
-    History.prototype._loadUrl = function (fragment, message) {
-        this._fragment = this.getFragment(fragment);
-        var n = this._handlers.length;
-        for (var i = 0; i < n; i++) {
-            var handler = this._handlers[i];
-            if (handler.route.test(this._fragment)) {
-                handler.callback(this._fragment, message);
-                return true;
-            }
-        }
-        return false;
-    };
-    /**
      * Save a fragment into the hash history, or replace the URL state if the
      * 'replace' option is passed. You are responsible for properly URL-encoding
      * the fragment in advance.
@@ -226,7 +181,7 @@ var History = (function () {
         this._fragment = fragment;
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._usePushState) {
-            this._history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
+            this._history[options.replace ? 'replaceState' : 'pushState'](null, null, url);
         }
         else if (this._wantsHashChange) {
             this._updateHash(fragment, options.replace);
@@ -293,6 +248,40 @@ var History = (function () {
         }
     };
     /**
+     * Checks the current URL to see if it has changed, and if it has,
+     * calls `loadUrl`.
+     * @returns {boolean} true if navigated, false otherwise.
+     * @private
+     */
+    History.prototype._checkUrl = function () {
+        var fragment = this.getFragment();
+        if (fragment === this._fragment) {
+            return false;
+        }
+        return this._loadUrl();
+    };
+    /**
+     * Attempt to load the current URL fragment. If a route succeeds with a
+     * match, returns `true`. If no defined routes matches the fragment,
+     * returns `false`.
+     * @param {string} fragment E.g.: 'user/pepito'
+     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
+     * @returns {boolean} true if the fragment matched some handler, false otherwise.
+     * @private
+     */
+    History.prototype._loadUrl = function (fragment, message) {
+        this._fragment = this.getFragment(fragment);
+        var n = this._handlers.length;
+        for (var i = 0; i < n; i++) {
+            var handler = this._handlers[i];
+            if (handler.route.test(this._fragment)) {
+                handler.callback(this._fragment, message);
+                return true;
+            }
+        }
+        return false;
+    };
+    /**
      * Update the hash location, either replacing the current entry, or adding
      * a new one to the browser history.
      * @param {string} fragment URL fragment
@@ -308,6 +297,17 @@ var History = (function () {
             // Some browsers require that `hash` contains a leading #.
             this._location.hash = '#' + fragment;
         }
+    };
+    /**
+     *  Unicode characters in `location.pathname` are percent encoded so they're
+     *  decoded for comparison. `%25` should not be decoded since it may be part
+     *  of an encoded parameter.
+     *  @param {string} fragment The url fragment to decode
+     *  @returns {string} the decoded fragment.
+     *  @private
+     */
+    History._decodeFragment = function (fragment) {
+        return decodeURI(fragment.replace(/%25/g, '%2525'));
     };
     // Has the history handling already been started?
     History._started = false;
