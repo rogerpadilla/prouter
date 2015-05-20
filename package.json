@@ -1,13 +1,13 @@
 {
     "name": "prouter",
-    "version": "1.3.7",
-    "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
+    "version": "1.3.8",
+    "description": "Unobtrusive, forward-thinking and lightweight JavaScript Router library.",
     "main": "dist/prouter.js",
     "keywords": [
-        "js",
+        "javascript",
         "router",
-        "front-end",
         "library",
+        "front-end",
         "mobile",
         "web",
         "spa"
@@ -25,8 +25,8 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "babel": "^5.3.3",
-        "del": "^1.1.1",
+        "babel": "^5.4.3",
+        "del": "^1.2.0",
         "gulp": "^3.8.11",
         "gulp-babel": "^5.1.0",
         "gulp-coveralls": "^0.1.4",
@@ -34,7 +34,7 @@
         "gulp-rename": "^1.2.2",
         "gulp-sourcemaps": "^1.5.2",
         "gulp-uglify": "^1.2.0",
-        "karma": "^0.12.31",
+        "karma": "^0.12.32",
         "karma-chrome-launcher": "^0.1",
         "karma-coverage": "^0.3.1",
         "karma-firefox-launcher": "^0.1.6",

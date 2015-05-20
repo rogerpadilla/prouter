@@ -5,7 +5,8 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-Unobtrusive, forward-thinking and ultra-lightweight client-side router library.
+This project was born as a fork of the great Backbone's Router-component.
+
 * __Really lightweight__, 5kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/prouter/master/dist/prouter.min.js) version.
 * __Great performance__, only native functions are used.
 * __No dependencies__, no jQuery, no Underscore... no dependencies at all.

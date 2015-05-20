@@ -657,7 +657,7 @@
         Router.history.stop();
         location.replace('http://example.com/root/x/y?a=b');
         location.replace = function (url) {
-            strictEqual(url, '/root/#x/y?a=b');
+            strictEqual(url, '/root#x/y?a=b');
         };
         Router.history._history = {
             pushState: null,
@@ -784,7 +784,7 @@
         Router.history.stop();
         Router.history._history = {
             pushState: function (state, title, url) {
-                strictEqual(url, '/root/?x=1');
+                strictEqual(url, '/root?x=1');
             }
         };
         location.replace('http://example.com/root/path');

@@ -21,6 +21,7 @@ export declare class History {
     private _hasPushState;
     private _wantsHashChange;
     private _wantsPushState;
+    private _usePushState;
     private _fragment;
     constructor();
     /**
@@ -29,19 +30,36 @@ export declare class History {
      */
     atRoot(): boolean;
     /**
+     *  Unicode characters in `location.pathname` are percent encoded so they're
+     *  decoded for comparison. `%25` should not be decoded since it may be part
+     *  of an encoded parameter.
+     *  @param {string} fragment The url fragment to decode
+     *  @returns {string} the decoded fragment.
+     */
+    private static _decodeFragment(fragment);
+    /**
+     * Obtain the search.
+     * @returns {string} the search.
+     */
+    getSearch(): string;
+    /**
      * Gets the true hash value. Cannot use location.hash directly due to bug
      * in Firefox where location.hash will always be decoded.
      * @returns {string} The hash.
      */
     getHash(): string;
     /**
+     *  Get the pathname and search params, without the root.
+     *  @returns {string} The path.
+     */
+    getPath(): string;
+    /**
      * Get the cross-browser normalized URL fragment, either from the URL,
      * the hash, or the override.
      * @param {string} fragment The url fragment
-     * @param {boolean} forcePushState flag to force the usage of pushSate
      * @returns {string} The fragment.
      */
-    getFragment(fragment?: string, forcePushState?: boolean): string;
+    getFragment(fragment?: string): string;
     /**
      * Start the route change handling, returning `true` if the current URL matches
      * an existing route, and `false` otherwise.
@@ -123,7 +141,6 @@ export declare class History {
 export declare class Router {
     static history: History;
     private _evtHandlers;
-    private _opts;
     private _old;
     private trigger;
     private on;
@@ -135,7 +152,7 @@ export declare class Router {
      * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
-    constructor(options?: {});
+    constructor(options?: any);
     /**
      * Manually bind a single named route to a callback.
      * The route argument may be a routing string or regular expression, each matching capture
@@ -156,9 +173,10 @@ export declare class Router {
      * Bind all defined routes to `Router.history`. We have to reverse the
      * order of the routes here to support behavior where the most general
      * routes can be defined at the bottom of the route map.
+     * @param {string} routes list of routes.
      * @private
      */
-    private _bindHandlers();
+    private _bindHandlers(routes);
     /**
      * Convert a route string into a regular expression, suitable for matching
      * against the current location fragment.

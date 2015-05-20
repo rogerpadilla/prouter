@@ -1,13 +1,13 @@
 {
     "name": "prouter",
-    "version": "1.3.7",
-    "description": "Unobtrusive, forward-thinking and ultra-lightweight client-side router library.",
+    "version": "1.3.8",
+    "description": "Unobtrusive, forward-thinking and lightweight JavaScript Router library.",
     "main": ["dist/prouter.js"],
     "keywords": [
-        "js",
+        "javascript",
         "router",
-        "front-end",
         "library",
+        "front-end",
         "mobile",
         "web",
         "spa"

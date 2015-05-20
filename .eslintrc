@@ -18,7 +18,7 @@
     "camelcase": [1, "always"],
     "no-unused-vars": [1, "always"],
     "max-depth": [1, 4],
-    "complexity": [1, 11],
+    "complexity": [1, 12],
     "max-nested-callbacks": [1, 2],
     "space-after-keywords": [1, "always"],
     "space-before-blocks": [1, "always"],
