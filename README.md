@@ -117,3 +117,4 @@ Router.history.start({pushState: true});
 
 // client-side redirect to the 'items/:id' handler, it will receive this custom message.
 Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
+```

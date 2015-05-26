@@ -2,29 +2,34 @@
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
 
+declare const window: any;
 declare const global: any;
 
 const root: any = typeof window !== 'undefined' ? window : global;
 
-// Cached regular expressions for matching named param parts and splatted
-// parts of route strings.
-const optionalParam = /\((.*?)\)/g;
-const namedParam = /(\(\?)?:\w+/g;
-const splatParam = /\*\w+/g;
-const escapeRegExp = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+/**
+ * Contract for event handler.
+ */
+export interface NavigationParams {
+    [index: string]: string;
+}
 
-// Cached regex for stripping a leading hash/slash and trailing space.
-const routeStripper = /^[#\/]|\s+$/g;
-// Cached regex for stripping leading and trailing slashes.
-const rootStripper = /^\/+|\/+$/g;
-// Cached regex for stripping urls of hash.
-const pathStripper = /#.*$/;
+/**
+ * Contract for navigation data.
+ */
+export interface NavigationData {
+    fragment: string;
+    params: NavigationParams;
+    queryString: string;
+    message?: any;
+    handler?: RouteHandler;
+}
 
 /**
  * Contract for route-entry's callback.
  */
 export interface RouteCallback {
-    (fragment: string, message?: any, evt?: RouteEventParameter): void
+    (fragment: string, newRouteData: NavigationData, oldRouteData?: NavigationData): void;
 }
 
 /**
@@ -45,27 +50,9 @@ export interface NavigationOptions {
 }
 
 /**
- * Contract for navigation data.
- */
-export interface NavigationData {
-    fragment: string;
-    params: any[];
-    handler?: RouteHandler;
-}
-
-/**
- * Contract for route event parameter.
- */
-export interface RouteEventParameter {
-    new: NavigationData;
-    old?: NavigationData;
-    canceled?: boolean;
-}
-
-/**
  * Contract for History.start options parameters.
  */
-export interface HistoryStartOptions {
+export interface HistoryOptions {
     root?: string;
     hashChange?: boolean;
     pushState?: boolean;
@@ -82,16 +69,269 @@ export interface RouterOptions {
 /**
  * Contract for entry handler.
  */
-interface EntryHandler {
+export interface Route {
     route: RegExp;
     callback: Function;
 }
 
 /**
+ * Contract for entry handler.
+ */
+export interface Path {
+    fragment: string;
+    queryString: string;
+}
+
+/**
  * Contract for event handler.
  */
-interface EventHandler {
+export interface EventHandler {
     [index: string]: Function[];
+}
+
+
+
+
+/**
+ * The main path matching regexp utility.
+ * @type {RegExp} path regexp.
+ */
+const PATH_STRIPPER = new RegExp([
+// Match escaped characters that would otherwise appear in future matches.
+// This allows the user to escape special characters that won't transform.
+    '(\\\\.)',
+// Match Express-style parameters and un-named parameters with a prefix
+// and optional suffixes. Matches appear as:
+//
+// "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+// "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+// "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+    '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
+].join('|'), 'g');
+
+// Cached regex for stripping a leading hash/slash and trailing space.
+const ROUTE_STRIPPER = /^[#\/]|\s+$/g;
+// Cached regex for stripping leading and trailing slashes.
+const ROOT_STRIPPER = /^\/{2,}|\/{2,}$/g;
+// Cached regex for stripping urls of hash.
+const HASH_STRIPPER = /#.*$/;
+
+
+class RouteHelper {
+
+    /**
+     * Escape a regular expression string.
+     * @param  {String} str
+     * @return {String}
+     */
+    private static _escapeString(str: string): string {
+        return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1');
+    }
+
+    /**
+     * Escape the capturing group by escaping special characters and meaning.
+     * @param  {String} group
+     * @return {String} escaped group.
+     */
+    private static _escapeGroup(group: string): string {
+        return group.replace(/([=!:$\/()])/g, '\\$1');
+    }
+
+    /**
+     * Get the flags for a regexp from the options.
+     * @param  {Object} options
+     * @return {String} flags.
+     */
+    private static _flags(options: Object): string {
+        return options['sensitive'] ? '' : 'i';
+    }
+
+
+    static removeQueryString(path: string): string {
+        const qsPos = path.lastIndexOf('?');
+        if (qsPos >= 0) {
+            path = path.slice(0, qsPos);
+        }
+        return path;
+    }
+
+    static splitPath(path: string): Path {
+        let fragment = path.replace(/#.*/, '');
+        let queryString = '';
+        const qsPos = fragment.indexOf('?');
+        if (qsPos >= 0) {
+            queryString = fragment.slice(qsPos + 1);
+            fragment = fragment.slice(qsPos);
+        }
+        return {fragment, queryString};
+    }
+
+    /**
+     *  Unicode characters in `location.pathname` are percent encoded so they're
+     *  decoded for comparison. `%25` should not be decoded since it may be part
+     *  of an encoded parameter.
+     *  @param {string} fragment The url fragment to decode
+     *  @returns {string} the decoded fragment.
+     */
+    static decodeFragment(fragment: string): string {
+        return root.decodeURI(fragment.replace(/%25/g, '%2525'));
+    }
+
+    /**
+     * Parse a string for the raw tokens.
+     * @param  {String} str
+     * @return {Array} tokens.
+     */
+    private static _parse(str: string): Object[] {
+
+        const tokens: Object[] = [];
+        let key = 0;
+        let index = 0;
+        let path = '';
+        let res: RegExpExecArray;
+
+        while ((res = PATH_STRIPPER.exec(str))) {
+
+            const m = res[0];
+            const escaped = res[1];
+            const offset = res.index;
+
+            path += str.slice(index, offset);
+            index = offset + m.length;
+
+            // Ignore already escaped sequences.
+            if (escaped) {
+                path += escaped[1];
+                continue;
+            }
+
+            // Push the current path onto the tokens.
+            if (path) {
+                tokens.push(path);
+                path = '';
+            }
+
+            const prefix = res[2];
+            const name = res[3];
+            const capture = res[4];
+            const group = res[5];
+            const suffix = res[6];
+            const asterisk = res[7];
+
+            const repeat = suffix === '+' || suffix === '*';
+            const optional = suffix === '?' || suffix === '*';
+            const delimiter = prefix || '/';
+            const pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?');
+
+            tokens.push({
+                name: name || key++,
+                prefix: prefix || '',
+                delimiter: delimiter,
+                optional: optional,
+                repeat: repeat,
+                pattern: RouteHelper._escapeGroup(pattern)
+            });
+        }
+
+        // Match any characters still remaining.
+        if (index < str.length) {
+            path += str.substr(index);
+        }
+
+        // If the path exists, push it onto the end.
+        if (path) {
+            tokens.push(path);
+        }
+
+        return tokens;
+    }
+
+    /**
+     * Expose a function for taking tokens and returning a RegExp.
+     * @param  {Array}  tokens
+     * @param  {Object} options
+     * @return {RegExp} the regexp.
+     */
+    private static _tokensToRegExp(tokens: Object[], options: Object = {}): RegExp {
+
+        const strict = options['strict'];
+        const end = options['end'] !== false;
+        let route = '';
+        const lastToken = tokens[tokens.length - 1];
+        const endsWithSlash = typeof lastToken === 'string' && lastToken.length && lastToken.charAt(lastToken.length - 1) === '/';
+
+        // Iterate over the tokens and create our regexp string.
+        for (let i = 0; i < tokens.length; i++) {
+
+            const token: any = tokens[i];
+
+            if (typeof token === 'string') {
+                route += RouteHelper._escapeString(token);
+            } else {
+
+                const prefix = RouteHelper._escapeString(token.prefix);
+                let capture = token.pattern;
+
+                if (token.repeat) {
+                    capture += '(?:' + prefix + capture + ')*';
+                }
+
+                if (token.optional) {
+                    if (prefix) {
+                        capture = '(?:' + prefix + '(' + capture + '))?';
+                    } else {
+                        capture = '(' + capture + ')?';
+                    }
+                } else {
+                    capture = prefix + '(' + capture + ')';
+                }
+
+                route += capture;
+            }
+        }
+
+        // In non-strict mode we allow a slash at the end of match. If the path to
+        // match already ends with a slash, we remove it for consistency. The slash
+        // is valid at the end of a path match, not in the middle. This is important
+        // in non-ending mode, where "/test/" shouldn't match "/test//route".
+        if (!strict) {
+            route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
+        }
+
+        if (end) {
+            route += '$';
+        } else {
+            // In non-ending mode, we need the capturing groups to match as much as
+            // possible by using a positive lookahead to the end or next path segment.
+            route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+        }
+
+        return new RegExp('^' + route, RouteHelper._flags(options));
+    }
+
+    /**
+     * Create a path regexp from string input.
+     * @param  {String} path
+     * @param  {Array}  keys
+     * @param  {Object} options
+     * @return {RegExp} the regexp
+     */
+    static stringToRegexp(path: string, keys: Object[] = [], options?: Object): RegExp {
+
+        const tokens = RouteHelper._parse(path);
+        const re = RouteHelper._tokensToRegExp(tokens, options);
+
+        // Attach keys back to the regexp.
+        for (let i = 0; i < tokens.length; i++) {
+            if (typeof tokens[i] !== 'string') {
+                keys.push(tokens[i]);
+            }
+        }
+
+        re['keys'] = keys;
+
+        return re;
+    }
 }
 
 /**
@@ -107,8 +347,8 @@ export class History {
     private static _started = false;
     private _location = root.location;
     private _history = root.history;
-    private _handlers: EntryHandler[] = [];
-    private _evtHandlers: EventHandler = {};
+    private _handlers: Route[] = [];
+    private _eventHandlers: EventHandler = {};
     private _root: string;
     private _hasPushState: boolean;
     private _wantsHashChange: boolean;
@@ -118,6 +358,62 @@ export class History {
 
     constructor() {
         this._checkUrl = this._checkUrl.bind(this);
+    }
+
+    /**
+     * Add event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    on(evt: string, callback: Function): History {
+        if (this._eventHandlers[evt] === undefined) {
+            this._eventHandlers[evt] = [];
+        }
+        this._eventHandlers[evt].push(callback);
+        return this;
+    }
+
+    /**
+     * Remove event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    off(evt: string, callback: Function): History {
+        if (this._eventHandlers[evt]) {
+            const callbacks = this._eventHandlers[evt];
+            for (let i = 0; i < callbacks.length; i++) {
+                if (callbacks[i] === callback) {
+                    callbacks.splice(i, 1);
+                    if (callbacks.length === 0) {
+                        delete this._eventHandlers[evt];
+                    }
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Events triggering.
+     * @param {string} evt Name of the event being triggered.
+     * @return {boolean} null if not suscriptors, false if the event was cancelled for some suscriptor, true otherwise.
+     */
+    trigger(evt: string, ...restParams: any[]): boolean {
+        const callbacks = this._eventHandlers[evt];
+        if (callbacks === undefined || !callbacks.length) {
+            return null;
+        }
+        for (let i = 0; i < callbacks.length; i++) {
+            let respIt = callbacks[i].apply(this, restParams);
+            // check if some listener cancelled the event.
+            if (respIt === false) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -153,7 +449,7 @@ export class History {
      *  @returns {string} The path.
      */
     getPath(): string {
-        const path = History._decodeFragment(this._location.pathname + this.getSearch()).slice(this._root.length - 1);
+        const path = RouteHelper.decodeFragment(this._location.pathname + this.getSearch()).slice(this._root.length - 1);
         return path.charAt(0) === '/' ? path.slice(1) : path;
     }
 
@@ -163,15 +459,15 @@ export class History {
      * @param {string} fragment The url fragment
      * @returns {string} The fragment.
      */
+
     getFragment(fragment?: string): string {
         if (fragment === undefined || fragment === null) {
             if (this._usePushState || !this._wantsHashChange) {
-                fragment = this.getPath();
-            } else {
-                fragment = this.getHash();
+                return this.getPath();
             }
+            return this.getHash();
         }
-        return fragment.replace(routeStripper, '');
+        return fragment = RouteHelper.decodeFragment(fragment).replace(ROUTE_STRIPPER, '');
     }
 
     /**
@@ -180,7 +476,7 @@ export class History {
      * @param {Object} options Options
      * @returns {boolean} true if the current fragment matched some handler, false otherwise.
      */
-    start(options: HistoryStartOptions = {}): boolean {
+    start(options: HistoryOptions = {}): boolean {
 
         if (History._started) {
             throw new Error('Router.history has already been started');
@@ -198,7 +494,7 @@ export class History {
         this._fragment = this.getFragment();
 
         // Normalize root to always include a leading and trailing slash.
-        this._root = ('/' + this._root + '/').replace(rootStripper, '/');
+        this._root = ('/' + this._root + '/').replace(ROOT_STRIPPER, '/');
 
         // Transition from hashChange to pushState or vice versa if both are
         // requested.
@@ -253,7 +549,7 @@ export class History {
      * @param {RegExp} rRoute The route.
      * @param {Function} callback Method to be executed.
      */
-    addHandler(rRoute: RegExp, callback: RouteCallback) {
+    _addHandler(rRoute: RegExp, callback: RouteCallback) {
         this._handlers.unshift({ route: rRoute, callback: callback });
     }
 
@@ -261,7 +557,6 @@ export class History {
      * Save a fragment into the hash history, or replace the URL state if the
      * 'replace' option is passed. You are responsible for properly URL-encoding
      * the fragment in advance.
-     *
      * The options object can contain `trigger: true` if you wish to have the
      * route callback be fired (not usually desirable), or `replace: true`, if
      * you wish to modify the current URL without adding an entry to the history.
@@ -289,11 +584,7 @@ export class History {
         const url = rootAux + fragment;
 
         // Strip the hash and decode for matching.
-        fragment = History._decodeFragment(fragment.replace(pathStripper, ''));
-
-        if (this._fragment === fragment) {
-            return false;
-        }
+        fragment = fragment.replace(HASH_STRIPPER, '');
 
         this._fragment = fragment;
 
@@ -318,68 +609,12 @@ export class History {
     }
 
     /**
-     * Add event listener.
-     * @param {string} evt Name of the event.
-     * @param {Function} callback Method.
-     * @returns {History} this history
-     */
-    on(evt: string, callback: Function): History {
-        if (this._evtHandlers[evt] === undefined) {
-            this._evtHandlers[evt] = [];
-        }
-        this._evtHandlers[evt].push(callback);
-        return this;
-    }
-
-    /**
-     * Remove event listener.
-     * @param {string} evt Name of the event.
-     * @param {Function} callback Method.
-     * @returns {History} this history
-     */
-    off(evt: string, callback: Function): History {
-        if (this._evtHandlers[evt]) {
-            const callbacks = this._evtHandlers[evt];
-            const n = callbacks.length;
-            for (let i = 0; i < n; i++) {
-                if (callbacks[i] === callback) {
-                    callbacks.splice(i, 1);
-                    if (callbacks.length === 0) {
-                        delete this._evtHandlers[evt];
-                    }
-                    break;
-                }
-            }
-        }
-        return this;
-    }
-
-    /**
-     * Events triggering.
-     * @param {string} evt Name of the event being triggered.
-     */
-    trigger(evt: string, ...restParams: any[]) {
-        const callbacks = this._evtHandlers[evt];
-        if (callbacks === undefined) {
-            return;
-        }
-        const callbacksLength = callbacks.length;
-        for (let i = 0; i < callbacksLength; i++) {
-            callbacks[i].apply(this, restParams);
-        }
-    }
-
-    /**
      * Checks the current URL to see if it has changed, and if it has,
      * calls `loadUrl`.
      * @returns {boolean} true if navigated, false otherwise.
      * @private
      */
     private _checkUrl(): boolean {
-        const fragment = this.getFragment();
-        if (fragment === this._fragment) {
-            return false;
-        }
         return this._loadUrl();
     }
 
@@ -392,12 +627,13 @@ export class History {
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      * @private
      */
-    private _loadUrl(fragment?: string, message?: string): boolean {
+    private _loadUrl(fragment?: string, message?: any): boolean {
         this._fragment = this.getFragment(fragment);
-        const n = this._handlers.length;
-        for (let i = 0; i < n; i++) {
-            let handler = this._handlers[i];
-            if (handler.route.test(this._fragment)) {
+        fragment = RouteHelper.removeQueryString(this._fragment);
+        const handlersLength = this._handlers.length;
+        for (let i = 0; i < handlersLength; i++) {
+            const handler = this._handlers[i];
+            if (handler.route.test(fragment)) {
                 handler.callback(this._fragment, message);
                 return true;
             }
@@ -421,30 +657,22 @@ export class History {
             this._location.hash = '#' + fragment;
         }
     }
-
-    /**
-     *  Unicode characters in `location.pathname` are percent encoded so they're
-     *  decoded for comparison. `%25` should not be decoded since it may be part
-     *  of an encoded parameter.
-     *  @param {string} fragment The url fragment to decode
-     *  @returns {string} the decoded fragment.
-     *  @private
-     */
-    private static _decodeFragment(fragment: string): string {
-        return decodeURI(fragment.replace(/%25/g, '%2525'));
-    }
 }
 
 
 export class Router {
 
+    // The history object.
     static history: History;
-    private _evtHandlers: EventHandler = {};
-    private _old: NavigationData;
+    // The previous route data.
+    private _oldRouteData: NavigationData;
     // Copy event bus functionality.
-    private trigger = History.prototype.trigger;
-    private on = History.prototype.on;
-    private off = History.prototype.off;
+    /* tslint:disable:no-unused-variable */
+    private _eventHandlers: EventHandler = {};
+    /* tslint:enable:no-unused-variable */
+    trigger = History.prototype.trigger;
+    on = History.prototype.on;
+    off = History.prototype.off;
 
     /**
      * Constructor for the router.
@@ -466,56 +694,71 @@ export class Router {
      */
     addHandler(handler: RouteHandler) {
 
-        const rRoute = Router._routeToRegExp(handler.route);
+        const rRoute = RouteHelper.stringToRegexp(handler.route);
 
-        Router.history.addHandler(rRoute, (fragment, message) => {
+        Router.history._addHandler(rRoute, (fragment, message) => {
 
-            const params: any = Router._extractParameters(rRoute, fragment);
+            const args: NavigationData = Router._extractParameters(rRoute, fragment);
 
-            const paramsAux = params.slice(0);
+            const newRouteData: NavigationData = { fragment, params: args.params, queryString: args.queryString, message, handler };
 
-            const evtRoute: RouteEventParameter = {
-                new: { fragment, params: paramsAux, message }
-            };
+            let next = Router.history.trigger('route:before', this, newRouteData, this._oldRouteData);
 
-            if (this._old) {
-                evtRoute.old = { fragment: this._old.fragment, params: this._old.params };
-            }
-
-            this.trigger('route:before', evtRoute);
-            Router.history.trigger('route:before', this, evtRoute);
-
-            if (evtRoute.canceled) {
+            if (next === false) {
                 return;
             }
 
-            params.push(evtRoute);
+            next = this.trigger('route:before', newRouteData, this._oldRouteData);
 
-            if (this._old && this._old.handler.deactivate) {
-                this._old.handler.deactivate.apply(this._old.handler);
+            if (next === false) {
+                return;
             }
 
-            handler.activate.apply(handler, params);
+            if (this._oldRouteData && this._oldRouteData.handler.deactivate) {
+                next = this._oldRouteData.handler.deactivate.call(this._oldRouteData.handler, newRouteData, this._oldRouteData);
+                if (next === false) {
+                    return;
+                }
+            }
 
-            this.trigger('route:after', evtRoute);
-            Router.history.trigger('route:after', this, evtRoute);
+            handler.activate.call(handler, newRouteData, this._oldRouteData);
 
-            this._old = { fragment, params: paramsAux, handler };
+            this.trigger('route:after', newRouteData, this._oldRouteData);
+            Router.history.trigger('route:after', this, newRouteData, this._oldRouteData);
+
+            this._oldRouteData = newRouteData;
         });
 
         return this;
     }
 
     /**
-     * Simple proxy to `Router.history` to save a fragment into the history.
-     * @param {string} fragment Route to navigate to.
-     * @param {Object=} message parameters
-     * @param {Object=} options parameters
-     * @returns {Router} this router
+     * Given a route, and a URL fragment that it matches, return the array of
+     * extracted decoded parameters. Empty or unmatched parameters will be
+     * treated as `null` to normalize cross-browser behavior.
+     * @param {RegExp} route The alias
+     * @param {string} fragment The url part
+     * @returns {string[]} the extracted parameters
+     * @private
      */
-    navigate(fragment: string, message?: any, options?: NavigationOptions): Router {
-        Router.history.navigate(fragment, message, options);
-        return this;
+    private static _extractParameters(route: RegExp, fragment: string): NavigationData {
+        const qsPos = fragment.indexOf('?');
+        let queryString = '';
+        if (qsPos >= 0) {
+            queryString = fragment.slice(qsPos + 1);
+            fragment = fragment.slice(0, qsPos);
+        }
+        const obj: NavigationData = {
+            params: {},
+            queryString,
+            fragment
+        };
+        const args = route.exec(fragment).slice(1);
+        const keys = (<any>route).keys;
+        for (let i = 0; i < args.length; i++) {
+            obj.params[keys[i].name] = root.decodeURIComponent(args[i]);
+        }
+        return obj;
     }
 
     /**
@@ -534,44 +777,6 @@ export class Router {
             this.addHandler(routes[i]);
         }
     }
-
-    /**
-     * Convert a route string into a regular expression, suitable for matching
-     * against the current location fragment.
-     * @param {string} route The route
-     * @returns {RegExp} the obtained regex
-     * @private
-     */
-    private static _routeToRegExp(route: string): RegExp {
-        const routeAux = route.replace(escapeRegExp, '\\$&')
-            .replace(optionalParam, '(?:$1)?')
-            .replace(namedParam, (match, optional) => {
-                return optional ? match : '([^/?]+)';
-            })
-            .replace(splatParam, '([^?]*?)');
-        return new RegExp('^' + routeAux + '(?:\\?([\\s\\S]*))?$');
-    }
-
-    /**
-     * Given a route, and a URL fragment that it matches, return the array of
-     * extracted decoded parameters. Empty or unmatched parameters will be
-     * treated as `null` to normalize cross-browser behavior.
-     * @param {RegExp} route The alias
-     * @param {string} fragment The url part
-     * @returns {string[]} the extracted parameters
-     * @private
-     */
-    private static _extractParameters(route: RegExp, fragment: string): string[] {
-        const params = route.exec(fragment).slice(1);
-        return params.map((param, i) => {
-            // Don't decode the search params.
-            if (i === params.length - 1) {
-                return param;
-            }
-            return param === undefined ? undefined : decodeURIComponent(param);
-        });
-    }
-
 }
 
 

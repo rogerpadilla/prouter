@@ -8,8 +8,8 @@
     const Router = this.prouter.Router;
     const History = this.prouter.History;
 
-    var beforeRoute = function (router, args) {
-        lastArgs = args.new.params;
+    var beforeRoute = function (router, newRouteData) {
+        lastArgs = newRouteData.params;
     };
 
     var Location = function (href) {
@@ -46,16 +46,16 @@
                 map: [
                     {
                         route: "search/:query",
-                        activate: function (query, page) {
-                            holder.query = query;
-                            holder.page = page;
+                        activate: function (newRouteData) {
+                            holder.query = newRouteData.params.query;
+                            holder.page = newRouteData.params.page;
                         }
                     },
                     {
                         route: "search/:query/p:page",
-                        activate: function (query, page) {
-                            holder.query = query;
-                            holder.page = page;
+                        activate: function (newRouteData) {
+                            holder.query = newRouteData.params.query;
+                            holder.page = newRouteData.params.page;
                         }
                     },
                     {
@@ -90,55 +90,20 @@
                     },
                     {
                         route: "route-event/:arg",
-                        activate: function (arg) {
+                        activate: function (newRouteData) {
                         }
                     },
                     {
-                        route: "optional(/:item)",
-                        activate: function (arg) {
-                            holder.arg = arg != void 0 ? arg : null;
-                        }
-                    },
-                    {
-                        route: "named/optional/(y:z)",
-                        activate: function (z) {
-                            holder.z = z;
-                        }
-                    },
-                    {
-                        route: "splat/*args/end",
-                        activate: function (args) {
-                            holder.args = args;
-                        }
-                    },
-                    {
-                        route: ":repo/compare/*from...*to",
-                        activate: function (repo, from, to) {
-                            holder.repo = repo;
-                            holder.from = from;
-                            holder.to = to;
-                        }
-                    },
-                    {
-                        route: "decode/:named/*splat",
-                        activate: function (named, path) {
-                            holder.named = named;
-                            holder.path = path;
-                        }
-                    },
-                    {
-                        route: "*first/complex-*part/*rest",
-                        activate: function (first, part, rest) {
-                            holder.first = first;
-                            holder.part = part;
-                            holder.rest = rest;
+                        route: "optional/:item?",
+                        activate: function (newRouteData) {
+                            holder.arg = newRouteData.params.arg != void 0 ? newRouteData.params.arg : null;
                         }
                     },
                     {
                         route: "query/:entity",
-                        activate: function (entity, args) {
-                            holder.entity = entity;
-                            holder.queryArgs = args;
+                        activate: function (newRouteData) {
+                            holder.entity = newRouteData.params.entity;
+                            holder.queryArgs = newRouteData.queryString;
                         }
                     },
                     {
@@ -152,9 +117,9 @@
                         }
                     },
                     {
-                        route: "*anything",
-                        activate: function (whatever) {
-                            holder.anything = whatever;
+                        route: ":path",
+                        activate: function (navigationData) {
+                            holder = navigationData;
                         }
                     }
                 ]
@@ -186,7 +151,7 @@
         Router.history._checkUrl();
         equal(holder.query, 'news');
         equal(holder.page, void 0);
-        equal(lastArgs[0], 'news');
+        equal(lastArgs.query, 'news');
     });
 
     test("routes (simple, but unicode)", 3, function () {
@@ -194,7 +159,7 @@
         Router.history._checkUrl();
         equal(holder.query, "тест");
         equal(holder.page, void 0);
-        equal(lastArgs[0], "тест");
+        equal(lastArgs.query, "тест");
     });
 
     test("routes (two part)", 2, function () {
@@ -204,7 +169,7 @@
         equal(holder.page, '10');
     });
 
-    test("routes no changes", 6, function () {
+    test("routes refresh", 7, function () {
         Router.history.stop();
         Router.history = new History();
         Router.history._location = location;
@@ -212,7 +177,7 @@
             map: [
                 {
                     route: 'login',
-                    activate: function (queryString, evt) {
+                    activate: function (newRouteData) {
                         ok(true);
                     }
                 }
@@ -225,7 +190,7 @@
         var checked = Router.history._checkUrl();
         ok(checked);
         checked = Router.history._checkUrl();
-        notOk(checked);
+        ok(checked);
         throws(
             Router.history.start,
             Error,
@@ -274,19 +239,18 @@
         Router.history.navigate('route', null, {trigger: false});
     });
 
-    test("event parameter.", 6, function () {
+    test("event parameter.", 4, function () {
         Router.history.stop();
+        var message = {type: 'success', msg: 'Item saved'};
         router = new Router({
             map: [
                 {
                     route: 'items/:id',
-                    activate: function (id, queryString, evt) {
-                        strictEqual(id, 'a12b');
-                        strictEqual(queryString, 'param1=val1&param2=val2');
-                        strictEqual(evt.new.fragment, 'items/a12b?param1=val1&param2=val2');
-                        strictEqual(evt.new.params[0], id);
-                        strictEqual(evt.new.params[1], queryString);
-                        strictEqual(evt.new.message, 'Item saved');
+                    activate: function (newRouteData) {
+                        equal(newRouteData.fragment, 'items/a12b?param1=val1&param2=val2');
+                        equal(newRouteData.params.id, 'a12b');
+                        equal(newRouteData.queryString, 'param1=val1&param2=val2');
+                        strictEqual(newRouteData.message, message);
                     }
                 }
             ]
@@ -295,7 +259,7 @@
             pushState: true,
             hashChange: false
         });
-        Router.history.navigate('items/a12b?param1=val1&param2=val2', 'Item saved');
+        Router.history.navigate('items/a12b?param1=val1&param2=val2', message);
     });
 
     test("silent parameter.", 0, function () {
@@ -316,17 +280,17 @@
         });
     });
 
-    test("query string.", 4, function () {
+    test("query string.", 3, function () {
         Router.history.stop();
+        const message = {msg: 'Password changed', type: 'success'};
         router = new Router({
             map: [
                 {
                     route: 'login',
-                    activate: function (queryString, evt) {
-                        strictEqual(queryString, 'param1=val1&param2=val2');
-                        strictEqual(evt.new.fragment, 'login?param1=val1&param2=val2');
-                        strictEqual(evt.new.params[0], queryString);
-                        deepEqual(evt.new.message, {msg: 'Password changed', type: 'success'});
+                    activate: function (newRouteData) {
+                        strictEqual(newRouteData.queryString, 'param1=val1&param2=val2');
+                        strictEqual(newRouteData.fragment, 'login?param1=val1&param2=val2');
+                        deepEqual(newRouteData.message, message);
                     }
                 }
             ]
@@ -335,12 +299,12 @@
             pushState: true,
             hashChange: false
         });
-        Router.history.navigate('login?param1=val1&param2=val2', {msg: 'Password changed', type: 'success'});
+        Router.history.navigate('login?param1=val1&param2=val2', message);
     });
 
     test("use implicit callback if none provided", 1, function () {
         router.count = 0;
-        router.navigate('implicit');
+        Router.history.navigate('implicit');
         equal(holder.count, 1);
     });
 
@@ -353,85 +317,15 @@
         Router.history.navigate('end_here', null, {replace: true});
     });
 
-    test("routes (splats)", 1, function () {
-        location.replace('http://example.com#splat/long-list/of/splatted_99args/end');
-        Router.history._checkUrl();
-        equal(holder.args, 'long-list/of/splatted_99args');
-    });
-
-    test("routes (github)", 3, function () {
-        location.replace('http://example.com#Router/compare/1.0...braddunbar:with/slash');
-        Router.history._checkUrl();
-        equal(holder.repo, 'Router');
-        equal(holder.from, '1.0');
-        equal(holder.to, 'braddunbar:with/slash');
-    });
-
-    test("routes (optional)", 2, function () {
-        location.replace('http://example.com#optional');
-        Router.history._checkUrl();
-        ok(!holder.arg);
-        location.replace('http://example.com#optional/thing');
-        Router.history._checkUrl();
-        equal(holder.arg, 'thing');
-    });
-
-    test("routes (complex)", 3, function () {
-        location.replace('http://example.com#one/two/three/complex-part/four/five/six/seven');
-        Router.history._checkUrl();
-        equal(holder.first, 'one/two/three');
-        equal(holder.part, 'part');
-        equal(holder.rest, 'four/five/six/seven');
-    });
-
-    test("routes (query)", 4, function () {
-        location.replace('http://example.com#query/mandel?a=b&c=d');
-        Router.history._checkUrl();
-        equal(holder.entity, 'mandel');
-        equal(holder.queryArgs, 'a=b&c=d');
-        equal(lastArgs[0], 'mandel');
-        equal(lastArgs[1], 'a=b&c=d');
-    });
-
-    test("routes (anything)", 1, function () {
-        location.replace('http://example.com#doesnt-match-a-route');
-        Router.history._checkUrl();
-        equal(holder.anything, 'doesnt-match-a-route');
-    });
-
-    test("routes (function)", 3, function () {
-        router.on('route:after', function (args) {
-            ok(args.new.params[0] === 'set');
-        });
-        equal(externalObject.value, 'unset');
-        location.replace('http://example.com#function/set');
-        Router.history._checkUrl();
-        equal(externalObject.value, 'set');
-    });
-
-    test("routes (function) new & old event", 5, function () {
-        location.replace('http://example.com#path/old?a=2');
-        Router.history._checkUrl();
-        router.on('route:after', function (args) {
-            strictEqual(args.old.fragment, 'path/old?a=2');
-            deepEqual(args.old.params, ['path/old', 'a=2']);
-            strictEqual(args.new.fragment, 'function/set');
-            deepEqual(args.new.params, ['set', undefined]);
-        });
-        location.replace('http://example.com#function/set');
-        Router.history._checkUrl();
-        deepEqual(externalObject.value, 'set');
-    });
-
     test("routes cancel navigation", 1, function () {
         router.on('route:before', function (evt) {
             ok(true);
-            evt.canceled = true;
+            return false;
         });
         router.on('route:after', function (evt) {
             ok(false);
         });
-        router.navigate('path');
+        Router.history.navigate('path');
     });
 
     test("routes (function) on off", 2, function () {
@@ -463,13 +357,6 @@
         Router.history.navigate('other');
     });
 
-    test("Decode named parameters, not splats.", 2, function () {
-        location.replace('http://example.com#decode/a%2Fb/c%2Fd/e');
-        Router.history._checkUrl();
-        strictEqual(holder.named, 'a/b');
-        strictEqual(holder.path, 'c/d/e');
-    });
-
     test("leading slash", 2, function () {
         location.replace('http://example.com/root/foo');
 
@@ -482,14 +369,6 @@
         Router.history._location = location;
         Router.history.start({root: '/root/', hashChange: false, silent: true});
         strictEqual(Router.history.getFragment(), 'foo');
-    });
-
-    test("Route callback gets passed encoded values.", 3, function () {
-        var route = 'has%2Fslash/complex-has%23hash/has%20space';
-        Router.history.navigate(route);
-        strictEqual(holder.first, 'has/slash');
-        strictEqual(holder.part, 'has#hash');
-        strictEqual(holder.rest, 'has space');
     });
 
     test("correctly handles URLs with % (#868)", 2, function () {
@@ -695,21 +574,10 @@
         strictEqual(history.getFragment('/fragment '), 'fragment');
     });
 
-    test("Optional parameters.", 2, function () {
+    test("Optional parameters.", 1, function () {
         location.replace('http://example.com#named/optional/y');
         Router.history._checkUrl();
         strictEqual(holder.z, undefined);
-        location.replace('http://example.com#named/optional/y123');
-        Router.history._checkUrl();
-        strictEqual(holder.z, '123');
-    });
-
-    test("Trigger 'route' event on router instance.", 1, function () {
-        router.on('route:before', function (args) {
-            deepEqual(args.new.params, ['x', undefined]);
-        });
-        location.replace('http://example.com#route-event/x');
-        Router.history._checkUrl();
     });
 
     test("hashChange to pushState only if both requested.", 0, function () {
@@ -820,8 +688,8 @@
                 map: [
                     {
                         route: "path",
-                        activate: function (params) {
-                            strictEqual(params, 'x=y%3Fz');
+                        activate: function (navigationData) {
+                            strictEqual(navigationData.queryString, 'x=y%3Fz');
                         }
                     }
                 ]
@@ -837,8 +705,8 @@
                 map: [
                     {
                         route: "path",
-                        activate: function (params) {
-                            strictEqual(params, 'x=y');
+                        activate: function (navigationData) {
+                            strictEqual(navigationData.queryString, 'x=y');
                         }
                     }
                 ]
@@ -855,8 +723,8 @@
                 map: [
                     {
                         route: "path",
-                        activate: function (params) {
-                            strictEqual(params, 'x=y');
+                        activate: function (navigationData) {
+                            strictEqual(navigationData.queryString, 'x=y');
                         }
                     }]
             }
@@ -930,12 +798,12 @@
         Router.history.navigate('two');
     });
 
-    test("History#navigate decodes before comparison.", 1, function () {
+    test("History#navigate decodes before comparison.", 2, function () {
         Router.history.stop();
         location.replace('http://example.com/shop/search?keyword=short%20dress');
         Router.history._history = {
             pushState: function () {
-                ok(false);
+                ok(true);
             },
             replaceState: function () {
                 ok(false);
@@ -952,8 +820,8 @@
         var router = new Router();
         router.addHandler({
             route: 'login',
-            activate: function (params) {
-                strictEqual(params, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
+            activate: function (newRouteData) {
+                strictEqual(newRouteData.queryString, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
             }
         });
         Router.history.start();

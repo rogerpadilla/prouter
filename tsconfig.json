@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "sourceMap": true,
+        "noImplicitAny": true
+    },
+    "filesGlob": [
+        "./src/prouter.ts",
+        "./typings/tsd.d.ts"
+    ],
+    "files": [
+        "./src/prouter.ts",
+        "./typings/tsd.d.ts"
+    ]
+}
