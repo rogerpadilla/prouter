@@ -122,7 +122,7 @@ Named parameters are defined by prefixing a colon to the parameter name (`:foo`)
 
 ```js
 ':foo/:bar'
-// Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
+// Given 'any/thing' => newRouteData.params = {foo: 'any', bar: 'thing'}
 ```
 
 #### Suffixed Parameters
@@ -133,8 +133,8 @@ Parameters can be suffixed with a question mark (`?`) to make the entire paramet
 
 ```js
 ':foo/:bar?'
-// Given 'any' => params = {foo: 'any', bar: undefined}
-// Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
+// Given 'any' => newRouteData.params = {foo: 'any', bar: undefined}
+// Given 'any/thing' => newRouteData.params = {foo: 'any', bar: 'thing'}
 ```
 
 ##### Zero or more
@@ -143,8 +143,8 @@ Parameters can be suffixed with an asterisk (`*`) to denote a zero or more param
 
 ```js
 ':foo*'
-// Given '' => params = {foo: ''}
-// Given 'one/two/three' => params = {foo: 'one/two/three'}
+// Given '' => newRouteData.params = {foo: ''}
+// Given 'one/two/three' => newRouteData.params = {foo: 'one/two/three'}
 ```
 
 ##### One or more
@@ -153,7 +153,7 @@ Parameters can be suffixed with a plus sign (`+`) to denote a one or more parame
 
 ```js
 ':foo+'
-// Given 'one/two/three' => params = {foo: 'one/two/three'}
+// Given 'one/two/three' => newRouteData.params = {foo: 'one/two/three'}
 ```
 
 #### Custom Match Parameters
@@ -162,7 +162,7 @@ All parameters can be provided a custom matching regexp and override the default
 
 ```js
 ':foo(\\d+)'
-// Given '123' => params = {foo: '123'}
+// Given '123' => newRouteData.params = {foo: '123'}
 ```
 
 #### Unnamed Parameters
@@ -171,7 +171,7 @@ It is possible to write an unnamed parameter that is only a matching group. It w
 
 ```js
 ':foo/(.*)'
-// Given 'test/route' => params = {foo: 'test', '0': 'route'}
+// Given 'test/route' => newRouteData.params = {foo: 'test', '0': 'route'}
 ```
 
 #### Asterisk
@@ -180,8 +180,8 @@ An asterisk can be used for matching everything. It is equivalent to an unnamed 
 
 ```js
 'foo/*'
-// Given 'foo/bar/baz' => params = {'0': 'bar/baz'}
+// Given 'foo/bar/baz' => newRouteData.params = {'0': 'bar/baz'}
 
 ':foo/*'
-// Given 'foo/bar/baz' => params = {foo: 'foo', '0': 'bar/baz'}
+// Given 'foo/bar/baz' => newRouteData.params = {foo: 'foo', '0': 'bar/baz'}
 ```
