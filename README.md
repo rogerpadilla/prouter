@@ -5,6 +5,8 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
+Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
+
 ### Why prouter?
 
 * __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Have an existing project and want to modernize it? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
@@ -23,7 +25,7 @@
 * Supports **preventing navigation** by returning _false_ from the callback for the _route:before_ event or from the _deactivate_ callback.
 * Complete __navigation data__ is passed in two parameters (objects with properties) to the activate / deactivate / event callbacks, allowing to obtain full information about the navigation.
 
-### Install it
+### Installation
 ``` bash
 npm install prouter --save
 
@@ -31,10 +33,6 @@ npm install prouter --save
 
 bower install prouter --save
 ```
-
-Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
-
-**During page load, after your application has finished creating all of its routers, be sure to call _Router.history.start()_, or _Router.history.start(options)_ to enable routers**.
 
 ### Usage
 
