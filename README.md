@@ -108,8 +108,8 @@ appRouter.addHandler({
 
 // Activate routers (default options used for this example).
 // During page load, after your application has finished creating all of
-// its routers, be sure to call _Router.history.start()_ or
-// _Router.history.start(options)_ to enable routers.
+// its routers, be sure to call Router.history.start() or
+// Router.history.start(options) to enable routers.
 Router.history.start({root: '/', hashChange: true, pushState: false, silent: false});
 
 // Client-side redirect to the 'items/:id' handler and send a flash message.
