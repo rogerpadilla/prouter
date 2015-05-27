@@ -43,7 +43,7 @@ Web applications often provide linkable, bookmarkable, shareable URLs for import
 ```js
 var Router = prouter.Router;
 
-// Instantiate router and declaring some handlers.
+// Instantiate router and declare some handlers.
 var appRouter = new Router({
     map: [
         {
