@@ -75,6 +75,12 @@ var appRouter = new Router({
                 // Information about the previous handler (if any).
                 console.log(oldRouteData);
             }
+        },
+        {
+            route: '*',
+            activate: function() {
+                console.log('Default route.');
+            }
         }
     ]
 });

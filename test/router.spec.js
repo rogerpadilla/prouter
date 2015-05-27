@@ -54,6 +54,38 @@
         Router.history.start();
     });
 
+    test('default route 1.', 1, function() {
+        location.replace('http://example.com#search/news');
+        var router = new Router([{
+            route: 'do-not-match',
+            activate: function(newRouteData) {
+                ok(false);
+            }
+        }, {
+            route: '*',
+            activate: function(newRouteData) {
+                ok(true);
+            }
+        }]);
+        Router.history.start();
+    });
+
+    test('default route 2.', 1, function() {
+        location.replace('http://example.com#search/news');
+        var router = new Router([{
+            route: 'do-not-match',
+            activate: function(newRouteData) {
+                ok(false);
+            }
+        }, {
+            route: ':any(.*)',
+            activate: function(newRouteData) {
+                ok(true);
+            }
+        }]);
+        Router.history.start();
+    });
+
     test('routes (simple, but unicode)', 1, function() {
         location.replace('http://example.com#search/тест');
         var router = new Router([{

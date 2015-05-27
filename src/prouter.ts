@@ -716,7 +716,9 @@ export class Router {
     }
 
     /**
-     * Bind all defined routes to `Router.history`.
+     * Bind all defined routes to `Router.history`. We have to reverse the
+     * order of the routes here to support behavior where the most general
+     * routes can be defined at the bottom of the route map.
      * @param {RouteHandler[]} handlers list of handlers.
      * @private
      */
