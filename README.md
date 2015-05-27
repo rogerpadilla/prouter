@@ -105,15 +105,6 @@ appRouter.addHandler({
     activate: function (newRouteData, oldRouteData) {
         console.log(newRouteData);
         console.log(oldRouteData);
-        ...
-    },
-    deactivate: function (newRouteData, oldRouteData) {
-        console.log(newRouteData);
-        console.log(oldRouteData);
-        if (!someCondition) {
-            // Prevents navigation.
-            return false;
-        }
     }
 });
 
