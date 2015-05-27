@@ -129,7 +129,7 @@ Named parameters are defined by prefixing a colon to the parameter name (`:foo`)
 
 ##### Optional
 
-Parameters can be suffixed with a question mark (`?`) to make the entire parameter optional. This will also make any prefixed path delimiter optional (`/` or `.`).
+Parameters can be suffixed with a question mark (`?`) to make the entire parameter optional.
 
 ```js
 ':foo/:bar?'
@@ -139,7 +139,7 @@ Parameters can be suffixed with a question mark (`?`) to make the entire paramet
 
 ##### Zero or more
 
-Parameters can be suffixed with an asterisk (`*`) to denote a zero or more parameter match. The prefixed path delimiter is also taken into account for the match.
+Parameters can be suffixed with an asterisk (`*`) to denote a zero or more parameter match.
 
 ```js
 ':foo*'
@@ -149,7 +149,7 @@ Parameters can be suffixed with an asterisk (`*`) to denote a zero or more param
 
 ##### One or more
 
-Parameters can be suffixed with a plus sign (`+`) to denote a one or more parameters match. The prefixed path delimiter is included in the match.
+Parameters can be suffixed with a plus sign (`+`) to denote a one or more parameters match.
 
 ```js
 ':foo+'
