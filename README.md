@@ -109,7 +109,7 @@ appRouter.addHandler({
 // Activate routers (default options used for this example).
 Router.history.start({root: '/', hashChange: true, pushState: false, silent: false});
 
-// Client-side redirect to the 'items/:id' handler, and send this flash message.
+// Client-side redirect to the 'items/:id' handler and send a flash message.
 Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
 ```
 
