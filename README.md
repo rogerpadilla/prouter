@@ -121,7 +121,8 @@ Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
 Named parameters are defined by prefixing a colon to the parameter name (`:foo`). By default, this parameter will match up to the next path segment.
 
 ```js
-'/:foo/:bar'
+':foo/:bar'
+//  Having 'any/thing' => params = {foo: 'any', bar: 'thing'}
 ```
 
 #### Suffixed Parameters
@@ -131,7 +132,9 @@ Named parameters are defined by prefixing a colon to the parameter name (`:foo`)
 Parameters can be suffixed with a question mark (`?`) to make the entire parameter optional. This will also make any prefixed path delimiter optional (`/` or `.`).
 
 ```js
-'/:foo/:bar?'
+':foo/:bar?'
+//  Given 'any' => params = {foo: 'any', bar: undefined}
+//  Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
 ```
 
 ##### Zero or more
@@ -139,7 +142,9 @@ Parameters can be suffixed with a question mark (`?`) to make the entire paramet
 Parameters can be suffixed with an asterisk (`*`) to denote a zero or more parameter match. The prefixed path delimiter is also taken into account for the match.
 
 ```js
-'/:foo*'
+':foo*'
+// Given '' => params = {foo: ''}
+// Given 'one/two/three' => params = {foo: 'one/two/three'}
 ```
 
 ##### One or more
@@ -147,7 +152,8 @@ Parameters can be suffixed with an asterisk (`*`) to denote a zero or more param
 Parameters can be suffixed with a plus sign (`+`) to denote a one or more parameters match. The prefixed path delimiter is included in the match.
 
 ```js
-'/:foo+'
+':foo+'
+// Given 'one/two/three' => params = {foo: 'one/two/three'}
 ```
 
 #### Custom Match Parameters
@@ -155,7 +161,8 @@ Parameters can be suffixed with a plus sign (`+`) to denote a one or more parame
 All parameters can be provided a custom matching regexp and override the default. Please note: Backslashes need to be escaped in strings.
 
 ```js
-'/:foo(\\d+)'
+':foo(\\d+)'
+// Given '123' => params = {foo: '123'}
 ```
 
 #### Unnamed Parameters
@@ -163,7 +170,8 @@ All parameters can be provided a custom matching regexp and override the default
 It is possible to write an unnamed parameter that is only a matching group. It works the same as a named parameter, except it will be numerically indexed.
 
 ```js
-'/:foo/(.*)'
+':foo/(.*)'
+// Given 'test/route' => params = {foo: 'test', '0': 'route'}
 ```
 
 #### Asterisk
@@ -171,5 +179,6 @@ It is possible to write an unnamed parameter that is only a matching group. It w
 An asterisk can be used for matching everything. It is equivalent to an unnamed matching group of `(.*)`.
 
 ```js
-'/foo/*'
+'foo/*'
+// Given 'foo/bar/baz' => params = {'0': 'bar/baz'}
 ```
