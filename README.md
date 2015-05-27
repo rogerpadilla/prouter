@@ -122,7 +122,7 @@ Named parameters are defined by prefixing a colon to the parameter name (`:foo`)
 
 ```js
 ':foo/:bar'
-//  Having 'any/thing' => params = {foo: 'any', bar: 'thing'}
+// Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
 ```
 
 #### Suffixed Parameters
@@ -133,8 +133,8 @@ Parameters can be suffixed with a question mark (`?`) to make the entire paramet
 
 ```js
 ':foo/:bar?'
-//  Given 'any' => params = {foo: 'any', bar: undefined}
-//  Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
+// Given 'any' => params = {foo: 'any', bar: undefined}
+// Given 'any/thing' => params = {foo: 'any', bar: 'thing'}
 ```
 
 ##### Zero or more
