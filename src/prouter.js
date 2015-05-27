@@ -28,6 +28,9 @@ var PATH_STRIPPER = new RegExp([
 ].join('|'), 'g');
 var ROUTE_STRIPPER = /^[#\/]|\s+$/g;
 var HASH_STRIPPER = /#.*$/;
+var isArray = Array.isArray || function (obj) {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+};
 var RouteHelper = (function () {
     function RouteHelper() {
     }
@@ -39,6 +42,15 @@ var RouteHelper = (function () {
     };
     RouteHelper._flags = function (opts) {
         return opts['sensitive'] ? '' : 'i';
+    };
+    RouteHelper.parseQuery = function (queryString) {
+        var query = {};
+        var params = queryString.split('&');
+        for (var i = 0; i < params.length; i++) {
+            var pair = params[i].split('=');
+            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        }
+        return query;
     };
     RouteHelper.parseFragment = function (fragment) {
         if (fragment === '') {
@@ -283,7 +295,7 @@ var History = (function () {
         History._started = false;
     };
     History.prototype._add = function (rRoute, callback) {
-        this._handlers.unshift({ route: rRoute, callback: callback });
+        this._handlers.push({ route: rRoute, callback: callback });
     };
     History.prototype.navigate = function (fragment, message, options) {
         if (options === void 0) { options = {}; }
@@ -344,12 +356,16 @@ exports.History = History;
 var Router = (function () {
     function Router(options) {
         if (options === void 0) { options = {}; }
-        this._eventHandlers = {};
-        this.trigger = History.prototype.trigger;
-        this.on = History.prototype.on;
-        this.off = History.prototype.off;
-        this._bindHandlers(options.map);
+        this._bindHandlers(isArray(options) ? options : options.map);
     }
+    Router.prototype._bindHandlers = function (handlers) {
+        if (!handlers) {
+            return;
+        }
+        for (var i = 0; i < handlers.length; i++) {
+            this.add(handlers[i]);
+        }
+    };
     Router.prototype.add = function (handler) {
         var _this = this;
         var rRoute = RouteHelper.stringToRegexp(handler.route);
@@ -360,10 +376,6 @@ var Router = (function () {
             if (next === false) {
                 return;
             }
-            next = _this.trigger('route:before', newRouteData, _this._oldRouteData);
-            if (next === false) {
-                return;
-            }
             if (_this._oldRouteData && _this._oldRouteData.handler.deactivate) {
                 next = _this._oldRouteData.handler.deactivate.call(_this._oldRouteData.handler, newRouteData, _this._oldRouteData);
                 if (next === false) {
@@ -371,7 +383,6 @@ var Router = (function () {
                 }
             }
             handler.activate.call(handler, newRouteData, _this._oldRouteData);
-            _this.trigger('route:after', newRouteData, _this._oldRouteData);
             Router.history.trigger('route:after', _this, newRouteData, _this._oldRouteData);
             _this._oldRouteData = newRouteData;
         });
@@ -389,14 +400,6 @@ var Router = (function () {
             params[keys[i].name] = _global.decodeURIComponent(args[i]);
         }
         return params;
-    };
-    Router.prototype._bindHandlers = function (handlers) {
-        if (!handlers) {
-            return;
-        }
-        for (var i = handlers.length - 1; i >= 0; i--) {
-            this.add(handlers[i]);
-        }
     };
     return Router;
 })();

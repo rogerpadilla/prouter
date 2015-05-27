@@ -62,13 +62,6 @@ export interface HistoryOptions {
 }
 
 /**
- * Contract for Router.constructor options.
- */
-export interface RouterOptions {
-    map?: Handler[];
-}
-
-/**
  * Contract for route-entry's callback.
  */
 interface RouteCallback {
@@ -130,6 +123,10 @@ const ROUTE_STRIPPER = /^[#\/]|\s+$/g;
 // Cached regex for stripping urls of hash.
 const HASH_STRIPPER = /#.*$/;
 
+const isArray = Array.isArray || function(obj: any): boolean {
+    return Object.prototype.toString.call(obj) === '[object Array]';
+};
+
 
 class RouteHelper {
 
@@ -158,6 +155,16 @@ class RouteHelper {
      */
     private static _flags(opts: Object): string {
         return opts['sensitive'] ? '' : 'i';
+    }
+
+    static parseQuery(queryString: string): Object {
+        const query = {};
+        const params = queryString.split('&');
+        for (let i = 0; i < params.length; i++) {
+            let pair = params[i].split('=');
+            query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        }
+        return query;
     }
 
     /**
@@ -574,13 +581,13 @@ export class History {
     }
 
     /**
-     * Add a route to be tested when the fragment changes. Routes added later
-     * may override previous routes.
+     * Add a route to be tested when the fragment changes. Routes added first
+     * takes priority.
      * @param {RegExp} rRoute The route.
      * @param {RouteCallback} callback Method to be executed.
      */
     _add(rRoute: RegExp, callback: RouteCallback) {
-        this._handlers.unshift({ route: rRoute, callback: callback });
+        this._handlers.push({ route: rRoute, callback: callback });
     }
 
     /**
@@ -696,23 +703,30 @@ export class Router {
     static history: History;
     // The previous route data.
     private _oldRouteData: NavigationData;
-    // Copy event bus functionality.
-    /* tslint:disable:no-unused-variable */
-    private _eventHandlers: EventHandler = {};
-    /* tslint:enable:no-unused-variable */
-    trigger = History.prototype.trigger;
-    on = History.prototype.on;
-    off = History.prototype.off;
 
     /**
      * Constructor for the router.
      * Routers map faux-URLs to actions, and fire events when routes are
      * matched. Creating a new one sets its `routes` hash, if not set statically.
-     * @param {RouterOptions} options options.root is a string indicating the site's context, defaults to '/'.
+     * @param {Object|Array} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
-    constructor(options: RouterOptions = {}) {
-        this._bindHandlers(options.map);
+    constructor(options: any = {}) {
+        this._bindHandlers(isArray(options) ? options : options.map);
+    }
+
+    /**
+     * Bind all defined routes to `Router.history`.
+     * @param {RouteHandler[]} handlers list of handlers.
+     * @private
+     */
+    private _bindHandlers(handlers: Handler[]) {
+        if (!handlers) {
+            return;
+        }
+        for (let i = 0; i < handlers.length; i++) {
+            this.add(handlers[i]);
+        }
     }
 
     /**
@@ -736,12 +750,6 @@ export class Router {
                 return;
             }
 
-            next = this.trigger('route:before', newRouteData, this._oldRouteData);
-
-            if (next === false) {
-                return;
-            }
-
             if (this._oldRouteData && this._oldRouteData.handler.deactivate) {
                 next = this._oldRouteData.handler.deactivate.call(this._oldRouteData.handler, newRouteData, this._oldRouteData);
                 if (next === false) {
@@ -750,7 +758,6 @@ export class Router {
             }
 
             handler.activate.call(handler, newRouteData, this._oldRouteData);
-            this.trigger('route:after', newRouteData, this._oldRouteData);
             Router.history.trigger('route:after', this, newRouteData, this._oldRouteData);
 
             this._oldRouteData = newRouteData;
@@ -779,22 +786,6 @@ export class Router {
             params[keys[i].name] = _global.decodeURIComponent(args[i]);
         }
         return params;
-    }
-
-    /**
-     * Bind all defined routes to `Router.history`. We have to reverse the
-     * order of the routes here to support behavior where the most general
-     * routes can be defined at the bottom of the route map.
-     * @param {RouteHandler[]} handlers list of handlers.
-     * @private
-     */
-    private _bindHandlers(handlers: Handler[]) {
-        if (!handlers) {
-            return;
-        }
-        for (let i = handlers.length - 1; i >= 0; i--) {
-            this.add(handlers[i]);
-        }
     }
 }
 
