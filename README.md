@@ -7,7 +7,7 @@
 
 ### Why prouter?
 
-* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Want to render in both sides the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
+* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Have an existing project and want to modernize it? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
 * __No dependencies:__ no jQuery, no underscore... no dependencies at all.
 * __Lightweight:__ 7kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/prouter/master/dist/prouter.min.js) version.
 * __Forward-thinking:__ written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
