@@ -114,7 +114,7 @@ Router.history.start({root: '/', hashChange: true, pushState: false, silent: fal
 Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
 ```
 
-### Routing expressions (from express - [path-to-regexp](https://github.com/pillarjs/path-to-regexp)):
+### Supported Routing expressions (compatible with express / [path-to-regexp](https://github.com/pillarjs/path-to-regexp)):
 
 #### Named Parameters
 
