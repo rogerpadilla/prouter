@@ -703,6 +703,13 @@ export class Router {
     static history: History;
     // The previous route data.
     private _oldRouteData: NavigationData;
+    // Copy event bus functionality.
+    /* tslint:disable:no-unused-variable */
+    private _eventHandlers: EventHandler = {};
+    /* tslint:enable:no-unused-variable */
+    trigger = History.prototype.trigger;
+    on = History.prototype.on;
+    off = History.prototype.off;
 
     /**
      * Constructor for the router.
@@ -747,6 +754,12 @@ export class Router {
             const newRouteData: NavigationData = { path: resource.path, query: resource.query, params, message, handler };
 
             let next = Router.history.trigger('route:before', this, newRouteData, this._oldRouteData);
+
+            if (next === false) {
+                return;
+            }
+
+            next = this.trigger('route:before', newRouteData, this._oldRouteData);
 
             if (next === false) {
                 return;

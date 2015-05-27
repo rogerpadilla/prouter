@@ -356,6 +356,10 @@ exports.History = History;
 var Router = (function () {
     function Router(options) {
         if (options === void 0) { options = {}; }
+        this._eventHandlers = {};
+        this.trigger = History.prototype.trigger;
+        this.on = History.prototype.on;
+        this.off = History.prototype.off;
         this._bindHandlers(isArray(options) ? options : options.map);
     }
     Router.prototype._bindHandlers = function (handlers) {
@@ -373,6 +377,10 @@ var Router = (function () {
             var params = Router._extractParameters(rRoute, resource.path);
             var newRouteData = { path: resource.path, query: resource.query, params: params, message: message, handler: handler };
             var next = Router.history.trigger('route:before', _this, newRouteData, _this._oldRouteData);
+            if (next === false) {
+                return;
+            }
+            next = _this.trigger('route:before', newRouteData, _this._oldRouteData);
             if (next === false) {
                 return;
             }

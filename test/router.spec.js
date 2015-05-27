@@ -263,23 +263,39 @@
         });
     });
 
-    test('routes cancel navigation', 2, function() {
+    test('cancel navigation', 2, function() {
         var router = new Router([{
             route: 'something',
-            activate: function(newRouteData) {
+            activate: function() {
+                ok(false);
+            }
+        }, {
+            route: 'other',
+            activate: function() {
                 ok(false);
             }
         }]);
         Router.history.on('route:before', function(router, newNavigationData, oldNavigationData) {
-            strictEqual(router, router);
-            equal(newNavigationData.path, 'something');
-            return false;
+            if (newNavigationData.path === 'something') {
+                strictEqual(router, router);
+                return false;
+            }
         });
         Router.history.on('route:after', function(router, newNavigationData, oldNavigationData) {
-            ok(false);
+            notEqual(newNavigationData.path, 'something');
+        });
+        router.on('route:before', function(newNavigationData, oldNavigationData) {
+            notEqual(newNavigationData.path, 'something');
+            if (newNavigationData.path === 'other') {
+                return false;
+            }
+        });
+        router.on('route:after', function(newNavigationData, oldNavigationData) {
+            notEqual(newNavigationData.path, 'other');
         });
         Router.history.start();
         Router.history.navigate('something');
+        Router.history.navigate('other');
     });
 
     test('activate / deactivate callbacks', 9, function() {
