@@ -181,4 +181,7 @@ An asterisk can be used for matching everything. It is equivalent to an unnamed 
 ```js
 'foo/*'
 // Given 'foo/bar/baz' => params = {'0': 'bar/baz'}
+
+':foo/*'
+// Given 'foo/bar/baz' => params = {foo: 'foo', '0': 'bar/baz'}
 ```
