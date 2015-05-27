@@ -10,7 +10,7 @@
 * __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Have an existing project and want to modernize it? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
 * __No dependencies:__ no jQuery, no underscore... no dependencies at all.
 * __Lightweight:__ 7kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/prouter/master/dist/prouter.min.js) version.
-* __Forward-thinking:__ written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
+* __Forward-thinking:__ learns from the Router components of Backbone, Aurelia and Express. Written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
 [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and global browser.
 * [KISS principle](http://en.wikipedia.org/wiki/KISS_principle): unnecessary complexity avoided.
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
@@ -31,7 +31,6 @@ npm install prouter --save
 
 bower install prouter --save
 ```
-prouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router), [Aurelia](http://aurelia.io/get-started.html) and [Express](http://expressjs.com/guide/routing.html).
 
 Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
 
