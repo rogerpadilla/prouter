@@ -1,4 +1,4 @@
-# prouter - The unobtrusive router library.
+# prouter.
 <p>
     <a href="https://travis-ci.org/rogerpadilla/prouter"><img src="https://travis-ci.org/rogerpadilla/prouter.svg" alt="build status" /></a>
     <a href="https://gemnasium.com/rogerpadilla/prouter"><img src="https://gemnasium.com/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
@@ -36,7 +36,7 @@ Web applications often provide linkable, bookmarkable, shareable URLs for import
 
 **During page load, after your application has finished creating all of its routers, be sure to call _Router.history.start()_, or _Router.history.start(options)_ to enable routers**.
 
-### Examples:
+### Usage
 
 ```js
 var Router = prouter.Router;
