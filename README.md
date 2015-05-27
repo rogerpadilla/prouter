@@ -20,7 +20,7 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 
 ### Unique features
 * Ability to pass **_flash_ messages** when triggering navigation.
-* Supports optionally declaring a **_deactivate_ callback**.
+* Supports optionally declaring **_deactivate_ callbacks**.
 * Ability to **register listeners for navigation's events**: _route:before_ and _route:after_.
 * Supports **preventing navigation** by returning _false_ from the callback for the _route:before_ event or from the _deactivate_ callback.
 * Complete __navigation data__ is passed in two parameters (objects with properties) to the activate / deactivate / event callbacks, allowing to obtain full information about the navigation.
