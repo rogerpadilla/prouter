@@ -5,7 +5,7 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-## Why prouter?
+### Why prouter?
 
 * __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Want to render in both sides the backend and the front-end? Have an existing project and want to modernize? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
 * __No dependencies:__ no jQuery, no underscore... no dependencies at all.
@@ -25,7 +25,7 @@
 
 prouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router), [Aurelia](http://aurelia.io/get-started.html) and [Express](http://expressjs.com/guide/routing.html).
 
-__Install it__
+### Install it
 ``` bash
 npm install prouter --save
 
