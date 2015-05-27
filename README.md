@@ -59,8 +59,8 @@ var appRouter = new Router({
                 console.log('The given userId is: ', userId);
             },
             deactivate: function() {
-                // An optionally 'deactivate' callback like this,
-                // can be declared for the handler.
+                // Optional 'deactivate' callbacks like this,
+                // can be declared for a handler.
                 console.log('Leaving user page.');
             }
         },
