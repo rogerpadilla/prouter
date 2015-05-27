@@ -107,7 +107,7 @@ appRouter.addHandler({
     }
 });
 
-// Initialize the routers (default options used for this example).
+// Activate routers (default options used for this example).
 Router.history.start({root: '/', hashChange: true, pushState: false, silent: false});
 
 // Client-side redirect to the 'items/:id' handler, and send this flash message.
