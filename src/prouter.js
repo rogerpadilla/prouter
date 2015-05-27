@@ -1,7 +1,8 @@
 /**
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
-var _global = typeof global === 'undefined' ? window : global;
+var _global = (typeof self === 'object' && self.self === self && self) ||
+    (typeof global === 'object' && global.global === global && global);
 var Resource = (function () {
     function Resource(path, query) {
         this.path = path;
