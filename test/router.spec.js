@@ -817,7 +817,7 @@
         Router.history.stop();
         location.replace('http://example.com#login?a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
         var router = new Router();
-        router.addHandler({
+        router.add({
             route: 'login',
             activate: function (newRouteData) {
                 strictEqual(newRouteData.query, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');

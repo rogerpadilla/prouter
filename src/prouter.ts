@@ -2,7 +2,6 @@
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
 
-declare const window: any;
 declare const global: any;
 
 // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
@@ -580,7 +579,7 @@ export class History {
      * @param {RegExp} rRoute The route.
      * @param {RouteCallback} callback Method to be executed.
      */
-    _addHandler(rRoute: RegExp, callback: RouteCallback) {
+    _add(rRoute: RegExp, callback: RouteCallback) {
         this._handlers.unshift({ route: rRoute, callback: callback });
     }
 
@@ -721,11 +720,11 @@ export class Router {
      * @param {Handler} handler The handler entry.
      * @returns {Router} this router
      */
-    addHandler(handler: Handler): Router {
+    add(handler: Handler): Router {
 
         const rRoute = RouteHelper.stringToRegexp(handler.route);
 
-        Router.history._addHandler(rRoute, (resource, message) => {
+        Router.history._add(rRoute, (resource, message) => {
 
             const params = Router._extractParameters(rRoute, resource.path);
 
@@ -794,7 +793,7 @@ export class Router {
             return;
         }
         for (let i = handlers.length - 1; i >= 0; i--) {
-            this.addHandler(handlers[i]);
+            this.add(handlers[i]);
         }
     }
 }

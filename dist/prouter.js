@@ -291,7 +291,7 @@
             _global.removeEventListener('hashchange', this._checkUrl, false);
             History._started = false;
         };
-        History.prototype._addHandler = function (rRoute, callback) {
+        History.prototype._add = function (rRoute, callback) {
             this._handlers.unshift({ route: rRoute, callback: callback });
         };
         History.prototype.navigate = function (fragment, message, options) {
@@ -360,10 +360,10 @@
             this.off = History.prototype.off;
             this._bindHandlers(options.map);
         }
-        Router.prototype.addHandler = function (handler) {
+        Router.prototype.add = function (handler) {
             var _this = this;
             var rRoute = RouteHelper.stringToRegexp(handler.route);
-            Router.history._addHandler(rRoute, function (resource, message) {
+            Router.history._add(rRoute, function (resource, message) {
                 var params = Router._extractParameters(rRoute, resource.path);
                 var newRouteData = { path: resource.path, query: resource.query, params: params, message: message, handler: handler };
                 var next = Router.history.trigger('route:before', _this, newRouteData, _this._oldRouteData);
@@ -405,7 +405,7 @@
                 return;
             }
             for (var i = handlers.length - 1; i >= 0; i--) {
-                this.addHandler(handlers[i]);
+                this.add(handlers[i]);
             }
         };
         return Router;

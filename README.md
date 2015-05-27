@@ -95,8 +95,8 @@ appRouter.on('route:before', function (newRouteData, oldRouteData) {
     }
 });
 
-// You can alternatively use the function "addHandler" for adding handlers:
-appRouter.addHandler({
+// You can alternatively use the function "add" for adding handlers:
+appRouter.add({
     route: 'item/:id',
     activate: function (newRouteData, oldRouteData) {
         console.log(newRouteData);
