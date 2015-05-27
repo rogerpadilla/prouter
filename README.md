@@ -25,10 +25,6 @@ __Unique features__:
 
 prouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router), [Aurelia](http://aurelia.io/get-started.html) and [Express](http://expressjs.com/guide/routing.html).
 
-Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
-
-**During page load, after your application has finished creating all of its routers, be sure to call _Router.history.start()_, or _Router.history.start({pushState: true})_ to route the initial URL**.
-
 Install it:
 ``` bash
 npm install prouter --save
@@ -38,7 +34,13 @@ npm install prouter --save
 bower install prouter --save
 ```
 
-```javascript
+Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
+
+**During page load, after your application has finished creating all of its routers, be sure to call _Router.history.start()_, or _Router.history.start({pushState: true})_ to route the initial URL**.
+
+#### Examples:
+
+```js
 var Router = prouter.Router;
 
 // Instantiate router and declaring some handlers.
@@ -120,4 +122,64 @@ Router.history.start({root: '/', hashChange: true, pushState: false, silent: fal
 
 // Client-side redirect to the 'items/:id' handler, and send this flash message.
 Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
+```
+
+### Supportted Routing expressions.
+
+#### Named Parameters
+
+Named parameters are defined by prefixing a colon to the parameter name (`:foo`). By default, this parameter will match up to the next path segment.
+
+```js
+'/:foo/:bar'
+```
+
+#### Suffixed Parameters
+
+##### Optional
+
+Parameters can be suffixed with a question mark (`?`) to make the entire parameter optional. This will also make any prefixed path delimiter optional (`/` or `.`).
+
+```js
+'/:foo/:bar?'
+```
+
+##### Zero or more
+
+Parameters can be suffixed with an asterisk (`*`) to denote a zero or more parameter match. The prefixed path delimiter is also taken into account for the match.
+
+```js
+'/:foo*'
+```
+
+##### One or more
+
+Parameters can be suffixed with a plus sign (`+`) to denote a one or more parameters match. The prefixed path delimiter is included in the match.
+
+```js
+'/:foo+'
+```
+
+#### Custom Match Parameters
+
+All parameters can be provided a custom matching regexp and override the default. Please note: Backslashes need to be escaped in strings.
+
+```js
+'/:foo(\\d+)'
+```
+
+#### Unnamed Parameters
+
+It is possible to write an unnamed parameter that is only a matching group. It works the same as a named parameter, except it will be numerically indexed.
+
+```js
+'/:foo/(.*)'
+```
+
+#### Asterisk
+
+An asterisk can be used for matching everything. It is equivalent to an unnamed matching group of `(.*)`.
+
+```js
+'/foo/*'
 ```
