@@ -23,8 +23,6 @@
 * Supports **preventing navigation** by returning _false_ from the callback for the _route:before_ event or from the _deactivate_ callback.
 * Complete __navigation data__ is passed in two parameters (objects with properties) to the activate / deactivate / event callbacks, allowing to obtain full information about the navigation.
 
-prouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router), [Aurelia](http://aurelia.io/get-started.html) and [Express](http://expressjs.com/guide/routing.html).
-
 ### Install it
 ``` bash
 npm install prouter --save
@@ -33,6 +31,7 @@ npm install prouter --save
 
 bower install prouter --save
 ```
+prouter is inspired from the Router components of [Backbone](http://backbonejs.org/#Router), [Aurelia](http://aurelia.io/get-started.html) and [Express](http://expressjs.com/guide/routing.html).
 
 Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
 
