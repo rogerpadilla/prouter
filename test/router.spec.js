@@ -103,7 +103,7 @@
                         route: "query/:entity",
                         activate: function (newRouteData) {
                             holder.entity = newRouteData.params.entity;
-                            holder.queryArgs = newRouteData.queryString;
+                            holder.queryArgs = newRouteData.query;
                         }
                     },
                     {
@@ -247,9 +247,9 @@
                 {
                     route: 'items/:id',
                     activate: function (newRouteData) {
-                        equal(newRouteData.fragment, 'items/a12b?param1=val1&param2=val2');
+                        equal(newRouteData.path, 'items/a12b');
                         equal(newRouteData.params.id, 'a12b');
-                        equal(newRouteData.queryString, 'param1=val1&param2=val2');
+                        equal(newRouteData.query, 'param1=val1&param2=val2');
                         strictEqual(newRouteData.message, message);
                     }
                 }
@@ -288,8 +288,8 @@
                 {
                     route: 'login',
                     activate: function (newRouteData) {
-                        strictEqual(newRouteData.queryString, 'param1=val1&param2=val2');
-                        strictEqual(newRouteData.fragment, 'login?param1=val1&param2=val2');
+                        strictEqual(newRouteData.query, 'param1=val1&param2=val2');
+                        strictEqual(newRouteData.path, 'login');
                         deepEqual(newRouteData.message, message);
                     }
                 }
@@ -362,13 +362,13 @@
 
         Router.history.stop();
         Router.history.start({root: '/root', hashChange: false, silent: true});
-        strictEqual(Router.history.getFragment(), 'foo');
+        strictEqual(Router.history.obtainFragment().full, 'foo');
 
         Router.history.stop();
         Router.history = new History();
         Router.history._location = location;
         Router.history.start({root: '/root/', hashChange: false, silent: true});
-        strictEqual(Router.history.getFragment(), 'foo');
+        strictEqual(Router.history.obtainFragment().full, 'foo');
     });
 
     test("correctly handles URLs with % (#868)", 2, function () {
@@ -391,7 +391,7 @@
         Router.history.stop();
         location.replace('http://example.com/path/name#hash');
         Router.history.start({hashChange: false});
-        var fragment = Router.history.getFragment();
+        var fragment = Router.history.obtainFragment().full;
         strictEqual(fragment, location.pathname.replace(/^\//, ''));
     });
 
@@ -409,10 +409,10 @@
         Router.history.stop();
         location.replace('http://example.com/root');
         Router.history.start({hashChange: false, root: '/root/', silent: true});
-        strictEqual(Router.history.getFragment(), '');
+        strictEqual(Router.history.obtainFragment().full, '');
     });
 
-    test("History does not prepend root to fragment.", 3, function () {
+    test("History does not prepend root to fragment.", 2, function () {
         Router.history.stop();
         location.replace('http://example.com/root/');
         Router.history._history = {
@@ -426,8 +426,7 @@
             hashChange: false
         });
         Router.history.navigate('x');
-        strictEqual(Router.history._fragment, 'x');
-        strictEqual(Router.history.getFragment(), '');
+        strictEqual(Router.history.obtainFragment().full, '');
     });
 
     test("Normalize root.", 1, function () {
@@ -566,12 +565,12 @@
 
     test("Trailing space in fragments.", 1, function () {
         var history = new History();
-        strictEqual(history.getFragment('fragment   '), 'fragment');
+        strictEqual(history.obtainFragment('fragment   ').full, 'fragment');
     });
 
     test("Leading slash and trailing space.", 1, function () {
         var history = new History();
-        strictEqual(history.getFragment('/fragment '), 'fragment');
+        strictEqual(history.obtainFragment('/fragment ').full, 'fragment');
     });
 
     test("Optional parameters.", 1, function () {
@@ -689,7 +688,7 @@
                     {
                         route: "path",
                         activate: function (navigationData) {
-                            strictEqual(navigationData.queryString, 'x=y%3Fz');
+                            strictEqual(navigationData.query, 'x=y%3Fz');
                         }
                     }
                 ]
@@ -706,7 +705,7 @@
                     {
                         route: "path",
                         activate: function (navigationData) {
-                            strictEqual(navigationData.queryString, 'x=y');
+                            strictEqual(navigationData.query, 'x=y');
                         }
                     }
                 ]
@@ -724,7 +723,7 @@
                     {
                         route: "path",
                         activate: function (navigationData) {
-                            strictEqual(navigationData.queryString, 'x=y');
+                            strictEqual(navigationData.query, 'x=y');
                         }
                     }]
             }
@@ -811,7 +810,7 @@
         };
         Router.history.start({pushState: true});
         Router.history.navigate('shop/search?keyword=short%20dress');
-        strictEqual(Router.history.getFragment(), 'shop/search?keyword=short dress');
+        strictEqual(Router.history.obtainFragment().full, 'shop/search?keyword=short dress');
     });
 
     test('Urls in the params', 1, function () {
@@ -821,7 +820,7 @@
         router.addHandler({
             route: 'login',
             activate: function (newRouteData) {
-                strictEqual(newRouteData.queryString, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
+                strictEqual(newRouteData.query, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
             }
         });
         Router.history.start();

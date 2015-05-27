@@ -5,7 +5,7 @@
 declare const window: any;
 declare const global: any;
 
-const root: any = typeof window !== 'undefined' ? window : global;
+const _global: any = typeof global === 'undefined' ? window : global;
 
 /**
  * Contract for event handler.
@@ -18,27 +18,27 @@ export interface NavigationParams {
  * Contract for navigation data.
  */
 export interface NavigationData {
-    fragment: string;
+    path: string;
     params: NavigationParams;
-    queryString: string;
+    query: string;
     message?: any;
-    handler?: RouteHandler;
+    handler?: Handler;
 }
 
 /**
  * Contract for route-entry's callback.
  */
-export interface RouteCallback {
-    (fragment: string, newRouteData: NavigationData, oldRouteData?: NavigationData): void;
+export interface HandlerCallback {
+    (newRouteData: NavigationData, oldRouteData?: NavigationData): void;
 }
 
 /**
  * Contract of route handler.
  */
-export interface RouteHandler {
+export interface Handler {
     route: string;
-    activate: RouteCallback;
-    deactivate?: RouteCallback;
+    activate: HandlerCallback;
+    deactivate?: HandlerCallback;
 }
 
 /**
@@ -63,33 +63,46 @@ export interface HistoryOptions {
  * Contract for Router.constructor options.
  */
 export interface RouterOptions {
-    map?: RouteHandler[];
+    map?: Handler[];
+}
+
+/**
+ * Contract for route-entry's callback.
+ */
+interface RouteCallback {
+    (resource: Resource, newRouteData: NavigationData, oldRouteData?: NavigationData): void;
 }
 
 /**
  * Contract for entry handler.
  */
-export interface Route {
+interface Route {
     route: RegExp;
-    callback: Function;
+    callback: RouteCallback;
 }
 
 /**
  * Contract for entry handler.
  */
-export interface Path {
-    fragment: string;
-    queryString: string;
+export class Resource {
+    private _full: string;
+    constructor(public path: string, public query?: string) {
+        this._full = this.path;
+        if (this.query !== undefined && this.query !== null && this.query !== '') {
+            this._full += '?' + this.query;
+        }
+    }
+    get full(): string {
+        return this._full;
+    }
 }
 
 /**
  * Contract for event handler.
  */
-export interface EventHandler {
+interface EventHandler {
     [index: string]: Function[];
 }
-
-
 
 
 /**
@@ -111,8 +124,7 @@ const PATH_STRIPPER = new RegExp([
 
 // Cached regex for stripping a leading hash/slash and trailing space.
 const ROUTE_STRIPPER = /^[#\/]|\s+$/g;
-// Cached regex for stripping leading and trailing slashes.
-const ROOT_STRIPPER = /^\/{2,}|\/{2,}$/g;
+
 // Cached regex for stripping urls of hash.
 const HASH_STRIPPER = /#.*$/;
 
@@ -121,8 +133,8 @@ class RouteHelper {
 
     /**
      * Escape a regular expression string.
-     * @param  {String} str
-     * @return {String}
+     * @param  {String} str the string to scape
+     * @return {String} the escaped string
      */
     private static _escapeString(str: string): string {
         return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1');
@@ -130,7 +142,7 @@ class RouteHelper {
 
     /**
      * Escape the capturing group by escaping special characters and meaning.
-     * @param  {String} group
+     * @param  {String} group the group to escape
      * @return {String} escaped group.
      */
     private static _escapeGroup(group: string): string {
@@ -139,31 +151,39 @@ class RouteHelper {
 
     /**
      * Get the flags for a regexp from the options.
-     * @param  {Object} options
+     * @param  {Object} opts the options object for building the flags.
      * @return {String} flags.
      */
-    private static _flags(options: Object): string {
-        return options['sensitive'] ? '' : 'i';
+    private static _flags(opts: Object): string {
+        return opts['sensitive'] ? '' : 'i';
     }
 
+    /**
+     * Parse the given uri.
+     * @param  {string} uri the url to parse
+     * @return {Resource} parsed uri
+     */
+    static parseFragment(fragment: string): Resource {
 
-    static removeQueryString(path: string): string {
-        const qsPos = path.lastIndexOf('?');
-        if (qsPos >= 0) {
-            path = path.slice(0, qsPos);
+        if (fragment === '') {
+            return new Resource(fragment);
         }
-        return path;
-    }
 
-    static splitPath(path: string): Path {
-        let fragment = path.replace(/#.*/, '');
-        let queryString = '';
         const qsPos = fragment.indexOf('?');
+
+        let path: string;
+        let query: string;
+
+        fragment = RouteHelper.decodeFragment(fragment).replace(ROUTE_STRIPPER, '');
+
         if (qsPos >= 0) {
-            queryString = fragment.slice(qsPos + 1);
-            fragment = fragment.slice(qsPos);
+            path = fragment.slice(0, qsPos);
+            query = fragment.slice(qsPos + 1);
+        } else {
+            path = fragment;
         }
-        return {fragment, queryString};
+
+        return new Resource(path, query);
     }
 
     /**
@@ -174,7 +194,8 @@ class RouteHelper {
      *  @returns {string} the decoded fragment.
      */
     static decodeFragment(fragment: string): string {
-        return root.decodeURI(fragment.replace(/%25/g, '%2525'));
+        fragment = fragment.replace(/%25/g, '%2525');
+        return _global.decodeURI(fragment);
     }
 
     /**
@@ -345,8 +366,8 @@ export class History {
 
     // Has the history handling already been started?
     private static _started = false;
-    private _location = root.location;
-    private _history = root.history;
+    private _location = _global.location;
+    private _history = _global.history;
     private _handlers: Route[] = [];
     private _eventHandlers: EventHandler = {};
     private _root: string;
@@ -354,7 +375,7 @@ export class History {
     private _wantsHashChange: boolean;
     private _wantsPushState: boolean;
     private _usePushState: boolean;
-    private _fragment: string;
+    private _fragment: Resource;
 
     constructor() {
         this._checkUrl = this._checkUrl.bind(this);
@@ -407,7 +428,7 @@ export class History {
             return null;
         }
         for (let i = 0; i < callbacks.length; i++) {
-            let respIt = callbacks[i].apply(this, restParams);
+            const respIt = callbacks[i].apply(this, restParams);
             // check if some listener cancelled the event.
             if (respIt === false) {
                 return false;
@@ -420,54 +441,61 @@ export class History {
      * Are we at the app root?
      * @returns {boolean} if we are in the root.
      */
-    atRoot(): boolean {
+    isAtRoot(): boolean {
         const path = this._location.pathname.replace(/[^\/]$/, '$&/');
-        return path === this._root && !this.getSearch();
+        return path === this._root && !this._location.search;
     }
 
     /**
-     * Obtain the search.
-     * @returns {string} the search.
+     *  Get the pathname and search params, without the root.
+     *  @returns {Resource} The path.
      */
-    getSearch(): string {
-        const match = this._location.href.replace(/#.*/, '').match(/\?.+/);
-        return match ? match[0] : '';
+    getCurrentPath(): Resource {
+
+        let path = RouteHelper.decodeFragment(this._location.pathname).slice(this._root.length - 1);
+
+        if (path.charAt(0) === '/') {
+            path = path.slice(1);
+        }
+
+        const query = _global.decodeURIComponent(this._location.search.slice(1));
+
+        let full = path;
+
+        if (query) {
+            full += '?' + query;
+        }
+
+        return new Resource(path, query);
     }
 
     /**
      * Gets the true hash value. Cannot use location.hash directly due to bug
      * in Firefox where location.hash will always be decoded.
-     * @returns {string} The hash.
+     * @returns {Resource} The hash.
      */
-    getHash(): string {
+    getCurrentHash(): Resource {
         const match = this._location.href.match(/#(.*)$/);
-        return match ? match[1] : '';
-    }
-
-    /**
-     *  Get the pathname and search params, without the root.
-     *  @returns {string} The path.
-     */
-    getPath(): string {
-        const path = RouteHelper.decodeFragment(this._location.pathname + this.getSearch()).slice(this._root.length - 1);
-        return path.charAt(0) === '/' ? path.slice(1) : path;
+        const path = match ? match[1] : '';
+        return RouteHelper.parseFragment(path);
     }
 
     /**
      * Get the cross-browser normalized URL fragment, either from the URL,
      * the hash, or the override.
      * @param {string} fragment The url fragment
-     * @returns {string} The fragment.
+     * @returns {Resource} The fragment.
      */
+    obtainFragment(fragment?: string): Resource {
 
-    getFragment(fragment?: string): string {
         if (fragment === undefined || fragment === null) {
             if (this._usePushState || !this._wantsHashChange) {
-                return this.getPath();
+                return this.getCurrentPath();
             }
-            return this.getHash();
+            return this.getCurrentHash();
         }
-        return fragment = RouteHelper.decodeFragment(fragment).replace(ROUTE_STRIPPER, '');
+
+        return RouteHelper.parseFragment(fragment);
     }
 
     /**
@@ -491,39 +519,39 @@ export class History {
         this._hasPushState = !!(this._history && this._history.pushState);
         this._usePushState = this._wantsPushState && this._hasPushState;
 
-        this._fragment = this.getFragment();
+        this._fragment = this.obtainFragment();
 
         // Normalize root to always include a leading and trailing slash.
-        this._root = ('/' + this._root + '/').replace(ROOT_STRIPPER, '/');
+        this._root = ('/' + this._root + '/').replace(/^\/{2,}|\/{2,}$/g, '/');
 
         // Transition from hashChange to pushState or vice versa if both are
         // requested.
         if (this._wantsHashChange && this._wantsPushState) {
 
-            const isAtRoot = this.atRoot();
+            const isAtRoot = this.isAtRoot();
 
             // If we've started off with a route from a `pushState`-enabled
             // browser, but we're currently in a browser that doesn't support it...
             if (!this._hasPushState && !isAtRoot) {
 
                 const rootAux = this._root.slice(0, -1) || '/';
-                this._location.replace(rootAux + '#' + this.getPath());
+                this._location.replace(rootAux + '#' + this.getCurrentPath().full);
                 // Return immediately as browser will do redirect to new url
                 return true;
 
                 // Or if we've started out with a hash-based route, but we're currently
                 // in a browser where it could be `pushState`-based instead...
             } else if (this._hasPushState && isAtRoot) {
-                this.navigate(this.getHash(), null, { replace: true, trigger: false });
+                this.navigate(this.getCurrentHash().full, null, { replace: true, trigger: false });
             }
         }
 
         // Depending on whether we're using pushState or hashes, and whether
         // 'onhashchange' is supported, determine how we check the URL state.
         if (this._usePushState) {
-            addEventListener('popstate', this._checkUrl, false);
+            _global.addEventListener('popstate', this._checkUrl, false);
         } else if (this._wantsHashChange) {
-            addEventListener('hashchange', this._checkUrl, false);
+            _global.addEventListener('hashchange', this._checkUrl, false);
         }
 
         if (!options.silent) {
@@ -538,8 +566,8 @@ export class History {
      * but possibly useful for unit testing Routers.
      */
     stop() {
-        root.removeEventListener('popstate', this._checkUrl, false);
-        root.removeEventListener('hashchange', this._checkUrl, false);
+        _global.removeEventListener('popstate', this._checkUrl, false);
+        _global.removeEventListener('hashchange', this._checkUrl, false);
         History._started = false;
     }
 
@@ -547,7 +575,7 @@ export class History {
      * Add a route to be tested when the fragment changes. Routes added later
      * may override previous routes.
      * @param {RegExp} rRoute The route.
-     * @param {Function} callback Method to be executed.
+     * @param {RouteCallback} callback Method to be executed.
      */
     _addHandler(rRoute: RegExp, callback: RouteCallback) {
         this._handlers.unshift({ route: rRoute, callback: callback });
@@ -561,8 +589,8 @@ export class History {
      * route callback be fired (not usually desirable), or `replace: true`, if
      * you wish to modify the current URL without adding an entry to the history.
      * @param {string} fragment Fragment to navigate to
-     * @param {Object=} message Options object.
-     * @param {Object=} options Options object.
+     * @param {any=} message The message.
+     * @param {NavigationOptions=} options Options object.
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      */
     navigate(fragment: string, message?: any, options: NavigationOptions = {}): boolean {
@@ -572,21 +600,23 @@ export class History {
         }
 
         // Normalize the fragment.
-        fragment = this.getFragment(fragment);
+        const resource = this.obtainFragment(fragment);
+
+        this._fragment = resource;
 
         // Don't include a trailing slash on the root.
         let rootAux = this._root;
 
-        if (fragment === '' || fragment.charAt(0) === '?') {
+        if (resource.path === '') {
             rootAux = rootAux.slice(0, -1) || '/';
         }
 
-        const url = rootAux + fragment;
+        let full = resource.full;
 
-        // Strip the hash and decode for matching.
-        fragment = fragment.replace(HASH_STRIPPER, '');
+        const url = rootAux + full;
 
-        this._fragment = fragment;
+        // Strip the hash.
+        full = full.replace(HASH_STRIPPER, '');
 
         // If pushState is available, we use it to set the fragment as a real URL.
         if (this._usePushState) {
@@ -594,7 +624,7 @@ export class History {
             // If hash changes haven't been explicitly disabled, update the hash
             // fragment to store history.
         } else if (this._wantsHashChange) {
-            this._updateHash(fragment, options.replace);
+            this._updateHash(full, options.replace);
             // If you've told us that you explicitly don't want fallback hashchange-
             // based history, then `navigate` becomes a page refresh.
         } else {
@@ -602,16 +632,15 @@ export class History {
         }
 
         if (options.trigger !== false) {
-            return this._loadUrl(fragment, message);
+            return this._loadUrl(full, message);
         }
 
         return false;
     }
 
     /**
-     * Checks the current URL to see if it has changed, and if it has,
-     * calls `loadUrl`.
-     * @returns {boolean} true if navigated, false otherwise.
+     * Delegates to `_loadUrl`.
+     * @returns {boolean} true if loaded, false otherwise.
      * @private
      */
     private _checkUrl(): boolean {
@@ -623,17 +652,16 @@ export class History {
      * match, returns `true`. If no defined routes matches the fragment,
      * returns `false`.
      * @param {string} fragment E.g.: 'user/pepito'
-     * @param {Object} message E.g.: {msg: 'Password changed', type: 'success'}
+     * @param {any} message E.g.: {msg: 'Password changed', type: 'success'}
      * @returns {boolean} true if the fragment matched some handler, false otherwise.
      * @private
      */
     private _loadUrl(fragment?: string, message?: any): boolean {
-        this._fragment = this.getFragment(fragment);
-        fragment = RouteHelper.removeQueryString(this._fragment);
+        this._fragment = this.obtainFragment(fragment);
         const handlersLength = this._handlers.length;
         for (let i = 0; i < handlersLength; i++) {
             const handler = this._handlers[i];
-            if (handler.route.test(fragment)) {
+            if (handler.route.test(this._fragment.path)) {
                 handler.callback(this._fragment, message);
                 return true;
             }
@@ -678,7 +706,7 @@ export class Router {
      * Constructor for the router.
      * Routers map faux-URLs to actions, and fire events when routes are
      * matched. Creating a new one sets its `routes` hash, if not set statically.
-     * @param {Object} options options.root is a string indicating the site's context, defaults to '/'.
+     * @param {RouterOptions} options options.root is a string indicating the site's context, defaults to '/'.
      * @constructor
      */
     constructor(options: RouterOptions = {}) {
@@ -686,21 +714,19 @@ export class Router {
     }
 
     /**
-     * Manually bind a single named route to a callback.
-     * The route argument may be a routing string or regular expression, each matching capture
-     * from the route or regular expression will be passed as an argument to the onCallback.
-     * @param {Object} handler The handler entry.
+     * Manually bind a single route to a callback.
+     * @param {Handler} handler The handler entry.
      * @returns {Router} this router
      */
-    addHandler(handler: RouteHandler) {
+    addHandler(handler: Handler): Router {
 
         const rRoute = RouteHelper.stringToRegexp(handler.route);
 
-        Router.history._addHandler(rRoute, (fragment, message) => {
+        Router.history._addHandler(rRoute, (resource, message) => {
 
-            const args: NavigationData = Router._extractParameters(rRoute, fragment);
+            const params = Router._extractParameters(rRoute, resource.path);
 
-            const newRouteData: NavigationData = { fragment, params: args.params, queryString: args.queryString, message, handler };
+            const newRouteData: NavigationData = { path: resource.path, query: resource.query, params, message, handler };
 
             let next = Router.history.trigger('route:before', this, newRouteData, this._oldRouteData);
 
@@ -722,7 +748,6 @@ export class Router {
             }
 
             handler.activate.call(handler, newRouteData, this._oldRouteData);
-
             this.trigger('route:after', newRouteData, this._oldRouteData);
             Router.history.trigger('route:after', this, newRouteData, this._oldRouteData);
 
@@ -733,48 +758,40 @@ export class Router {
     }
 
     /**
-     * Given a route, and a URL fragment that it matches, return the array of
-     * extracted decoded parameters. Empty or unmatched parameters will be
-     * treated as `null` to normalize cross-browser behavior.
+     * Given a route, and a path that it matches, return the object of
+     * extracted decoded parameters.
      * @param {RegExp} route The alias
-     * @param {string} fragment The url part
-     * @returns {string[]} the extracted parameters
+     * @param {string} path The uri's path part.
+     * @returns {NavigationParams} the extracted parameters
      * @private
      */
-    private static _extractParameters(route: RegExp, fragment: string): NavigationData {
-        const qsPos = fragment.indexOf('?');
-        let queryString = '';
-        if (qsPos >= 0) {
-            queryString = fragment.slice(qsPos + 1);
-            fragment = fragment.slice(0, qsPos);
+    private static _extractParameters(route: RegExp, path: string): NavigationParams {
+        const params: NavigationParams = {};
+        const result = route.exec(path);
+        if (!result) {
+            return params;
         }
-        const obj: NavigationData = {
-            params: {},
-            queryString,
-            fragment
-        };
-        const args = route.exec(fragment).slice(1);
+        const args = result.slice(1);
         const keys = (<any>route).keys;
         for (let i = 0; i < args.length; i++) {
-            obj.params[keys[i].name] = root.decodeURIComponent(args[i]);
+            params[keys[i].name] = _global.decodeURIComponent(args[i]);
         }
-        return obj;
+        return params;
     }
 
     /**
      * Bind all defined routes to `Router.history`. We have to reverse the
      * order of the routes here to support behavior where the most general
      * routes can be defined at the bottom of the route map.
-     * @param {string} routes list of routes.
+     * @param {RouteHandler[]} handlers list of handlers.
      * @private
      */
-    private _bindHandlers(routes: RouteHandler[]) {
-        if (!routes) {
+    private _bindHandlers(handlers: Handler[]) {
+        if (!handlers) {
             return;
         }
-        const routesN = routes.length - 1;
-        for (let i = routesN; i >= 0; i--) {
-            this.addHandler(routes[i]);
+        for (let i = handlers.length - 1; i >= 0; i--) {
+            this.addHandler(handlers[i]);
         }
     }
 }

@@ -1,13 +1,31 @@
 /**
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
-var root = typeof window !== 'undefined' ? window : global;
+var _global = typeof global === 'undefined' ? window : global;
+var Resource = (function () {
+    function Resource(path, query) {
+        this.path = path;
+        this.query = query;
+        this._full = this.path;
+        if (this.query !== undefined && this.query !== null && this.query !== '') {
+            this._full += '?' + this.query;
+        }
+    }
+    Object.defineProperty(Resource.prototype, "full", {
+        get: function () {
+            return this._full;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return Resource;
+})();
+exports.Resource = Resource;
 var PATH_STRIPPER = new RegExp([
     '(\\\\.)',
     '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
 ].join('|'), 'g');
 var ROUTE_STRIPPER = /^[#\/]|\s+$/g;
-var ROOT_STRIPPER = /^\/{2,}|\/{2,}$/g;
 var HASH_STRIPPER = /#.*$/;
 var RouteHelper = (function () {
     function RouteHelper() {
@@ -18,28 +36,29 @@ var RouteHelper = (function () {
     RouteHelper._escapeGroup = function (group) {
         return group.replace(/([=!:$\/()])/g, '\\$1');
     };
-    RouteHelper._flags = function (options) {
-        return options['sensitive'] ? '' : 'i';
+    RouteHelper._flags = function (opts) {
+        return opts['sensitive'] ? '' : 'i';
     };
-    RouteHelper.removeQueryString = function (path) {
-        var qsPos = path.lastIndexOf('?');
-        if (qsPos >= 0) {
-            path = path.slice(0, qsPos);
+    RouteHelper.parseFragment = function (fragment) {
+        if (fragment === '') {
+            return new Resource(fragment);
         }
-        return path;
-    };
-    RouteHelper.splitPath = function (path) {
-        var fragment = path.replace(/#.*/, '');
-        var queryString = '';
         var qsPos = fragment.indexOf('?');
+        var path;
+        var query;
+        fragment = RouteHelper.decodeFragment(fragment).replace(ROUTE_STRIPPER, '');
         if (qsPos >= 0) {
-            queryString = fragment.slice(qsPos + 1);
-            fragment = fragment.slice(qsPos);
+            path = fragment.slice(0, qsPos);
+            query = fragment.slice(qsPos + 1);
         }
-        return { fragment: fragment, queryString: queryString };
+        else {
+            path = fragment;
+        }
+        return new Resource(path, query);
     };
     RouteHelper.decodeFragment = function (fragment) {
-        return root.decodeURI(fragment.replace(/%25/g, '%2525'));
+        fragment = fragment.replace(/%25/g, '%2525');
+        return _global.decodeURI(fragment);
     };
     RouteHelper._parse = function (str) {
         var tokens = [];
@@ -147,8 +166,8 @@ var RouteHelper = (function () {
 })();
 var History = (function () {
     function History() {
-        this._location = root.location;
-        this._history = root.history;
+        this._location = _global.location;
+        this._history = _global.history;
         this._handlers = [];
         this._eventHandlers = {};
         this._checkUrl = this._checkUrl.bind(this);
@@ -192,30 +211,35 @@ var History = (function () {
         }
         return true;
     };
-    History.prototype.atRoot = function () {
+    History.prototype.isAtRoot = function () {
         var path = this._location.pathname.replace(/[^\/]$/, '$&/');
-        return path === this._root && !this.getSearch();
+        return path === this._root && !this._location.search;
     };
-    History.prototype.getSearch = function () {
-        var match = this._location.href.replace(/#.*/, '').match(/\?.+/);
-        return match ? match[0] : '';
+    History.prototype.getCurrentPath = function () {
+        var path = RouteHelper.decodeFragment(this._location.pathname).slice(this._root.length - 1);
+        if (path.charAt(0) === '/') {
+            path = path.slice(1);
+        }
+        var query = _global.decodeURIComponent(this._location.search.slice(1));
+        var full = path;
+        if (query) {
+            full += '?' + query;
+        }
+        return new Resource(path, query);
     };
-    History.prototype.getHash = function () {
+    History.prototype.getCurrentHash = function () {
         var match = this._location.href.match(/#(.*)$/);
-        return match ? match[1] : '';
+        var path = match ? match[1] : '';
+        return RouteHelper.parseFragment(path);
     };
-    History.prototype.getPath = function () {
-        var path = RouteHelper.decodeFragment(this._location.pathname + this.getSearch()).slice(this._root.length - 1);
-        return path.charAt(0) === '/' ? path.slice(1) : path;
-    };
-    History.prototype.getFragment = function (fragment) {
+    History.prototype.obtainFragment = function (fragment) {
         if (fragment === undefined || fragment === null) {
             if (this._usePushState || !this._wantsHashChange) {
-                return this.getPath();
+                return this.getCurrentPath();
             }
-            return this.getHash();
+            return this.getCurrentHash();
         }
-        return fragment = RouteHelper.decodeFragment(fragment).replace(ROUTE_STRIPPER, '');
+        return RouteHelper.parseFragment(fragment);
     };
     History.prototype.start = function (options) {
         if (options === void 0) { options = {}; }
@@ -228,24 +252,24 @@ var History = (function () {
         this._wantsPushState = !!options.pushState;
         this._hasPushState = !!(this._history && this._history.pushState);
         this._usePushState = this._wantsPushState && this._hasPushState;
-        this._fragment = this.getFragment();
-        this._root = ('/' + this._root + '/').replace(ROOT_STRIPPER, '/');
+        this._fragment = this.obtainFragment();
+        this._root = ('/' + this._root + '/').replace(/^\/{2,}|\/{2,}$/g, '/');
         if (this._wantsHashChange && this._wantsPushState) {
-            var isAtRoot = this.atRoot();
+            var isAtRoot = this.isAtRoot();
             if (!this._hasPushState && !isAtRoot) {
                 var rootAux = this._root.slice(0, -1) || '/';
-                this._location.replace(rootAux + '#' + this.getPath());
+                this._location.replace(rootAux + '#' + this.getCurrentPath().full);
                 return true;
             }
             else if (this._hasPushState && isAtRoot) {
-                this.navigate(this.getHash(), null, { replace: true, trigger: false });
+                this.navigate(this.getCurrentHash().full, null, { replace: true, trigger: false });
             }
         }
         if (this._usePushState) {
-            addEventListener('popstate', this._checkUrl, false);
+            _global.addEventListener('popstate', this._checkUrl, false);
         }
         else if (this._wantsHashChange) {
-            addEventListener('hashchange', this._checkUrl, false);
+            _global.addEventListener('hashchange', this._checkUrl, false);
         }
         if (!options.silent) {
             return this._loadUrl();
@@ -253,8 +277,8 @@ var History = (function () {
         return false;
     };
     History.prototype.stop = function () {
-        root.removeEventListener('popstate', this._checkUrl, false);
-        root.removeEventListener('hashchange', this._checkUrl, false);
+        _global.removeEventListener('popstate', this._checkUrl, false);
+        _global.removeEventListener('hashchange', this._checkUrl, false);
         History._started = false;
     };
     History.prototype._addHandler = function (rRoute, callback) {
@@ -265,25 +289,26 @@ var History = (function () {
         if (!History._started) {
             return false;
         }
-        fragment = this.getFragment(fragment);
+        var resource = this.obtainFragment(fragment);
+        this._fragment = resource;
         var rootAux = this._root;
-        if (fragment === '' || fragment.charAt(0) === '?') {
+        if (resource.path === '') {
             rootAux = rootAux.slice(0, -1) || '/';
         }
-        var url = rootAux + fragment;
-        fragment = fragment.replace(HASH_STRIPPER, '');
-        this._fragment = fragment;
+        var full = resource.full;
+        var url = rootAux + full;
+        full = full.replace(HASH_STRIPPER, '');
         if (this._usePushState) {
             this._history[options.replace ? 'replaceState' : 'pushState'](null, null, url);
         }
         else if (this._wantsHashChange) {
-            this._updateHash(fragment, options.replace);
+            this._updateHash(full, options.replace);
         }
         else {
             return this._location.assign(url);
         }
         if (options.trigger !== false) {
-            return this._loadUrl(fragment, message);
+            return this._loadUrl(full, message);
         }
         return false;
     };
@@ -291,12 +316,11 @@ var History = (function () {
         return this._loadUrl();
     };
     History.prototype._loadUrl = function (fragment, message) {
-        this._fragment = this.getFragment(fragment);
-        fragment = RouteHelper.removeQueryString(this._fragment);
+        this._fragment = this.obtainFragment(fragment);
         var handlersLength = this._handlers.length;
         for (var i = 0; i < handlersLength; i++) {
             var handler = this._handlers[i];
-            if (handler.route.test(fragment)) {
+            if (handler.route.test(this._fragment.path)) {
                 handler.callback(this._fragment, message);
                 return true;
             }
@@ -328,9 +352,9 @@ var Router = (function () {
     Router.prototype.addHandler = function (handler) {
         var _this = this;
         var rRoute = RouteHelper.stringToRegexp(handler.route);
-        Router.history._addHandler(rRoute, function (fragment, message) {
-            var args = Router._extractParameters(rRoute, fragment);
-            var newRouteData = { fragment: fragment, params: args.params, queryString: args.queryString, message: message, handler: handler };
+        Router.history._addHandler(rRoute, function (resource, message) {
+            var params = Router._extractParameters(rRoute, resource.path);
+            var newRouteData = { path: resource.path, query: resource.query, params: params, message: message, handler: handler };
             var next = Router.history.trigger('route:before', _this, newRouteData, _this._oldRouteData);
             if (next === false) {
                 return;
@@ -352,32 +376,25 @@ var Router = (function () {
         });
         return this;
     };
-    Router._extractParameters = function (route, fragment) {
-        var qsPos = fragment.indexOf('?');
-        var queryString = '';
-        if (qsPos >= 0) {
-            queryString = fragment.slice(qsPos + 1);
-            fragment = fragment.slice(0, qsPos);
+    Router._extractParameters = function (route, path) {
+        var params = {};
+        var result = route.exec(path);
+        if (!result) {
+            return params;
         }
-        var obj = {
-            params: {},
-            queryString: queryString,
-            fragment: fragment
-        };
-        var args = route.exec(fragment).slice(1);
+        var args = result.slice(1);
         var keys = route.keys;
         for (var i = 0; i < args.length; i++) {
-            obj.params[keys[i].name] = root.decodeURIComponent(args[i]);
+            params[keys[i].name] = _global.decodeURIComponent(args[i]);
         }
-        return obj;
+        return params;
     };
-    Router.prototype._bindHandlers = function (routes) {
-        if (!routes) {
+    Router.prototype._bindHandlers = function (handlers) {
+        if (!handlers) {
             return;
         }
-        var routesN = routes.length - 1;
-        for (var i = routesN; i >= 0; i--) {
-            this.addHandler(routes[i]);
+        for (var i = handlers.length - 1; i >= 0; i--) {
+            this.addHandler(handlers[i]);
         }
     };
     return Router;
