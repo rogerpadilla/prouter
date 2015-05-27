@@ -5,7 +5,7 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-Web applications often provide linkable, bookmarkable, shareable URLs for important locations in the app. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
+In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within an app. Use the Router to update the browser URL whenever the user reaches a new "place" in your app that they might want to bookmark or share. Conversely, the Router detects changes to the URL, and can tell your application exactly where you are now. Until recently, hash fragments (#page) were used to provide these permalinks, but with the arrival of the History API, it's now possible to use standard URLs (/page). prouter provides methods for routing client-side pages, and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), the Router handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
 
 ### Why prouter?
 
@@ -105,6 +105,9 @@ appRouter.addHandler({
 });
 
 // Activate routers (default options used for this example).
+// During page load, after your application has finished creating all of
+// its routers, be sure to call _Router.history.start()_ or
+// _Router.history.start(options)_ to enable routers.
 Router.history.start({root: '/', hashChange: true, pushState: false, silent: false});
 
 // Client-side redirect to the 'items/:id' handler and send a flash message.
