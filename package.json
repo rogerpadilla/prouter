@@ -39,6 +39,7 @@
     "karma-firefox-launcher": "^0.1.6",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-qunit": "^0.1.4",
-    "qunitjs": "^1.18.0"
+    "qunitjs": "^1.18.0",
+    "run-sequence": "^1.1.0"
   }
 }
