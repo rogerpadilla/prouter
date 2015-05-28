@@ -1,0 +1,24 @@
+{
+  "rules": {
+    "class-name": true,
+    "curly": true,
+    "indent": true,
+    "jsdoc-format": true,
+    "no-arg": true,
+    "no-bitwise": true,
+    "no-construct": true,
+    "no-debugger": true,
+    "no-duplicate-key": true,
+    "no-duplicate-variable": true,
+    "no-empty": true,
+    "no-eval": true,
+    "no-trailing-comma": true,
+    "no-unreachable": true,
+    "no-unused-expression": true,
+    "no-use-before-declare": true,
+    "quotemark": true,
+    "semicolon": true,
+    "triple-equals": true,
+    "variable-name": "allow-leading-underscore"
+  }
+}

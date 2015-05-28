@@ -12,6 +12,7 @@ var wrap = require('gulp-wrap-umd');
 var runSequence = require('run-sequence');
 
 var tsConfig = require('./tsconfig.json');
+var tslintConfig = require('./tslint.json');
 
 var mainFileName = 'prouter';
 var mainFile = 'src/' + mainFileName + '.js';
@@ -36,7 +37,7 @@ gulp.task('coveralls', ['test'], function() {
 });
 
 gulp.task('clean', function(done) {
-    del(['dist/**/*'], done);
+    del(['dist/**/*', 'src/*', '!src/*.ts'], done);
 });
 
 gulp.task('script', function () {
@@ -58,41 +59,16 @@ gulp.task('script:minify', ['script'], function() {
 
 gulp.task('lint', function() {
     return gulp.src(tsConfig.filesGlob)
-        .pipe(tslint({
-            configuration: {
-                rules: {
-                    'class-name': true,
-                    curly: true,
-                    indent: true,
-                    'jsdoc-format': true,
-                    'no-arg': true,
-                    'no-bitwise': true,
-                    'no-construct': true,
-                    'no-debugger': true,
-                    'no-duplicate-key': true,
-                    'no-duplicate-variable': true,
-                    'no-empty': true,
-                    'no-eval': true,
-                    'no-trailing-comma': true,
-                    'no-unreachable': true,
-                    'no-unused-expression': true,
-                    'no-use-before-declare': true,
-                    quotemark: true,
-                    semicolon: true,
-                    'triple-equals': true,
-                    'variable-name': 'allow-leading-underscore'
-                }
-            }
-        }))
+        .pipe(tslint({configuration: tslintConfig}))
         .pipe(tslint.report('full'));
-});
-
-gulp.task('watch', ['build'], function() {
-    gulp.watch([mainFile, 'test/*.spec.js'], ['build']);
 });
 
 gulp.task('build', function(done) {
     runSequence(['lint', 'script:minify'], 'test', done);
+});
+
+gulp.task('watch', ['build'], function() {
+    gulp.watch([mainFile, 'test/*.spec.js'], ['build']);
 });
 
 gulp.task('default', ['watch']);
