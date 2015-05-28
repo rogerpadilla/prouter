@@ -11,14 +11,13 @@
 
 var _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
-var _ALLOWED_MODES = ['node', 'hash', 'history'];
+var _MODES = ['node', 'hash', 'history'];
 var _DEF_OPTIONS = { mode: 'node', keys: true, root: '/', rerouting: true };
 var _DEF_OPTIONS_STR = JSON.stringify(_DEF_OPTIONS);
 var _OPTIONAL_PARAM = /\((.*?)\)/g;
 var _NAMED_PARAM = /(\(\?)?:\w+/g;
 var _SPLAT_PARAM = /\*\w+/g;
 var _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
-var _DEFAULT_ROUTE = /.*/;
 var RouteHelper = (function () {
     function RouteHelper() {
     }
@@ -94,7 +93,7 @@ var RoutingLevel = (function () {
         var re;
         if (typeof path === 'function') {
             callback = path;
-            re = _DEFAULT_ROUTE;
+            re = /.*/;
         }
         else {
             keys = RouteHelper._getRouteKeys(path);

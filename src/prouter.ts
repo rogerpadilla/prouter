@@ -52,16 +52,15 @@ declare const global: any;
 const _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
 
-const _ALLOWED_MODES = ['node', 'hash', 'history'];
+const _MODES = ['node', 'hash', 'history'];
 const _DEF_OPTIONS: Options = { mode: 'node', keys: true, root: '/', rerouting: true };
 const _DEF_OPTIONS_STR = JSON.stringify(_DEF_OPTIONS);
 
-// parse regular expression
+// Caches for common regexp.
 const _OPTIONAL_PARAM = /\((.*?)\)/g;
 const _NAMED_PARAM = /(\(\?)?:\w+/g;
 const _SPLAT_PARAM = /\*\w+/g;
 const _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
-const _DEFAULT_ROUTE = /.*/;
 
 
 class RouteHelper {
@@ -146,9 +145,10 @@ class RoutingLevel {
         let keys: string[];
         let re: RegExp;
 
+        // If default route.
         if (typeof path === 'function') {
             callback = path;
-            re = _DEFAULT_ROUTE;
+            re = /.*/;
         } else {
             keys = RouteHelper._getRouteKeys(path);
             re = RouteHelper._routeToRegExp(path);
