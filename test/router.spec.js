@@ -361,7 +361,6 @@ describe("Routing", function() {
     Router.add(function() {
       done();
     });
-
     Router.route('/about');
   });
 
