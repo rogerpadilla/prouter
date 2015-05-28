@@ -20,7 +20,10 @@ class RouteHelper {
 
     static _getRouteKeys(path: string): Object[] {
         const keys = path.match(/:([^\/]+)/g);
-        for (let i = 0, l = keys ? keys.length : 0; i < l; i++) {
+        if (!keys) {
+            return keys;
+        }
+        for (let i = 0; i < keys.length; i++) {
             keys[i] = keys[i].replace(/[:\(\)]/g, '');
         }
         return keys;
@@ -85,13 +88,8 @@ class RouteHelper {
 
 class RoutingLevel {
 
-    _routes: any[];
-    _options: any;
-
-    constructor() {
-        this._routes = [];
-        this._options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
-    }
+    _routes: any[] = [];
+    _options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
 
     add(path: any, callback?: Function, options?: any): RoutingLevel {
 
@@ -120,12 +118,12 @@ class RoutingLevel {
 
     remove(alias: string): RoutingLevel {
 
-        for (let i = this._routes.length - 1; i > -1; i--) {
+        for (let i = this._routes.length - 1; i >= 0; i--) {
             const r = this._routes[i];
             if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
                 this._routes.splice(i, 1);
             } else if (r._routes.length > 0) {
-                for (let j = r._routes.length - 1; j > -1; j--) {
+                for (let j = r._routes.length - 1; j >= 0; j--) {
                     r._routes[j].remove(alias);
                 }
             }

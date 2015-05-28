@@ -23,7 +23,10 @@ var RouteHelper = (function () {
     }
     RouteHelper._getRouteKeys = function (path) {
         var keys = path.match(/:([^\/]+)/g);
-        for (var i = 0, l = keys ? keys.length : 0; i < l; i++) {
+        if (!keys) {
+            return keys;
+        }
+        for (var i = 0; i < keys.length; i++) {
             keys[i] = keys[i].replace(/[:\(\)]/g, '');
         }
         return keys;
@@ -105,13 +108,13 @@ var RoutingLevel = (function () {
         return this;
     };
     RoutingLevel.prototype.remove = function (alias) {
-        for (var i = this._routes.length - 1; i > -1; i--) {
+        for (var i = this._routes.length - 1; i >= 0; i--) {
             var r = this._routes[i];
             if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
                 this._routes.splice(i, 1);
             }
             else if (r._routes.length > 0) {
-                for (var j = r._routes.length - 1; j > -1; j--) {
+                for (var j = r._routes.length - 1; j >= 0; j--) {
                     r._routes[j].remove(alias);
                 }
             }
