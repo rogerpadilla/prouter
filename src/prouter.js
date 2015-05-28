@@ -4,17 +4,24 @@
 var _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
 var Resource = (function () {
-    function Resource(path, query) {
+    function Resource(path, queryString) {
         this.path = path;
-        this.query = query;
         this._full = this.path;
-        if (this.query !== undefined && this.query !== null && this.query !== '') {
-            this._full += '?' + this.query;
+        if (queryString !== undefined && queryString !== null && queryString !== '') {
+            this._full += '?' + queryString;
+            this._query = RouteHelper.parseQuery(queryString);
         }
     }
     Object.defineProperty(Resource.prototype, "full", {
         get: function () {
             return this._full;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Resource.prototype, "query", {
+        get: function () {
+            return this._query;
         },
         enumerable: true,
         configurable: true
@@ -28,9 +35,6 @@ var PATH_STRIPPER = new RegExp([
 ].join('|'), 'g');
 var ROUTE_STRIPPER = /^[#\/]|\s+$/g;
 var HASH_STRIPPER = /#.*$/;
-var isArray = Array.isArray || function (obj) {
-    return Object.prototype.toString.call(obj) === '[object Array]';
-};
 var RouteHelper = (function () {
     function RouteHelper() {
     }
@@ -360,7 +364,7 @@ var Router = (function () {
         this.trigger = History.prototype.trigger;
         this.on = History.prototype.on;
         this.off = History.prototype.off;
-        this._bindHandlers(isArray(options) ? options : options.map);
+        this._bindHandlers(Array.isArray(options) ? options : options.map);
     }
     Router.prototype._bindHandlers = function (handlers) {
         if (!handlers) {

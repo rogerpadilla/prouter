@@ -22,7 +22,7 @@ export interface NavigationParams {
 export interface NavigationData {
     path: string;
     params: NavigationParams;
-    query: string;
+    query: Object;
     message?: any;
     handler?: Handler;
 }
@@ -81,14 +81,19 @@ interface Route {
  */
 export class Resource {
     private _full: string;
-    constructor(public path: string, public query?: string) {
+    private _query: Object;
+    constructor(public path: string, queryString?: string) {
         this._full = this.path;
-        if (this.query !== undefined && this.query !== null && this.query !== '') {
-            this._full += '?' + this.query;
+        if (queryString !== undefined && queryString !== null && queryString !== '') {
+            this._full += '?' + queryString;
+            this._query = RouteHelper.parseQuery(queryString);
         }
     }
     get full(): string {
         return this._full;
+    }
+    get query(): Object {
+        return this._query;
     }
 }
 
@@ -122,10 +127,6 @@ const ROUTE_STRIPPER = /^[#\/]|\s+$/g;
 
 // Cached regex for stripping urls of hash.
 const HASH_STRIPPER = /#.*$/;
-
-const isArray = Array.isArray || function(obj: any): boolean {
-    return Object.prototype.toString.call(obj) === '[object Array]';
-};
 
 
 class RouteHelper {
@@ -719,7 +720,7 @@ export class Router {
      * @constructor
      */
     constructor(options: any = {}) {
-        this._bindHandlers(isArray(options) ? options : options.map);
+        this._bindHandlers(Array.isArray(options) ? options : options.map);
     }
 
     /**

@@ -68,7 +68,7 @@ var appRouter = new Router({
                 // The value for the parameter 'paramB'.
                 console.log(newRouteData.params.paramB);
                 console.log(newRouteData.path);
-                // The query-string (search).
+                // The query (parsed as object).
                 console.log(newRouteData.query);
                 // The flash message (if any).
                 console.log(newRouteData.message);

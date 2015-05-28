@@ -153,7 +153,7 @@
         var router = new Router([{
             route: 'query/*',
             activate: function(newRouteData) {
-                equal(newRouteData.query, 'a=b');
+                equal(newRouteData.query.a, 'b');
                 equal(newRouteData.params['0'], 'test');
             }
         }]);
@@ -161,7 +161,6 @@
         var navigated = Router.history.navigate('query/test?a=b');
         ok(navigated);
     });
-
 
     test('route precedence via navigate', 2, function() {
         var val;
@@ -183,8 +182,7 @@
         equal(val, 100);
     });
 
-
-    test('event parameter.', 4, function() {
+    test('message parameter.', 1, function() {
         var message = {
             type: 'success',
             msg: 'Item saved'
@@ -192,16 +190,10 @@
         var router = new Router([{
             route: 'items/:id',
             activate: function(newRouteData) {
-                equal(newRouteData.path, 'items/a12b');
-                equal(newRouteData.params.id, 'a12b');
-                equal(newRouteData.query, 'param1=val1&param2=val2');
                 strictEqual(newRouteData.message, message);
             }
         }]);
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
+        Router.history.start();
         Router.history.navigate('items/a12b?param1=val1&param2=val2', message);
     });
 
@@ -219,8 +211,7 @@
         notOk(navigated);
     });
 
-
-    test('query string.', 3, function() {
+    test('query string.', 4, function() {
         var message = {
             msg: 'Password changed',
             type: 'success'
@@ -228,7 +219,8 @@
         var router = new Router([{
             route: 'login',
             activate: function(newRouteData) {
-                strictEqual(newRouteData.query, 'param1=val1&param2=val2');
+                strictEqual(newRouteData.query.param1, 'val1');
+                strictEqual(newRouteData.query.param2, 'val2');
                 strictEqual(newRouteData.path, 'login');
                 deepEqual(newRouteData.message, message);
             }
@@ -240,7 +232,7 @@
         Router.history.navigate('login?param1=val1&param2=val2', message);
     });
 
-    test('use implicit callback if none provided', 2, function() {
+    test('use implicit callback if none provided', 3, function() {
         var router = new Router();
         Router.history.start();
         router.add({
@@ -249,6 +241,9 @@
                 equal(newRouteData.path, 'implicit');
                 equal(newRouteData.params.any, 'implicit');
             }
+        });
+        Router.history.on('route:after', function(router, newNavigationData, oldNavigationData) {
+            ok(true);
         });
         Router.history.navigate('implicit');
     });
@@ -282,7 +277,7 @@
             }
         });
         Router.history.on('route:after', function(router, newNavigationData, oldNavigationData) {
-            notEqual(newNavigationData.path, 'something');
+            ok(false);
         });
         router.on('route:before', function(newNavigationData, oldNavigationData) {
             notEqual(newNavigationData.path, 'something');
@@ -296,6 +291,23 @@
         Router.history.start();
         Router.history.navigate('something');
         Router.history.navigate('other');
+    });
+
+    test('off event', 1, function() {
+        var router = new Router([{
+            route: 'something',
+            activate: function() {
+                ok(true);
+            }
+        }]);
+        function cb() {
+            return false;
+        };
+        Router.history.start();
+        Router.history.on('route:before', cb);
+        Router.history.navigate('something');
+        Router.history.off('route:before', cb);
+        Router.history.navigate('something');
     });
 
     test('activate / deactivate callbacks', 9, function() {
@@ -574,7 +586,6 @@
         });
     });
 
-
     test('No trailing slash on root 1.', 1, function() {
         Router.history._history = {
             pushState: function(state, title, url) {
@@ -646,7 +657,7 @@
             map: [{
                 route: 'path',
                 activate: function(navigationData) {
-                    strictEqual(navigationData.query, 'x=y%3Fz');
+                    strictEqual(navigationData.query.x, 'y?z');
                 }
             }]
         });
@@ -654,7 +665,7 @@
         Router.history.navigate('path?x=y%3Fz');
     });
 
-    test('Navigate to a hash url.', 1, function() {
+    test('Navigate to a hash url 1.', 1, function() {
         Router.history.start({
             pushState: true
         });
@@ -662,7 +673,7 @@
             map: [{
                 route: 'path',
                 activate: function(navigationData) {
-                    strictEqual(navigationData.query, 'x=y');
+                    strictEqual(navigationData.query.x, 'y');
                 }
             }]
         });
@@ -670,7 +681,7 @@
         Router.history._checkUrl();
     });
 
-    test('navigate to a hash url.', 1, function() {
+    test('Navigate to a hash url 2.', 1, function() {
         Router.history.start({
             pushState: true
         });
@@ -678,7 +689,7 @@
             map: [{
                 route: 'path',
                 activate: function(navigationData) {
-                    strictEqual(navigationData.query, 'x=y');
+                    strictEqual(navigationData.query.x, 'y');
                 }
             }]
         });
@@ -757,13 +768,14 @@
         strictEqual(Router.history.obtainFragment().full, 'shop/search?keyword=short dress');
     });
 
-    test('Urls in the params', 1, function() {
+    test('Urls in the params', 2, function() {
         location.replace('http://example.com#login?a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
         var router = new Router();
         router.add({
             route: 'login',
             activate: function(newRouteData) {
-                strictEqual(newRouteData.query, 'a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
+                strictEqual(newRouteData.query.a, 'value');
+                strictEqual(newRouteData.query.backUrl, 'https://www.msn.com/idp/idpdemo?spid=spdemo&target=b');
             }
         });
         Router.history.start();
