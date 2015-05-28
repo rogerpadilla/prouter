@@ -191,7 +191,8 @@ class RoutingLevel {
             if (alias === route.alias) {
                 subrouter = route.facade;
                 if (!subrouter) {
-                    subrouter = (new RoutingLevel()).config(this._options);
+                    subrouter = new RoutingLevel();
+                    subrouter.config(this._options);
                     route.facade = subrouter;
                 }
                 break;
