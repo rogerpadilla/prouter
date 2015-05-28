@@ -1,8 +1,4 @@
-// Establish the root object, `window` (`self`) in the browser, or `global` on the server.
-var should = chai.should;
 
-
-//.listen();
 
 describe("0.1: Routing checking", function() {
 
