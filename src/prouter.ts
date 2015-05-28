@@ -65,10 +65,10 @@ const _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 
 class RouteHelper {
 
-    static _getRouteKeys(path: string): string[] {
+    static _extractKeys(path: string): string[] {
         const keys = path.match(/:([^\/]+)/g);
         if (keys) {
-            const resp = new Array(keys.length);
+            const resp: string[] = [];
             for (let i = 0; i < keys.length; i++) {
                 resp[i] = keys[i].replace(/[:\(\)]/g, '');
             }
@@ -150,7 +150,7 @@ class RoutingLevel {
             callback = path;
             re = /.*/;
         } else {
-            keys = RouteHelper._getRouteKeys(path);
+            keys = RouteHelper._extractKeys(path);
             re = RouteHelper._routeToRegExp(path);
         }
 

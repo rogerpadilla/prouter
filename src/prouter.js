@@ -10,10 +10,10 @@ var _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 var RouteHelper = (function () {
     function RouteHelper() {
     }
-    RouteHelper._getRouteKeys = function (path) {
+    RouteHelper._extractKeys = function (path) {
         var keys = path.match(/:([^\/]+)/g);
         if (keys) {
-            var resp = new Array(keys.length);
+            var resp = [];
             for (var i = 0; i < keys.length; i++) {
                 resp[i] = keys[i].replace(/[:\(\)]/g, '');
             }
@@ -85,7 +85,7 @@ var RoutingLevel = (function () {
             re = /.*/;
         }
         else {
-            keys = RouteHelper._getRouteKeys(path);
+            keys = RouteHelper._extractKeys(path);
             re = RouteHelper._routeToRegExp(path);
         }
         this._routes.push({
