@@ -35,7 +35,7 @@ module.exports = function (config) {
 
         files: [
             'test/setup/*.js',
-            'dist/prouter.js',
+            'src/prouter.js',
             'test/*.spec.js'
         ],
 

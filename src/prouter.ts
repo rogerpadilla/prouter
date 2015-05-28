@@ -91,14 +91,13 @@ class RoutingLevel {
     _routes: any[] = [];
     _options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
 
-    add(path: any, callback?: Function, options?: any): RoutingLevel {
+    add(path: any, callback?: Function): RoutingLevel {
 
         let keys: Object[];
         let re: RegExp;
 
         if (typeof path === 'function') {
-            options = callback;
-            callback = <any> path;
+            callback = path;
             re = _DEFAULT_ROUTE;
         } else {
             keys = RouteHelper._getRouteKeys(path);
@@ -109,20 +108,20 @@ class RoutingLevel {
             path: re,
             callback: callback,
             keys: keys,
-            alias: (options && options.alias) ? options.alias : path,
+            alias: path,
             facade: null
         });
 
         return this;
     }
 
-    remove(alias: string): RoutingLevel {
+    remove(alias: any): RoutingLevel {
 
         for (let i = this._routes.length - 1; i >= 0; i--) {
             const r = this._routes[i];
             if (alias === r.alias || alias === r.callback || alias === r.path) {
                 this._routes.splice(i, 1);
-            } else if (r._routes.length > 0) {
+            } else if (r._routes) {
                 for (let j = r._routes.length - 1; j >= 0; j--) {
                     r._routes[j].remove(alias);
                 }
@@ -270,8 +269,8 @@ const Router = (function(facade: RoutingLevel) {
             return facade.to(alias);
         },
 
-        add(path: any, callback?: Function, alias?: string): RoutingLevel {
-            return facade.add(path, callback, alias);
+        add(path: any, callback?: Function): RoutingLevel {
+            return facade.add(path, callback);
         },
 
         remove(alias: string): RoutingLevel {

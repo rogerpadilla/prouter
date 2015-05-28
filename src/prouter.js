@@ -75,11 +75,10 @@ var RoutingLevel = (function () {
         this._routes = [];
         this._options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
     }
-    RoutingLevel.prototype.add = function (path, callback, options) {
+    RoutingLevel.prototype.add = function (path, callback) {
         var keys;
         var re;
         if (typeof path === 'function') {
-            options = callback;
             callback = path;
             re = _DEFAULT_ROUTE;
         }
@@ -91,7 +90,7 @@ var RoutingLevel = (function () {
             path: re,
             callback: callback,
             keys: keys,
-            alias: (options && options.alias) ? options.alias : path,
+            alias: path,
             facade: null
         });
         return this;
@@ -102,7 +101,7 @@ var RoutingLevel = (function () {
             if (alias === r.alias || alias === r.callback || alias === r.path) {
                 this._routes.splice(i, 1);
             }
-            else if (r._routes.length > 0) {
+            else if (r._routes) {
                 for (var j = r._routes.length - 1; j >= 0; j--) {
                     r._routes[j].remove(alias);
                 }
@@ -224,8 +223,8 @@ var Router = (function (facade) {
         to: function (alias) {
             return facade.to(alias);
         },
-        add: function (path, callback, alias) {
-            return facade.add(path, callback, alias);
+        add: function (path, callback) {
+            return facade.add(path, callback);
         },
         remove: function (alias) {
             return facade.remove(alias);
