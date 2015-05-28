@@ -18,8 +18,8 @@ var _NAMED_PARAM = /(\(\?)?:\w+/g;
 var _SPLAT_PARAM = /\*\w+/g;
 var _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
 var _DEFAULT_ROUTE = /.*/;
-function _getRouteKeys(string) {
-    var keys = string.match(/:([^\/]+)/g);
+function _getRouteKeys(path) {
+    var keys = path.match(/:([^\/]+)/g);
     for (var i = 0, l = keys ? keys.length : 0; i < l; i++) {
         keys[i] = keys[i].replace(/[:\(\)]/g, '');
     }
@@ -35,14 +35,15 @@ function _routeToRegExp(route) {
     return new RegExp('^' + route + '(?:\\?*([^/]*))');
 }
 function _clearSlashes(path) {
-    return path.toString().replace(/\/$/, '').replace(/^\//, '');
+    return path.replace(/\/$/, '').replace(/^\//, '');
 }
 function _extractParameters(route, fragment) {
     var params = route.exec(fragment).slice(1);
     return params.map(function (param, i) {
-        if (i === params.length - 1)
+        if (i === params.length - 1) {
             return param || null;
-        return param ? decodeURIComponent(param) : null;
+        }
+        return param ? _global.decodeURIComponent(param) : null;
     });
 }
 function _parseQuery(qstr) {
@@ -50,12 +51,14 @@ function _parseQuery(qstr) {
     var params = qstr.split('&');
     for (var i = 0; i < params.length; i++) {
         var pair = params[i].split('=');
-        query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        query[_global.decodeURIComponent(pair[0])] = _global.decodeURIComponent(pair[1]);
     }
     return query;
 }
 function _prepareArguments(parameters, keys) {
-    var wrapper = {}, lastIndex = parameters.length - 1, query = parameters[lastIndex];
+    var wrapper = {};
+    var lastIndex = parameters.length - 1;
+    var query = parameters[lastIndex];
     if (keys && keys.length > 0) {
         for (var i = 0; i < keys.length; i++) {
             wrapper[keys[i]] = parameters[i];
@@ -75,8 +78,9 @@ function RoutingLevel() {
     this._options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
 }
 RoutingLevel.prototype.add = function (path, callback, options) {
-    var keys, re;
-    if (typeof path == 'function') {
+    var keys;
+    var re;
+    if (typeof path === 'function') {
         options = callback;
         callback = path;
         re = _DEFAULT_ROUTE;
@@ -109,15 +113,15 @@ RoutingLevel.prototype.remove = function (alias) {
     return this;
 };
 RoutingLevel.prototype.check = function (fragment, array, lastURL) {
-    var match, node, route, params, should;
-    for (var i = 0; i < this._routes.length, route = this._routes[i]; i++) {
-        match = fragment.match(route.path);
+    for (var i = 0; i < this._routes.length; i++) {
+        var route = this._routes[i];
+        var match = fragment.match(route.path);
         if (match) {
-            params = _extractParameters(route.path, fragment);
+            var params = _extractParameters(route.path, fragment);
             var keys = this._options.keys ? route.keys : null;
             params = _prepareArguments(params, keys);
-            should = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
-            node = {
+            var should = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
+            var node = {
                 callback: route.callback,
                 params: params,
                 routes: [],
@@ -149,8 +153,9 @@ RoutingLevel.prototype.config = function (options) {
     return this;
 };
 RoutingLevel.prototype.to = function (alias) {
-    var subrouter, route;
-    for (var i = 0; i < this._routes.length, route = this._routes[i]; i += 1) {
+    var subrouter;
+    for (var i = 0; i < this._routes.length; i++) {
+        var route = this._routes[i];
         if (alias === route.alias) {
             subrouter = route.facade;
             if (!subrouter) {
@@ -171,19 +176,22 @@ var Router = (function (facade) {
             else if (typeof param === 'string') {
                 router.route(param);
             }
-            else if (routes && routes.length)
+            else if (routes && routes.length) {
                 apply(routes);
+            }
         };
     }
     function apply(routes) {
         var falseToReject;
-        if (routes)
-            for (var i = 0, route = void 0; i < routes.length, route = routes[i]; i += 1) {
+        if (routes) {
+            for (var i = 0; i < routes.length; i += 1) {
+                var route = routes[i];
                 if (route.rootRerouting) {
                     falseToReject = route.callback.apply(null, route.params);
                 }
                 applyNested(route.routes)(falseToReject);
             }
+        }
     }
     router.drop = function () {
         lastURL = '';
@@ -217,7 +225,6 @@ var Router = (function (facade) {
                 _global.history.pushState(null, null, facade._options.root + _clearSlashes(path));
                 break;
             case 'hash':
-                _global.location.href.match(/#(.*)$/);
                 _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
                 break;
             case 'node':
@@ -227,10 +234,12 @@ var Router = (function (facade) {
         return facade;
     };
     router.route = function (path) {
-        if (facade._options.mode === 'node')
+        if (facade._options.mode === 'node') {
             this.check(path);
-        if (!rollback)
+        }
+        if (!rollback) {
             this.navigate(path);
+        }
         rollback = false;
         return facade;
     };
@@ -247,7 +256,9 @@ var Router = (function (facade) {
         return facade.remove(alias);
     };
     router.getCurrent = function () {
-        var mode = facade._options.mode, root = facade._options.root, fragment = lastURL;
+        var mode = facade._options.mode;
+        var root = facade._options.root;
+        var fragment = lastURL;
         if (mode === 'history') {
             fragment = _clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
             fragment = fragment.replace(/\?(.*)$/, '');

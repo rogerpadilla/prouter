@@ -2,7 +2,7 @@
     "compilerOptions": {
         "target": "es5",
         "sourceMap": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "module": "commonjs"
     },
     "filesGlob": [

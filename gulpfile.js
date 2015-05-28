@@ -76,7 +76,6 @@ gulp.task('lint', function() {
                     'no-trailing-comma': true,
                     'no-unreachable': true,
                     'no-unused-expression': true,
-                    'no-unused-variable': true,
                     'no-use-before-declare': true,
                     quotemark: true,
                     semicolon: true,
@@ -93,7 +92,7 @@ gulp.task('watch', ['build'], function() {
 });
 
 gulp.task('build', function(done) {
-    runSequence(['script:minify'], 'test', done);
+    runSequence(['lint', 'script:minify'], 'test', done);
 });
 
 gulp.task('default', ['watch']);
