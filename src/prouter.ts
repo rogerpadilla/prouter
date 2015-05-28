@@ -120,7 +120,7 @@ class RoutingLevel {
 
         for (let i = this._routes.length - 1; i >= 0; i--) {
             const r = this._routes[i];
-            if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
+            if (alias === r.alias || alias === r.callback || alias === r.path) {
                 this._routes.splice(i, 1);
             } else if (r._routes.length > 0) {
                 for (let j = r._routes.length - 1; j >= 0; j--) {
@@ -194,6 +194,7 @@ class RoutingLevel {
                     subrouter = (new RoutingLevel()).config(this._options);
                     route.facade = subrouter;
                 }
+                break;
             }
         }
         return subrouter;
@@ -203,9 +204,108 @@ class RoutingLevel {
 
 const Router = (function(facade: RoutingLevel) {
 
-    const router: any = {};
     let lastURL = '';
     let rollback = false;
+
+    const router = {
+
+        drop(): RoutingLevel {
+            lastURL = '';
+            return facade.drop();
+        },
+
+        listen() {
+
+            const self = this;
+            let current = this.getCurrent();
+
+            clearInterval(this._interval);
+
+            this._interval = setInterval(function() {
+                const location = router.getCurrent();
+                if (current !== location) {
+                    current = location;
+                    self.check(self.getCurrent());
+                }
+            }, 50);
+
+            _global.onpopstate = function(e: PopStateEvent) {
+                if (e.state !== null && e.state !== undefined) {
+                    _global.clearInterval(self._interval);
+                    self.check(self.getCurrent());
+                }
+            };
+        },
+
+        check(path: string): RoutingLevel {
+            apply(facade.check(path, [], lastURL));
+            return facade;
+        },
+
+        navigate(path: string): RoutingLevel {
+            const mode = facade._options.mode;
+            switch (mode) {
+                case 'history':
+                    _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
+                    break;
+                case 'hash':
+                    _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
+                    break;
+                case 'node':
+                    lastURL = path;
+                    break;
+            }
+            return facade;
+        },
+
+        route(path: string): RoutingLevel {
+            if (facade._options.mode === 'node') {
+                this.check(path);
+            }
+            if (!rollback) {
+                this.navigate(path);
+            }
+            rollback = false;
+            return facade;
+        },
+
+        config(options: Object): RoutingLevel {
+            return facade.config(options);
+        },
+
+        to(alias: string): RoutingLevel {
+            return facade.to(alias);
+        },
+
+        add(path: any, callback?: Function, alias?: string): RoutingLevel {
+            return facade.add(path, callback, alias);
+        },
+
+        remove(alias: string): RoutingLevel {
+            return facade.remove(alias);
+        },
+
+        getCurrent(): string {
+
+            const mode = facade._options.mode;
+            const root = facade._options.root;
+            let fragment = lastURL;
+
+            if (mode === 'history') {
+                fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+                fragment = fragment.replace(/\?(.*)$/, '');
+                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+                fragment = RouteHelper._clearSlashes(fragment);
+            } else if (mode === 'hash') {
+                const match = _global.location.href.match(/#(.*)$/);
+                fragment = match ? match[1] : '';
+                fragment = RouteHelper._clearSlashes(fragment);
+            }
+
+            return fragment;
+        }
+    };
+
 
     function applyNested(routes: any[]): Function {
         return function(param: any) {
@@ -232,102 +332,6 @@ const Router = (function(facade: RoutingLevel) {
             }
         }
     }
-
-    router.drop = function(): RoutingLevel {
-        lastURL = '';
-        return facade.drop();
-    };
-
-    router.listen = function() {
-
-        const self = this;
-        let current = this.getCurrent();
-
-        clearInterval(this._interval);
-
-        this._interval = setInterval(function() {
-            const location = router.getCurrent();
-            if (current !== location) {
-                current = location;
-                self.check(self.getCurrent());
-            }
-        }, 50);
-
-        _global.onpopstate = function(e: PopStateEvent) {
-            if (e.state !== null && e.state !== undefined) {
-                _global.clearInterval(self._interval);
-                self.check(self.getCurrent());
-            }
-        };
-    };
-
-    router.check = function(path: string): RoutingLevel {
-        apply(facade.check(path, [], lastURL));
-        return facade;
-    };
-
-    router.navigate = function(path: string): RoutingLevel {
-        const mode = facade._options.mode;
-        switch (mode) {
-            case 'history':
-                _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
-                break;
-            case 'hash':
-                _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
-                break;
-            case 'node':
-                lastURL = path;
-                break;
-        }
-        return facade;
-    };
-
-    router.route = function(path: string): RoutingLevel {
-        if (facade._options.mode === 'node') {
-            this.check(path);
-        }
-        if (!rollback) {
-            this.navigate(path);
-        }
-        rollback = false;
-        return facade;
-    };
-
-    router.config = function(options: Object): RoutingLevel {
-        return facade.config(options);
-    };
-
-    router.to = function(alias: string): RoutingLevel {
-        return facade.to(alias);
-    };
-
-    router.add = function(path: any, callback?: Function, alias?: string): RoutingLevel {
-        return facade.add(path, callback, alias);
-    };
-
-    router.remove = function(alias: string): RoutingLevel {
-        return facade.remove(alias);
-    };
-
-    router.getCurrent = function(): string {
-
-        const mode = facade._options.mode;
-        const root = facade._options.root;
-        let fragment = lastURL;
-
-        if (mode === 'history') {
-            fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
-            fragment = fragment.replace(/\?(.*)$/, '');
-            fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-            fragment = RouteHelper._clearSlashes(fragment);
-        } else if (mode === 'hash') {
-            const match = _global.location.href.match(/#(.*)$/);
-            fragment = match ? match[1] : '';
-            fragment = RouteHelper._clearSlashes(fragment);
-        }
-
-        return fragment;
-    };
 
     return router;
 

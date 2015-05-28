@@ -110,7 +110,7 @@ var RoutingLevel = (function () {
     RoutingLevel.prototype.remove = function (alias) {
         for (var i = this._routes.length - 1; i >= 0; i--) {
             var r = this._routes[i];
-            if (alias === r.alias || alias === r.callback || alias.toString() === r.path.toString()) {
+            if (alias === r.alias || alias === r.callback || alias === r.path) {
                 this._routes.splice(i, 1);
             }
             else if (r._routes.length > 0) {
@@ -171,6 +171,7 @@ var RoutingLevel = (function () {
                     subrouter = (new RoutingLevel()).config(this._options);
                     route.facade = subrouter;
                 }
+                break;
             }
         }
         return subrouter;
@@ -178,9 +179,90 @@ var RoutingLevel = (function () {
     return RoutingLevel;
 })();
 var Router = (function (facade) {
-    var router = {};
     var lastURL = '';
     var rollback = false;
+    var router = {
+        drop: function () {
+            lastURL = '';
+            return facade.drop();
+        },
+        listen: function () {
+            var self = this;
+            var current = this.getCurrent();
+            clearInterval(this._interval);
+            this._interval = setInterval(function () {
+                var location = router.getCurrent();
+                if (current !== location) {
+                    current = location;
+                    self.check(self.getCurrent());
+                }
+            }, 50);
+            _global.onpopstate = function (e) {
+                if (e.state !== null && e.state !== undefined) {
+                    _global.clearInterval(self._interval);
+                    self.check(self.getCurrent());
+                }
+            };
+        },
+        check: function (path) {
+            apply(facade.check(path, [], lastURL));
+            return facade;
+        },
+        navigate: function (path) {
+            var mode = facade._options.mode;
+            switch (mode) {
+                case 'history':
+                    _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
+                    break;
+                case 'hash':
+                    _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
+                    break;
+                case 'node':
+                    lastURL = path;
+                    break;
+            }
+            return facade;
+        },
+        route: function (path) {
+            if (facade._options.mode === 'node') {
+                this.check(path);
+            }
+            if (!rollback) {
+                this.navigate(path);
+            }
+            rollback = false;
+            return facade;
+        },
+        config: function (options) {
+            return facade.config(options);
+        },
+        to: function (alias) {
+            return facade.to(alias);
+        },
+        add: function (path, callback, alias) {
+            return facade.add(path, callback, alias);
+        },
+        remove: function (alias) {
+            return facade.remove(alias);
+        },
+        getCurrent: function () {
+            var mode = facade._options.mode;
+            var root = facade._options.root;
+            var fragment = lastURL;
+            if (mode === 'history') {
+                fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+                fragment = fragment.replace(/\?(.*)$/, '');
+                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+                fragment = RouteHelper._clearSlashes(fragment);
+            }
+            else if (mode === 'hash') {
+                var match = _global.location.href.match(/#(.*)$/);
+                fragment = match ? match[1] : '';
+                fragment = RouteHelper._clearSlashes(fragment);
+            }
+            return fragment;
+        }
+    };
     function applyNested(routes) {
         return function (param) {
             if (param === false) {
@@ -207,86 +289,6 @@ var Router = (function (facade) {
             }
         }
     }
-    router.drop = function () {
-        lastURL = '';
-        return facade.drop();
-    };
-    router.listen = function () {
-        var self = this;
-        var current = this.getCurrent();
-        clearInterval(this._interval);
-        this._interval = setInterval(function () {
-            var location = router.getCurrent();
-            if (current !== location) {
-                current = location;
-                self.check(self.getCurrent());
-            }
-        }, 50);
-        _global.onpopstate = function (e) {
-            if (e.state !== null && e.state !== undefined) {
-                _global.clearInterval(self._interval);
-                self.check(self.getCurrent());
-            }
-        };
-    };
-    router.check = function (path) {
-        apply(facade.check(path, [], lastURL));
-        return facade;
-    };
-    router.navigate = function (path) {
-        var mode = facade._options.mode;
-        switch (mode) {
-            case 'history':
-                _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
-                break;
-            case 'hash':
-                _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
-                break;
-            case 'node':
-                lastURL = path;
-                break;
-        }
-        return facade;
-    };
-    router.route = function (path) {
-        if (facade._options.mode === 'node') {
-            this.check(path);
-        }
-        if (!rollback) {
-            this.navigate(path);
-        }
-        rollback = false;
-        return facade;
-    };
-    router.config = function (options) {
-        return facade.config(options);
-    };
-    router.to = function (alias) {
-        return facade.to(alias);
-    };
-    router.add = function (path, callback, alias) {
-        return facade.add(path, callback, alias);
-    };
-    router.remove = function (alias) {
-        return facade.remove(alias);
-    };
-    router.getCurrent = function () {
-        var mode = facade._options.mode;
-        var root = facade._options.root;
-        var fragment = lastURL;
-        if (mode === 'history') {
-            fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
-            fragment = fragment.replace(/\?(.*)$/, '');
-            fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-            fragment = RouteHelper._clearSlashes(fragment);
-        }
-        else if (mode === 'hash') {
-            var match = _global.location.href.match(/#(.*)$/);
-            fragment = match ? match[1] : '';
-            fragment = RouteHelper._clearSlashes(fragment);
-        }
-        return fragment;
-    };
     return router;
 })(new RoutingLevel());
 
