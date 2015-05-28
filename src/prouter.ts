@@ -1,3 +1,50 @@
+/**
+ * Contract of route handler.
+ */
+export interface Handler {
+    route: string;
+    activate: Function;
+    deactivate?: Function;
+}
+
+/**
+ * Contract for entry handler.
+ */
+interface Route {
+    path: RegExp;
+    callback: Function;
+    keys: string[];
+    alias: string;
+    facade: RoutingLevel;
+}
+/**
+ * Contract for entry handler.
+ */
+interface NodeRoute {
+    callback: Function;
+    params: Object[];
+    routes: NodeRoute[];
+    rootRerouting: boolean;
+}
+
+/**
+ * Contract for entry handler.
+ */
+interface Options {
+    mode: string;
+    keys: boolean;
+    root: string;
+    rerouting: boolean;
+}
+
+/**
+ * Contract for object param.
+ */
+export interface ObjectParam {
+    [index: string]: any;
+}
+
+
 declare const global: any;
 
 // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
@@ -6,7 +53,8 @@ const _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
 
 const _ALLOWED_MODES = ['node', 'hash', 'history'];
-const _DEFAULT_OPTIONS = { mode: 'node', keys: true, root: '/', rerouting: true };
+const _DEF_OPTIONS: Options = { mode: 'node', keys: true, root: '/', rerouting: true };
+const _DEF_OPTIONS_STR = JSON.stringify(_DEF_OPTIONS);
 
 // parse regular expression
 const _OPTIONAL_PARAM = /\((.*?)\)/g;
@@ -18,15 +66,16 @@ const _DEFAULT_ROUTE = /.*/;
 
 class RouteHelper {
 
-    static _getRouteKeys(path: string): Object[] {
+    static _getRouteKeys(path: string): string[] {
         const keys = path.match(/:([^\/]+)/g);
-        if (!keys) {
-            return keys;
+        if (keys) {
+            const resp = new Array(keys.length);
+            for (let i = 0; i < keys.length; i++) {
+                resp[i] = keys[i].replace(/[:\(\)]/g, '');
+            }
+            return resp;
         }
-        for (let i = 0; i < keys.length; i++) {
-            keys[i] = keys[i].replace(/[:\(\)]/g, '');
-        }
-        return keys;
+        return null;
     }
 
     static _routeToRegExp(route: string): RegExp {
@@ -58,25 +107,26 @@ class RouteHelper {
         const params = qstr.split('&');
         for (let i = 0; i < params.length; i++) {
             const pair = params[i].split('=');
-            query[_global.decodeURIComponent(pair[0])] = _global.decodeURIComponent(pair[1]);
+            const prop = _global.decodeURIComponent(pair[0]);
+            query[prop] = _global.decodeURIComponent(pair[1]);
         }
         return query;
     }
 
-    static _prepareArguments(parameters: any[], keys: any[]): any[] {
+    static _prepareArguments(parameters: any[], keys?: string[]): Object[] {
 
-        const wrapper: any = {};
         const lastIndex = parameters.length - 1;
         const query = parameters[lastIndex];
 
-        if (keys && keys.length > 0) {
+        if (keys) {
+            const objectParam: ObjectParam = {};
             for (let i = 0; i < keys.length; i++) {
-                wrapper[keys[i]] = parameters[i];
+                objectParam[keys[i]] = parameters[i];
             }
             if (parameters[keys.length]) {
-                wrapper.query = RouteHelper._parseQuery(parameters[keys.length]);
+                objectParam['query'] = RouteHelper._parseQuery(parameters[keys.length]);
             }
-            parameters = [wrapper];
+            parameters = [objectParam];
         } else if (query && query.indexOf('=') > -1) {
             parameters[lastIndex] = RouteHelper._parseQuery(query);
         }
@@ -88,12 +138,12 @@ class RouteHelper {
 
 class RoutingLevel {
 
-    _routes: any[] = [];
-    _options = JSON.parse(JSON.stringify(_DEFAULT_OPTIONS));
+    _routes: Route[] = [];
+    _options: Options = JSON.parse(_DEF_OPTIONS_STR);
 
     add(path: any, callback?: Function): RoutingLevel {
 
-        let keys: Object[];
+        let keys: string[];
         let re: RegExp;
 
         if (typeof path === 'function') {
@@ -121,17 +171,13 @@ class RoutingLevel {
             const r = this._routes[i];
             if (alias === r.alias || alias === r.callback || alias === r.path) {
                 this._routes.splice(i, 1);
-            } else if (r._routes) {
-                for (let j = r._routes.length - 1; j >= 0; j--) {
-                    r._routes[j].remove(alias);
-                }
             }
         }
 
         return this;
     }
 
-    check(fragment: string, array: any[], lastURL: string): any[] {
+    check(fragment: string, nodeRoutes: NodeRoute[], lastURL: string): NodeRoute[] {
 
         for (let i = 0; i < this._routes.length; i++) {
 
@@ -143,42 +189,42 @@ class RoutingLevel {
                 let params = RouteHelper._extractParameters(route.path, fragment);
                 const keys = this._options.keys ? route.keys : null;
                 params = RouteHelper._prepareArguments(params, keys);
-                const should = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
+                const shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
 
-                const node: any = {
+                const nodeRoute: NodeRoute = {
                     callback: route.callback,
                     params: params,
                     routes: [],
-                    rootRerouting: this._options.rerouting || should
+                    rootRerouting: this._options.rerouting || shouldReroute
                 };
 
-                array.push(node);
+                nodeRoutes.push(nodeRoute);
 
                 if (route.facade) {
                     fragment = fragment.slice(match[0].length, fragment.length);
                     lastURL = lastURL.slice(match[0].length, lastURL.length);
-                    route.facade.check(fragment, node.routes, lastURL);
+                    route.facade.check(fragment, nodeRoute.routes, lastURL);
                 }
 
                 break;
             }
         }
 
-        return array;
+        return nodeRoutes;
     }
 
     drop(): RoutingLevel {
         this._routes = [];
-        this.config(_DEFAULT_OPTIONS);
+        this.config(_DEF_OPTIONS);
         return this;
     }
 
-    config(options: any): RoutingLevel {
+    config(options: Options): RoutingLevel {
         if (options) {
-            this._options.keys = (typeof options.keys === 'boolean') ? options.keys : this._options.keys;
-            this._options.mode = (_ALLOWED_MODES.indexOf(options.mode) !== -1) ? options.mode : this._options.mode;
+            this._options.keys = options.keys;
+            this._options.mode = options.mode ? options.mode : this._options.mode;
             this._options.root = options.root ? '/' + RouteHelper._clearSlashes(options.root) + '/' : this._options.root;
-            this._options.rerouting = (typeof options.rerouting === 'boolean') ? options.rerouting : this._options.rerouting;
+            this._options.rerouting = options.rerouting;
         }
         return this;
     }
@@ -261,7 +307,7 @@ const Router = (function(facade: RoutingLevel) {
             return facade;
         },
 
-        config(options: Object): RoutingLevel {
+        config(options: Options): RoutingLevel {
             return facade.config(options);
         },
 
@@ -299,28 +345,28 @@ const Router = (function(facade: RoutingLevel) {
     };
 
 
-    function applyNested(routes: any[]): Function {
+    function applyNested(nodeRoutes: NodeRoute[]): Function {
         return function(param: any) {
             if (param === false) {
                 rollback = true;
                 router.navigate(lastURL);
             } else if (typeof param === 'string') {
                 router.route(param);
-            } else if (routes && routes.length) {
-                apply(routes);
+            } else if (nodeRoutes && nodeRoutes.length) {
+                apply(nodeRoutes);
             }
         };
     }
 
-    function apply(routes: any[]) {
-        if (routes) {
+    function apply(nodeRoutes: NodeRoute[]) {
+        if (nodeRoutes) {
             let falseToReject: boolean;
-            for (let i = 0; i < routes.length; i += 1) {
-                const route = routes[i];
-                if (route.rootRerouting) {
-                    falseToReject = route.callback.apply(null, route.params);
+            for (let i = 0; i < nodeRoutes.length; i += 1) {
+                const nodeRoute = nodeRoutes[i];
+                if (nodeRoute.rootRerouting) {
+                    falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
                 }
-                applyNested(route.routes)(falseToReject);
+                applyNested(nodeRoute.routes)(falseToReject);
             }
         }
     }
