@@ -481,14 +481,7 @@ describe("Routing", function() {
         done();
       });
 
-    //todo Router.route('/docs/1/about'); так не сработает т.к. '/about' будет восприниматся как (/:subsection)
-    // а не как nested routing, удалить из тестов
     Router.route('/docs/2/3/about');
-
-    //setTimeout(function () {
-    //    counter.should.equal(6);
-    //    done();
-    //}, 50);
   });
 
   it("() routing with parameters", function(done) {
