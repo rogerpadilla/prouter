@@ -176,22 +176,17 @@ var Router = (function (facade) {
             return facade.drop();
         },
         listen: function () {
-            var self = this;
-            var current = this.getCurrent();
-            clearInterval(this._interval);
-            this._interval = setInterval(function () {
-                var location = router.getCurrent();
-                if (current !== location) {
-                    current = location;
-                    self.check(self.getCurrent());
+            var _this = this;
+            _global.addEventListener('hashchange', function () {
+                var current = _this.getCurrent();
+                _this.check(current);
+            }, false);
+            _global.addEventListener('popstate', function (evt) {
+                if (evt.state !== null && evt.state !== undefined) {
+                    var current = _this.getCurrent();
+                    _this.check(current);
                 }
-            }, 50);
-            _global.onpopstate = function (e) {
-                if (e.state !== null && e.state !== undefined) {
-                    _global.clearInterval(self._interval);
-                    self.check(self.getCurrent());
-                }
-            };
+            }, false);
         },
         check: function (path) {
             apply(facade.check(path, [], lastURL));

@@ -216,25 +216,17 @@ const Router = (function(facade: RoutingLevel) {
 
         listen() {
 
-            const self = this;
-            let current = this.getCurrent();
+            _global.addEventListener('hashchange', () => {
+                const current = this.getCurrent();
+                this.check(current);
+            }, false);
 
-            clearInterval(this._interval);
-
-            this._interval = setInterval(function() {
-                const location = router.getCurrent();
-                if (current !== location) {
-                    current = location;
-                    self.check(self.getCurrent());
+            _global.addEventListener('popstate', (evt: PopStateEvent) => {
+                if (evt.state !== null && evt.state !== undefined) {
+                    const current = this.getCurrent();
+                    this.check(current);
                 }
-            }, 50);
-
-            _global.onpopstate = function(e: PopStateEvent) {
-                if (e.state !== null && e.state !== undefined) {
-                    _global.clearInterval(self._interval);
-                    self.check(self.getCurrent());
-                }
-            };
+            }, false);
         },
 
         check(path: string): RoutingLevel {
