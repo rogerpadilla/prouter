@@ -2,13 +2,13 @@
 
 var gulp = require('gulp');
 var tslint = require('gulp-tslint');
-var babel = require('gulp-babel');
 var sourcemaps = require('gulp-sourcemaps');
 var del = require('del');
 var karma = require('karma').server;
 var coveralls = require('gulp-coveralls');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
+var wrap = require('gulp-wrap-umd');
 var runSequence = require('run-sequence');
 
 var tsConfig = require('./tsconfig.json');
@@ -39,14 +39,14 @@ gulp.task('clean', function(done) {
     del(['dist/**/*'], done);
 });
 
-gulp.task('script', function() {
+gulp.task('script', function () {
     return gulp.src(mainFile)
-        .pipe(sourcemaps.init({
-            loadMaps: true
-        }))
-        .pipe(babel())
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('dist'));
+    .pipe(sourcemaps.init({
+        loadMaps: true
+    }))
+    .pipe(wrap({namespace: 'Router', exports: 'Router'}))
+    .pipe(sourcemaps.write('.'))
+    .pipe(gulp.dest('dist'));
 });
 
 gulp.task('script:minify', ['script'], function() {
@@ -91,7 +91,9 @@ gulp.task('lint', function() {
 gulp.task('watch', ['build'], function() {
     gulp.watch([mainFile, 'test/*.spec.js'], ['build']);
 });
+
 gulp.task('build', function(done) {
-    runSequence(['lint', 'script:minify'], 'test', done);
+    runSequence(['script:minify'], 'test', done);
 });
+
 gulp.task('default', ['watch']);

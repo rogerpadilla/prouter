@@ -24,22 +24,25 @@
     "test": "gulp test"
   },
   "devDependencies": {
-    "babel": "^5.4.7",
+    "chai": "^2.3.0",
     "del": "^1.2.0",
     "gulp": "^3.8.11",
-    "gulp-babel": "^5.1.0",
     "gulp-coveralls": "^0.1.4",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-tslint": "^3.0.1-beta",
     "gulp-uglify": "^1.2.0",
+    "gulp-wrap-umd": "^0.2.1",
     "karma": "^0.12.33",
+    "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^0.1",
     "karma-coverage": "^0.3.1",
     "karma-firefox-launcher": "^0.1.6",
+    "karma-mocha": "^0.1.10",
     "karma-phantomjs-launcher": "^0.1.4",
-    "karma-qunit": "^0.1.4",
-    "qunitjs": "^1.18.0",
-    "run-sequence": "^1.1.0"
+    "karma-typescript-preprocessor": "0.0.19",
+    "mocha": "^2.2.5",
+    "run-sequence": "^1.1.0",
+    "typescript": "^1.5.0-beta"
   }
 }

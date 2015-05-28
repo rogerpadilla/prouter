@@ -4,8 +4,8 @@
 // karma start --browsers=Firefox
 module.exports = function (config) {
     config.set({
-        basePath: '',
-        frameworks: ['qunit'],
+
+        frameworks: ['mocha', 'chai'],
 
         // test results reporter to use
         // possible values: 'dots', 'progress'

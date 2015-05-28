@@ -1,784 +1,708 @@
-(function() {
-    'use strict';
+// Establish the root object, `window` (`self`) in the browser, or `global` on the server.
+var should = chai.should;
 
-    var location;
-    var Router = self.prouter.Router;
-    var History = self.prouter.History;
 
-    var Location = function(href) {
-        this.replace(href);
-    };
+//.listen();
 
-    Location.prototype.parser = document.createElement('a');
+describe("0.1: Routing checking", function() {
 
-    Location.prototype.replace = function(href) {
-        this.parser.href = href;
-        var self = this;
-        ['href', 'hash', 'host', 'search', 'fragment', 'pathname', 'protocol'].forEach(function(prop) {
-            self[prop] = self.parser[prop];
+    beforeEach(function() {
+        Router.drop();
+    });
+
+    it("0.1.1: Expression routing", function(done) {
+        Router.add('about', function() {
+            done();
         });
-        // In IE, anchor.pathname does not contain a leading slash though
-        // window.location.pathname does.
-        if (!/^\//.test(this.pathname)) this.pathname = '/' + this.pathname;
-    };
+        Router.route('about');
+    });
 
-    Location.prototype.toString = function() {
-        return this.href;
-    };
+    it("0.1.2: Nested routing", function(done) {
+        var sequence = '';
 
-    module('prouter.Router', {
-        setup: function() {
-            location = new Location('http://example.com');
-            Router.history = new History();
-            Router.history._location = location;
-        },
-        teardown: function() {
-            Router.history.stop();
+        Router
+            .add('about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('about')
+            .add('/docs', function() {
+                sequence.should.equal('1');
+                done();
+            });
+
+        Router.route('about/docs');
+    });
+
+    it("0.1.3: Nested routing (more levels)", function(done) {
+        var sequence = '';
+
+        Router
+            .add('about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        var aboutDocs = Router
+            .to('about')
+            .to('/docs');
+
+        aboutDocs.add('/about', function() {
+            sequence.should.equal('12');
+            done();
+        });
+
+        Router.route('about/docs/about');
+    });
+
+    it("0.1.4: Expression routing with parameters", function(done) {
+        Router.add('/about/:id', function(params) {
+            params.should.be.a('object');
+            (params.id).should.equal('16');
+            done();
+        });
+
+        Router.route('/about/16');
+    });
+
+    it("0.1.5: Expression routing with query", function(done) {
+        Router.add('/about', function(params) {
+            params.should.be.a('object');
+            (params.first).should.equal('5');
+            (params.second).should.equal('6');
+            done();
+        });
+
+        Router.route('/about?first=5&second=6');
+    });
+
+    it("0.1.6: Expression routing with parameters & query", function(done) {
+        Router.add('/about/:id/:number', function(params) {
+            params.should.be.a('object');
+            (params.id).should.equal('16');
+            (params.number).should.equal('18');
+            (params.query.first).should.equal('5');
+            (params.query.second).should.equal('6');
+            done();
+        });
+
+        Router.route('/about/16/18?first=5&second=6');
+    });
+
+    it("0.1.7: Nested routing with parameters", function(done) {
+        var sequence = '';
+
+        Router
+            .add('/about/:id/:number', function(params) {
+                sequence = params;
+            });
+
+        Router
+            .to('/about/:id/:number')
+            .add('/docs', function() {
+                sequence.should.be.a('object');
+                (sequence.id).should.equal('16');
+                (sequence.number).should.equal('18');
+                done();
+            });
+
+        Router.route('/about/16/18/docs');
+    });
+
+    it("0.1.8: Nested routing with parameters two levels", function(done) {
+        var first = '';
+
+        Router
+            .add('/about/:id/:number', function(params) {
+                first = params;
+            });
+
+        Router
+            .to('/about/:id/:number')
+            .add('/docs/:id/:number', function(params) {
+                first.should.be.a('object');
+                (first.id).should.equal('16');
+                (first.number).should.equal('18');
+                (first.query.first).should.equal('5');
+
+                params.should.be.a('object');
+                (params.id).should.equal('17');
+                (params.number).should.equal('19');
+                (params.query.second).should.equal('7');
+                done();
+            });
+
+        Router.route('/about/16/18?first=5/docs/17/19?second=7');
+    });
+
+    it("0.1.9: Expression routing with parameters (keysof mode)", function(done) {
+        Router.config({ keys: false });
+        Router.add('/about/:id/:number', function(id, number) {
+            (id).should.equal('16');
+            (number).should.equal('18');
+            done();
+        });
+
+        Router.route('/about/16/18');
+    });
+
+
+    it("0.1.10: Expression routing with parameters & query (keysof mode)", function(done) {
+        Router.config({ keys: false });
+        Router.add('/about/:id/:number', function(id, number, query) {
+            (id).should.equal('16');
+            (number).should.equal('18');
+            (query.first).should.equal('1');
+            (query.second).should.equal('2');
+            done();
+        });
+
+        Router.route('/about/16/18?first=1&second=2');
+    });
+
+    it("0.1.11: Nested routing with parameters two levels (keyoff mode)", function(done) {
+        Router
+            .config({ keys: false })
+            .add('/about/:id/:number', function(id, number, query) {
+                (id).should.equal('16');
+                (number).should.equal('18');
+                (query.first).should.equal('5');
+            });
+
+        Router
+            .to('/about/:id/:number')
+            .add('/docs/:id/:number', function(id, number, query) {
+                (id).should.equal('17');
+                (number).should.equal('19');
+                (query.second).should.equal('7');
+                done();
+            });
+
+        Router.route('/about/16/18?first=5/docs/17/19?second=7');
+    });
+
+
+    it("0.1.12: Expression routing with divided parameters", function(done) {
+        Router.add('/about/:id/route/:number', function(params) {
+            params.should.be.a('object');
+            (params.id).should.equal('16');
+            (params.number).should.equal('18');
+            done();
+        });
+
+        Router.route('/about/16/route/18');
+    });
+
+    it("0.1.13: Nested routing with parameters two levels", function(done) {
+        Router
+            .add('/about/:id/todo/:number', function(params) {
+                (params.id).should.equal('16');
+                (params.number).should.equal('18');
+                (params.query.first).should.equal('5');
+            });
+
+        Router
+            .to('/about/:id/todo/:number')
+            .add('/docs/:id/:number', function(params) {
+                (params.id).should.equal('17');
+                (params.number).should.equal('19');
+                (params.query.second).should.equal('7');
+                done();
+            });
+
+        Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
+    });
+
+    it("0.1.14: Nested routing with parameters two levels (keyoff mode)", function(done) {
+        Router
+            .config({ keys: false })
+            .add('/about/:id/todo/:number', function(id, number, query) {
+                (id).should.equal('16');
+                (number).should.equal('18');
+                (query.first).should.equal('5');
+            });
+
+        Router
+            .to('/about/:id/todo/:number')
+            .add('/docs/:id/:number', function(id, number, query) {
+                (id).should.equal('17');
+                (number).should.equal('19');
+                (query.second).should.equal('7');
+                done();
+            });
+
+        Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
+    });
+
+    it("0.1.15: Remove string expression routing via string", function(done) {
+        var flag = false;
+
+        Router.add('/about', function() {
+            flag = true;
+        });
+
+        Router.remove('/about');
+        Router.route('/about');
+
+        setTimeout(function() {
+            flag.should.equal(false);
+            done();
+        }, 50);
+    });
+
+    it("0.1.16: Remove root routing", function(done) {
+        var sequence = '';
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        Router.remove('/about');
+        Router.route('/about/docs');
+
+        setTimeout(function() {
+            sequence.should.equal('');
+            done();
+        }, 50);
+    });
+
+    it("0.1.17: Remove nested routing", function(done) {
+        var sequence = '';
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        Router.to('/about').remove('/docs');
+        Router.route('/about/docs');
+
+        setTimeout(function() {
+            sequence.should.equal('1');
+            done();
+        }, 50);
+    });
+
+    it("0.1.18: Remove several string expression routing via alias " +
+        "(it is possible in the same routing level !!!)", function(done) {
+            var flag = false, alias = '*';
+
+            Router
+                .add('/about', function() {
+                    flag = true;
+                }, { alias: alias })
+                .add('/doc', function() {
+                    flag = true;
+                }, { alias: alias });
+
+            Router.remove(alias);
+
+            Router.check('/about').check('/doc');
+
+            setTimeout(function() {
+                flag.should.equal(false);
+                done();
+            }, 50);
+        });
+
+    it("0.1.19: Remove expression routing via callback", function(done) {
+        var flag = false;
+
+        function callback() {
+            flag = true;
         }
+
+        Router.add('/about', callback);
+
+        Router.remove(callback);
+        Router.route('/about');
+
+        setTimeout(function() {
+            flag.should.equal(false);
+            done();
+        }, 50);
     });
 
-    test('routes (simple)', 2, function() {
-        location.replace('http://example.com#search/news');
-        var router = new Router([{
-            route: 'search/:query',
-            activate: function(newRouteData) {
-                equal(newRouteData.path, 'search/news');
-                equal(newRouteData.params.query, 'news');
-            }
-        }, {
-            route: 'search/:query/p:page',
-            activate: function(newRouteData) {
-                ok(false);
-            }
-        }]);
-        Router.history.start();
+    it("0.1.20: Expression routing context", function(done) {
+        var context = { name: 'context' };
+
+        Router.add('/about', function() {
+            this.should.equal(context);
+            done();
+        }.bind(context));
+
+        Router.route('/about');
     });
 
-    test('default route 1.', 1, function() {
-        location.replace('http://example.com#search/news');
-        var router = new Router([{
-            route: 'do-not-match',
-            activate: function(newRouteData) {
-                ok(false);
-            }
-        }, {
-            route: '*',
-            activate: function(newRouteData) {
-                ok(true);
-            }
-        }]);
-        Router.history.start();
+    it("0.1.21: Default routing", function(done) {
+        Router.add(function() {
+            done();
+        });
+
+        Router.route('/about');
     });
 
-    test('default route 2.', 1, function() {
-        location.replace('http://example.com#search/news');
-        var router = new Router([{
-            route: 'do-not-match',
-            activate: function(newRouteData) {
-                ok(false);
-            }
-        }, {
-            route: ':any(.*)',
-            activate: function(newRouteData) {
-                ok(true);
-            }
-        }]);
-        Router.history.start();
+    it("0.1.22: Default nested routing", function(done) {
+        var sequence = '';
+
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                // stub routing callback
+            })
+            .add(function() {
+                sequence.should.equal('1');
+                done();
+            });
+
+        Router.route('/about/default');
     });
 
-    test('routes (simple, but unicode)', 1, function() {
-        location.replace('http://example.com#search/тест');
-        var router = new Router([{
-            route: 'search/:query',
-            activate: function(newRouteData) {
-                equal(newRouteData.params.query, 'тест');
-            }
-        }, {
-            route: 'search/:query/p:page',
-            activate: function(newRouteData) {
-                ok(false);
-            }
-        }]);
-        Router.history.start();
+    it("0.1.23: Path routing", function(done) {
+        Router.add('/file/*path', function(path) {
+            path.should.equal('dir/file.jpg');
+            done();
+        });
+
+        Router.route('/file/dir/file.jpg');
     });
 
+    it("0.1.24: Path routing with parameters", function(done) {
+        Router.add('/file/*path', function(path, query) {
+            path.should.equal('dir/file.jpg');
+            (query.first).should.equal('1');
+            (query.second).should.equal('2');
+            done();
+        });
 
-    test('routes (two part)', 3, function() {
-        location.replace('http://example.com#search/nyc/p10');
-        var router = new Router([{
-            route: 'search/:query/p:page',
-            activate: function(newRouteData) {
-                equal(newRouteData.params.query, 'nyc');
-                equal(newRouteData.params.page, '10');
-            }
-        }]);
-        var navigated = Router.history.start();
-        ok(navigated);
+        Router.route('/file/dir/file.jpg?first=1&second=2');
     });
 
-    test('routes refresh', 4, function() {
-        var router = new Router([{
-            route: 'login',
-            activate: function(newRouteData) {
-                ok(true);
-            }
-        }]);
-        var navigated = Router.history.navigate('login');
-        notOk(navigated);
-        Router.history.start();
-        location.replace('http://example.com#login');
-        throws(
-            Router.history.start,
-            Error,
-            'must throws error if already started'
-        );
-        navigated = Router.history.navigate('login');
-        ok(navigated);
+    it("0.1.25: () routing", function(done) {
+        var counter = 0;
+        Router.add('/docs(/)', function() {
+            counter++;
+        });
+
+        Router.route('/docs');
+        Router.route('/docs/');
+
+        setTimeout(function() {
+            counter.should.equal(2);
+            done();
+        }, 50);
     });
 
-    test('routes via navigate', 2, function() {
-        var router = new Router();
-        Router.history.start();
-        router.add({
-            route: 'search/:query/p:page',
-            activate: function(newRouteData) {
-                equal(newRouteData.params.query, 'manhattan');
-                equal(newRouteData.params.page, '20');
+    it("0.1.26: () routing with parameters", function(done) {
+        Router.add('/docs(/)', function(query) {
+            (query.first).should.equal('1');
+            (query.second).should.equal('2');
+            done();
+        });
+
+        Router.route('/docs?first=1&second=2');
+    });
+
+    it("0.1.27: () nested routing with parameters", function(done) {
+        var sequence = '';
+
+        Router.add('/docs(/)', function(query) {
+            sequence += '1';
+        });
+
+        Router
+            .to('/docs(/)')
+            .add('/about', function() {
+                sequence.should.equal('1');
+                done();
+            });
+
+        Router.route('/docs?first=1&second=2/about');
+    });
+
+    it("0.1.28: () routing", function(done) {
+        var counter = 0;
+        Router.add('/docs/:section(/:subsection)', function(params) {
+            counter += parseInt(params.section, 10);
+            if (params.subsection) {
+                counter += parseInt(params.subsection, 10);
             }
         });
-        Router.history.navigate('search/manhattan/p20');
+
+        Router.route('/docs/1');
+        Router.route('/docs/2/3');
+
+        setTimeout(function() {
+            counter.should.equal(6);
+            done();
+        }, 50);
     });
 
-    test('routes via navigate with search', 3, function() {
-        var router = new Router([{
-            route: 'query/*',
-            activate: function(newRouteData) {
-                equal(newRouteData.query.a, 'b');
-                equal(newRouteData.params['0'], 'test');
-            }
-        }]);
-        Router.history.start();
-        var navigated = Router.history.navigate('query/test?a=b');
-        ok(navigated);
-    });
-
-    test('route precedence via navigate', 2, function() {
-        var val;
-        var router = new Router([{
-            route: 'contacts/:any?',
-            activate: function(newRouteData) {
-                val = 100;
-            }
-        }, {
-            route: 'contacts/fixed',
-            activate: function(newRouteData) {
-                val = 200;
-            }
-        }]);
-        Router.history.start();
-        Router.history.navigate('contacts');
-        equal(val, 100);
-        Router.history.navigate('contacts/fixed');
-        equal(val, 100);
-    });
-
-    test('message parameter.', 1, function() {
-        var message = {
-            type: 'success',
-            msg: 'Item saved'
-        };
-        var router = new Router([{
-            route: 'items/:id',
-            activate: function(newRouteData) {
-                strictEqual(newRouteData.message, message);
-            }
-        }]);
-        Router.history.start();
-        Router.history.navigate('items/a12b?param1=val1&param2=val2', message);
-    });
-
-    test('silent parameter.', 1, function() {
-        location.replace('http://example.com/#items/123');
-        var router = new Router([{
-            route: 'items/:id',
-            activate: function() {
-                ok(false);
-            }
-        }]);
-        var navigated = Router.history.start({
-            silent: true
-        });
-        notOk(navigated);
-    });
-
-    test('query string.', 4, function() {
-        var message = {
-            msg: 'Password changed',
-            type: 'success'
-        };
-        var router = new Router([{
-            route: 'login',
-            activate: function(newRouteData) {
-                strictEqual(newRouteData.query.param1, 'val1');
-                strictEqual(newRouteData.query.param2, 'val2');
-                strictEqual(newRouteData.path, 'login');
-                deepEqual(newRouteData.message, message);
-            }
-        }]);
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('login?param1=val1&param2=val2', message);
-    });
-
-    test('use implicit callback if none provided', 3, function() {
-        var router = new Router();
-        Router.history.start();
-        router.add({
-            route: ':any*',
-            activate: function(newRouteData) {
-                equal(newRouteData.path, 'implicit');
-                equal(newRouteData.params.any, 'implicit');
+    it("xxxxx: () routing", function(done) {
+        var counter = 0;
+        Router.add('/docs/:section(/:subsection)', function(params) {
+            counter += parseInt(params.section, 10);
+            if (params.subsection) {
+                counter += parseInt(params.subsection, 10);
             }
         });
-        Router.history.on('route:after', function(router, newNavigationData, oldNavigationData) {
-            ok(true);
-        });
-        Router.history.navigate('implicit');
+
+        Router
+            .to('/docs/:section(/:subsection)')
+            .add('/about', function() {
+                console.log(counter)
+                done();
+            });
+
+        //todo Router.route('/docs/1/about'); так не сработает т.к. '/about' будет восприниматся как (/:subsection)
+        // а не как nested routing, удалить из тестов
+        Router.route('/docs/2/3/about');
+
+        //setTimeout(function () {
+        //    counter.should.equal(6);
+        //    done();
+        //}, 50);
     });
 
-    test('routes via navigate with {replace: true}', 1, function() {
-        location.replace = function(href) {
-            strictEqual(href, new Location('http://example.com#end_here').href);
-        };
-        Router.history.start();
-        Router.history.navigate('end_here', null, {
-            replace: true
+    it("0.1.29: () routing with parameters", function(done) {
+        var counter = 0, queryCounter = 0;
+        Router.add('/docs/:section(/:subsection)', function(params) {
+            counter += parseInt(params.section, 10);
+            if (params.subsection) {
+                counter += parseInt(params.subsection, 10);
+            }
+            queryCounter += parseInt(params.query.first, 10);
         });
+
+        Router.route('/docs/1?first=1');
+        Router.route('/docs/2/3?first=2');
+
+        setTimeout(function() {
+            counter.should.equal(6);
+            queryCounter.should.equal(3);
+            done();
+        }, 50);
     });
 
-    test('cancel navigation', 2, function() {
-        var router = new Router([{
-            route: 'something',
-            activate: function() {
-                ok(false);
-            }
-        }, {
-            route: 'other',
-            activate: function() {
-                ok(false);
-            }
-        }]);
-        Router.history.on('route:before', function(router, newNavigationData, oldNavigationData) {
-            if (newNavigationData.path === 'something') {
-                strictEqual(router, router);
+    it("0.1.33: Nested routing (rerouting:true)", function(done) {
+        var sequence = '';
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function() {
+                sequence += '3';
+            })
+            .add('/stub', function() {
+                sequence += '4';
+            });
+
+        Router.route('/about/docs');
+        Router.route('/about/docs/about');
+        Router.route('/about/docs/stub');
+
+        setTimeout(function() {
+            sequence.should.equal('12123124');
+            done();
+        }, 50);
+    });
+
+    it("0.1.33: Nested routing (rerouting:false)", function(done) {
+        var sequence = '';
+        Router
+            .config({ rerouting: false })
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function() {
+                sequence += '3';
+            })
+            .add('/stub', function() {
+                sequence += '4';
+            });
+
+        Router.route('/about/docs');
+        Router.route('/about/docs/about');
+        Router.route('/about/docs/stub');
+
+        setTimeout(function() {
+            sequence.should.equal('1234');
+            done();
+        }, 50);
+    });
+
+    it("0.1.34: Get current URL", function() {
+        Router
+            .add('/about', function() {
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function() {
+            })
+            .add('/stub', function() {
+            });
+
+        (Router.getCurrent()).should.equal('');
+        Router.route('/about/docs');
+        (Router.getCurrent()).should.equal('/about/docs');
+        Router.route('/about/docs/about');
+        (Router.getCurrent()).should.equal('/about/docs/about');
+        Router.route('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/stub');
+    });
+
+    it("0.1.35: Navigate without saving rote in history", function(done) {
+        var sequence = '';
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function() {
+                sequence += '3';
+            })
+            .add('/stub', function() {
+                sequence += '4';
+            });
+
+        Router.check('/about/docs');
+        Router.route('/about/docs/about');
+        Router.check('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/about');
+
+        setTimeout(function() {
+            sequence.should.equal('12123124');
+            done();
+        }, 50);
+    });
+
+    it("0.1.36: Saving rote in history without navigate", function(done) {
+        var sequence = '';
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
+            });
+
+        var aboutDocs = Router
+            .to('/about')
+            .to('/docs');
+
+        aboutDocs
+            .add('/about', function() {
+                sequence += '3';
+            })
+            .add('/stub', function() {
+                sequence += '4';
+            });
+
+        Router.navigate('/about/docs');
+        Router.route('/about/docs/about');
+        Router.navigate('/about/docs/stub');
+        (Router.getCurrent()).should.equal('/about/docs/stub');
+
+        setTimeout(function() {
+            sequence.should.equal('123');
+            done();
+        }, 50);
+    });
+
+
+    it("0.1.37: Sync rollback", function() {
+        var sequence = '';
+
+        Router
+            .add('/about', function() {
+                sequence += '1';
+            });
+
+        Router
+            .to('/about')
+            .add('/docs', function() {
+                sequence += '2';
                 return false;
-            }
-        });
-        Router.history.on('route:after', function(router, newNavigationData, oldNavigationData) {
-            ok(false);
-        });
-        router.on('route:before', function(newNavigationData, oldNavigationData) {
-            notEqual(newNavigationData.path, 'something');
-            if (newNavigationData.path === 'other') {
-                return false;
-            }
-        });
-        router.on('route:after', function(newNavigationData, oldNavigationData) {
-            notEqual(newNavigationData.path, 'other');
-        });
-        Router.history.start();
-        Router.history.navigate('something');
-        Router.history.navigate('other');
+            });
+
+        Router.to('/about').to('/docs')
+            .add('/about', function() {
+                sequence += '3';
+            });
+
+        Router.route('/about/docs/about');
+
+        (Router.getCurrent()).should.equal('');
+        (sequence).should.equal('12');
     });
 
-    test('off event', 1, function() {
-        var router = new Router([{
-            route: 'something',
-            activate: function() {
-                ok(true);
-            }
-        }]);
-        function cb() {
-            return false;
-        };
-        Router.history.start();
-        Router.history.on('route:before', cb);
-        Router.history.navigate('something');
-        Router.history.off('route:before', cb);
-        Router.history.navigate('something');
-    });
-
-    test('activate / deactivate callbacks', 9, function() {
-        location.replace('http://example.com/path/123');
-        var router = new Router([{
-            route: 'path/:val',
-            activate: function(newNavData, oldNavData) {
-                equal(newNavData.path, 'path/123');
-                equal(newNavData.params.val, '123');
-                equal(oldNavData, null);
-            },
-            deactivate: function(newNavData, oldNavData) {
-                equal(newNavData.path, 'other');
-                equal(oldNavData.path, 'path/123');
-                equal(oldNavData.params.val, '123');
-            }
-        }, {
-            route: 'other',
-            activate: function(newNavData, oldNavData) {
-                equal(newNavData.path, 'other');
-                equal(oldNavData.path, 'path/123');
-                equal(oldNavData.params.val, '123');
-            }
-        }]);
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('other');
-    });
-
-    test('leading slash', 2, function() {
-        location.replace('http://example.com/the-root/foo');
-        Router.history.start({
-            root: '/the-root',
-            hashChange: false,
-            silent: true
-        });
-        strictEqual(Router.history.obtainFragment().full, 'foo');
-        Router.history.stop();
-        Router.history = new History();
-        Router.history._location = location;
-        Router.history.start({
-            root: '/the-root/',
-            hashChange: false,
-            silent: true
-        });
-        strictEqual(Router.history.obtainFragment().full, 'foo');
-    });
-
-    test('correctly handles URLs with %', 2, function() {
-        location.replace('http://example.com#search/fat%3A1.5%25');
-        var router = new Router([{
-            route: 'search/:query',
-            activate: function() {
-                ok(true);
-            }
-        }, {
-            route: 'search/:query/:page',
-            activate: function() {
-                ok(false);
-            }
-        }]);
-        Router.history.start();
-        Router.history.navigate('search/fat');
-    });
-
-    test('Hashes with UTF8 in them.', 2, function() {
-        var router = new Router([{
-            route: 'charñ',
-            activate: function() {
-                ok(true);
-            }
-        }, {
-            route: 'char%C3%B1',
-            activate: function() {
-                ok(false);
-            }
-        }]);
-        Router.history.start();
-        Router.history.navigate('charñ');
-        Router.history.navigate('char%C3%B1');
-    });
-
-    test('Use pathname when hashChange is not wanted.', 1, function() {
-        location.replace('http://example.com/path/name#hash');
-        Router.history.start({
-            hashChange: false
-        });
-        var fragment = Router.history.obtainFragment().full;
-        strictEqual(fragment, location.pathname.replace(/^\//, ''));
-    });
-
-    test('Strip leading slash before location.assign.', 1, function() {
-        location.replace('http://example.com/root/');
-        Router.history.start({
-            hashChange: false,
-            root: '/root/'
-        });
-        location.assign = function(pathname) {
-            strictEqual(pathname, '/root/fragment');
-        };
-        Router.history.navigate('/fragment');
-    });
-
-    test('Root fragment without trailing slash.', 1, function() {
-        location.replace('http://example.com/root');
-        Router.history.start({
-            hashChange: false,
-            root: '/root/',
-            silent: true
-        });
-        strictEqual(Router.history.obtainFragment().full, '');
-    });
-
-    test('History does not prepend root to fragment.', 2, function() {
-        location.replace('http://example.com/root/');
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/root/x');
-            }
-        };
-        Router.history.start({
-            root: '/root/',
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('x');
-        strictEqual(Router.history.obtainFragment().full, '');
-    });
-
-    test('Normalize root.', 1, function() {
-        location.replace('http://example.com/root');
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/root/fragment');
-            }
-        };
-        Router.history.start({
-            pushState: true,
-            root: '/root',
-            hashChange: false
-        });
-        Router.history.navigate('fragment');
-    });
-
-    test('Normalize root.', 1, function() {
-        location.replace('http://example.com/root#fragment');
-        Router.history._history = {
-            pushState: function(state, title, url) {},
-            replaceState: function(state, title, url) {
-                strictEqual(url, '/root/fragment');
-            }
-        };
-        Router.history.start({
-            pushState: true,
-            root: '/root'
-        });
-    });
-
-    test('Normalize root.', 1, function() {
-        location.replace('http://example.com/root');
-        Router.history._loadUrl = function() {
-            ok(true);
-        };
-        Router.history.start({
-            pushState: true,
-            root: '/root'
-        });
-    });
-
-    test('Normalize root - leading slash.', 1, function() {
-        location.replace('http://example.com/root');
-        Router.history._history = {
-            pushState: function() {},
-            replaceState: function() {}
-        };
-        Router.history.start({
-            root: 'root'
-        });
-        strictEqual(Router.history._root, '/root/');
-    });
-
-    test('Transition from hashChange to pushState.', 1, function() {
-        location.replace('http://example.com/root#x/y');
-        Router.history._history = {
-            pushState: function() {},
-            replaceState: function(state, title, url) {
-                strictEqual(url, '/root/x/y');
-            }
-        };
-        Router.history.start({
-            root: 'root',
-            pushState: true
-        });
-    });
-
-    test('Router: Normalize empty root', 1, function() {
-        location.replace('http://example.com/');
-        Router.history._history = {
-            pushState: function() {},
-            replaceState: function() {}
-        };
-        Router.history.start({
-            root: ''
-        });
-        strictEqual(Router.history._root, '/');
-    });
-
-    test('Router: nagivate with empty root', 1, function() {
-        location.replace('http://example.com/');
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/fragment');
-            }
-        };
-        Router.history.start({
-            pushState: true,
-            root: '',
-            hashChange: false
-        });
-        Router.history.navigate('fragment');
-    });
-
-    test('Transition from pushState to hashChange.', 1, function() {
-        location.replace('http://example.com/root/x/y?a=b');
-        location.replace = function(url) {
-            strictEqual(url, '/root#x/y?a=b');
-        };
-        Router.history._history = {
-            pushState: null,
-            replaceState: null
-        };
-        Router.history.start({
-            root: 'root',
-            pushState: true
-        });
-    });
-
-    test('hashChange to pushState with search.', 1, function() {
-        location.replace('http://example.com/root#x/y?a=b');
-        Router.history._history = {
-            pushState: function() {},
-            replaceState: function(state, title, url) {
-                strictEqual(url, '/root/x/y?a=b');
-            }
-        };
-        Router.history.start({
-            root: 'root',
-            pushState: true
-        });
-    });
-
-    test('Trailing space in fragments.', 1, function() {
-        var history = new History();
-        strictEqual(history.obtainFragment('fragment   ').full, 'fragment');
-    });
-
-    test('Leading slash and trailing space.', 1, function() {
-        var history = new History();
-        strictEqual(history.obtainFragment('/fragment ').full, 'fragment');
-    });
-
-    test('hashChange to pushState only if both requested.', 0, function() {
-        location.replace('http://example.com/root?a=b#x/y');
-        Router.history._history = {
-            pushState: function() {},
-            replaceState: function() {
-                ok(false);
-            }
-        };
-        Router.history.start({
-            root: 'root',
-            pushState: true,
-            hashChange: false
-        });
-    });
-
-    test('No trailing slash on root 1.', 1, function() {
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/root');
-            }
-        };
-        location.replace('http://example.com/root/path');
-        Router.history.start({
-            pushState: true,
-            hashChange: false,
-            root: 'root'
-        });
-        Router.history.navigate('');
-    });
-
-    test('No trailing slash on root 2.', 1, function() {
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/');
-            }
-        };
-        location.replace('http://example.com/path');
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('');
-    });
-
-    test('No trailing slash on root 3.', 1, function() {
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/root?x=1');
-            }
-        };
-        location.replace('http://example.com/root/path');
-        Router.history.start({
-            pushState: true,
-            hashChange: false,
-            root: 'root'
-        });
-        Router.history.navigate('?x=1');
-    });
-
-    test('Fragment matching sans query/hash.', 2, function() {
-        Router.history._history = {
-            pushState: function(state, title, url) {
-                strictEqual(url, '/path?query#hash');
-            }
-        };
-        new Router({
-            map: [{
-                route: 'path',
-                activate: function() {
-                    ok(true);
-                }
-            }]
-        });
-        location.replace('http://example.com/');
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('path?query#hash');
-    });
-
-    test('Do not decode the search params.', 1, function() {
-        new Router({
-            map: [{
-                route: 'path',
-                activate: function(navigationData) {
-                    strictEqual(navigationData.query.x, 'y?z');
-                }
-            }]
-        });
-        Router.history.start();
-        Router.history.navigate('path?x=y%3Fz');
-    });
-
-    test('Navigate to a hash url 1.', 1, function() {
-        Router.history.start({
-            pushState: true
-        });
-        new Router({
-            map: [{
-                route: 'path',
-                activate: function(navigationData) {
-                    strictEqual(navigationData.query.x, 'y');
-                }
-            }]
-        });
-        location.replace('http://example.com/path?x=y#hash');
-        Router.history._checkUrl();
-    });
-
-    test('Navigate to a hash url 2.', 1, function() {
-        Router.history.start({
-            pushState: true
-        });
-        new Router({
-            map: [{
-                route: 'path',
-                activate: function(navigationData) {
-                    strictEqual(navigationData.query.x, 'y');
-                }
-            }]
-        });
-        Router.history.navigate('path?x=y#hash');
-    });
-
-    test('unicode pathname', 1, function() {
-        location.replace('http://example.com/myyjä');
-        new Router({
-            map: [{
-                route: 'myyjä',
-                activate: function() {
-                    ok(true);
-                }
-            }]
-        });
-        Router.history.start({
-            pushState: true
-        });
-    });
-
-    test('newline in route', 1, function() {
-        location.replace('http://example.com/stuff%0Anonsense?param=foo%0Abar');
-        new Router({
-            map: [{
-                route: 'stuff\nnonsense',
-                activate: function() {
-                    ok(true);
-                }
-            }]
-        });
-        Router.history.start({
-            pushState: true
-        });
-    });
-
-    test('preserve context (this)', 2, function() {
-        var someVal = Math.random();
-        var router = new Router([{
-            route: 'one',
-            someAttr: someVal,
-            activate: function() {
-                strictEqual(this.someAttr, someVal);
-            },
-            deactivate: function() {
-                strictEqual(this.someAttr, someVal);
-            }
-        }, {
-            route: 'two',
-            activate: function() {
-
-            }
-        }]);
-        Router.history.start({
-            pushState: true,
-            hashChange: false
-        });
-        Router.history.navigate('one');
-        Router.history.navigate('two');
-    });
-
-    test('History#navigate decodes before comparison.', 2, function() {
-        location.replace('http://example.com/shop/search?keyword=short%20dress');
-        Router.history._history = {
-            pushState: function() {
-                ok(true);
-            },
-            replaceState: function() {
-                ok(false);
-            }
-        };
-        Router.history.start({
-            pushState: true
-        });
-        Router.history.navigate('shop/search?keyword=short%20dress');
-        strictEqual(Router.history.obtainFragment().full, 'shop/search?keyword=short dress');
-    });
-
-    test('Urls in the params', 2, function() {
-        location.replace('http://example.com#login?a=value&backUrl=https%3A%2F%2Fwww.msn.com%2Fidp%2Fidpdemo%3Fspid%3Dspdemo%26target%3Db');
-        var router = new Router();
-        router.add({
-            route: 'login',
-            activate: function(newRouteData) {
-                strictEqual(newRouteData.query.a, 'value');
-                strictEqual(newRouteData.query.backUrl, 'https://www.msn.com/idp/idpdemo?spid=spdemo&target=b');
-            }
-        });
-        Router.history.start();
-    });
-
-})();
+});
