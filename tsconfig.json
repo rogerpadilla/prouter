@@ -7,7 +7,6 @@
     },
     "filesGlob": [
         "./src/prouter.ts",
-        "./test/**/*.ts",
         "./typings/tsd.d.ts"
     ],
     "files": [

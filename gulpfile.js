@@ -74,6 +74,12 @@ function compileTs(srcFiles, callback) {
     });
 }
 
+function build(changedFiles, done) {
+    compileTs.call(this, changedFiles, function() {
+        runSequence(['lint', 'script:minify', 'test'], done);
+    });
+}
+
 /*** Tasks ***/
 
 /**
@@ -125,16 +131,15 @@ gulp.task('lint', function () {
         .pipe(tslint.report('full'));
 });
 
-gulp.task('compile', function (done) {
-    compileTs.call(this, 'src/' + mainFileName + '.ts', done);
+gulp.task('build', function (done) {
+    build.call(this, tsConfig.files, done);
 });  
 
-gulp.task('build', function (done) {
-    runSequence(['lint', 'compile'], ['script:minify', 'test'], done);
+gulp.task('dev', ['build'], function () {
+    var self = this;
+    gulp.watch(tsConfig.files, function(evt) {
+        build.call(self, evt.path, console.log);
+    });
 });
 
-gulp.task('dev', ['build'], function () {   
-    gulp.watch(['src/' + mainFileName + '.ts'], ['build']);
-});
-
-gulp.task('default', ['build']);
+gulp.task('default', ['test:watch']);

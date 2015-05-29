@@ -18,7 +18,7 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 * Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are included in the build process.
 
-### Unique features
+### Features
 * Ability to pass **_flash_ messages** when triggering navigation.
 * Supports optionally declaring **_deactivate_ callbacks**.
 * Ability to **register listeners for navigation's events**: _route:before_ and _route:after_.
