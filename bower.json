@@ -16,7 +16,9 @@
     "ignore": [
         "/.*",
         "CNAME",
+        "src",
         "test",
-        "docs"
+        "typings",
+        "docs"        
     ]
 }

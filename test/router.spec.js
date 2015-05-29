@@ -1,53 +1,54 @@
+'use strict';
+
+var Router = prouter.Router;
+
 describe("Routing", function () {
 
-  before(function () {
-    _DEF_OPTIONS.mode = 'node';
-  });
-
   beforeEach(function () {
-    Prouter.drop();
+    Router.drop();
+    Router.config({ mode: 'node' });
   });
 
   it("Expression routing", function (done) {
-    Prouter.add('about', function () {
+    Router.add('about', function () {
       done();
     });
-    Prouter.route('about');
+    Router.route('about');
   });
 
   it("Nested routing", function (done) {
     var sequence = 0;
 
-    Prouter
+    Router
       .add('about', function () {
       sequence++;
     });
 
-    Prouter
+    Router
       .to('about')
       .add('/docs', function () {
       sequence.should.equal(1);
       done();
     });
 
-    Prouter.route('about/docs');
+    Router.route('about/docs');
   });
 
   it("Nested routing (more levels)", function (done) {
     var sequence = '';
 
-    Prouter
+    Router
       .add('about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('about')
       .to('/docs');
 
@@ -56,32 +57,32 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('about/docs/about');
+    Router.route('about/docs/about');
   });
 
   it("Expression routing with parameters", function (done) {
-    Prouter.add('/about/:id', function (params) {
+    Router.add('/about/:id', function (params) {
       params.should.be.a('object');
       params.id.should.equal('16');
       done();
     });
 
-    Prouter.route('/about/16');
+    Router.route('/about/16');
   });
 
   it("Expression routing with query", function (done) {
-    Prouter.add('/about', function (params) {
+    Router.add('/about', function (params) {
       params.should.be.a('object');
       (params.first).should.equal('5');
       (params.second).should.equal('6');
       done();
     });
 
-    Prouter.route('/about?first=5&second=6');
+    Router.route('/about?first=5&second=6');
   });
 
   it("Expression routing with parameters & query", function (done) {
-    Prouter.add('/about/:id/:number', function (params) {
+    Router.add('/about/:id/:number', function (params) {
       params.should.be.a('object');
       (params.id).should.equal('16');
       (params.number).should.equal('18');
@@ -90,18 +91,18 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/18?first=5&second=6');
+    Router.route('/about/16/18?first=5&second=6');
   });
 
   it("Nested routing with parameters", function (done) {
     var sequence = '';
 
-    Prouter
+    Router
       .add('/about/:id/:number', function (params) {
       sequence = params;
     });
 
-    Prouter
+    Router
       .to('/about/:id/:number')
       .add('/docs', function () {
       sequence.should.be.a('object');
@@ -110,18 +111,18 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/18/docs');
+    Router.route('/about/16/18/docs');
   });
 
   it("Nested routing with parameters two levels", function (done) {
     var first = '';
 
-    Prouter
+    Router
       .add('/about/:id/:number', function (params) {
       first = params;
     });
 
-    Prouter
+    Router
       .to('/about/:id/:number')
       .add('/docs/:id/:number', function (params) {
       first.should.be.a('object');
@@ -136,28 +137,28 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/18?first=5/docs/17/19?second=7');
+    Router.route('/about/16/18?first=5/docs/17/19?second=7');
   });
 
   it("Expression routing with parameters (keysof mode)", function (done) {
-    Prouter.config({
+    Router.config({
       keys: false
     });
-    Prouter.add('/about/:id/:number', function (id, number) {
+    Router.add('/about/:id/:number', function (id, number) {
       (id).should.equal('16');
       (number).should.equal('18');
       done();
     });
 
-    Prouter.route('/about/16/18');
+    Router.route('/about/16/18');
   });
 
 
   it("Expression routing with parameters & query (keysof mode)", function (done) {
-    Prouter.config({
+    Router.config({
       keys: false
     });
-    Prouter.add('/about/:id/:number', function (id, number, query) {
+    Router.add('/about/:id/:number', function (id, number, query) {
       (id).should.equal('16');
       (number).should.equal('18');
       (query.first).should.equal('1');
@@ -165,11 +166,11 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/18?first=1&second=2');
+    Router.route('/about/16/18?first=1&second=2');
   });
 
   it("Nested routing with parameters two levels (keyoff mode)", function (done) {
-    Prouter
+    Router
       .config({
       keys: false
     })
@@ -179,7 +180,7 @@ describe("Routing", function () {
       (query.first).should.equal('5');
     });
 
-    Prouter
+    Router
       .to('/about/:id/:number')
       .add('/docs/:id/:number', function (id, number, query) {
       (id).should.equal('17');
@@ -188,30 +189,30 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/18?first=5/docs/17/19?second=7');
+    Router.route('/about/16/18?first=5/docs/17/19?second=7');
   });
 
 
   it("Expression routing with divided parameters", function (done) {
-    Prouter.add('/about/:id/route/:number', function (params) {
+    Router.add('/about/:id/route/:number', function (params) {
       params.should.be.a('object');
       (params.id).should.equal('16');
       (params.number).should.equal('18');
       done();
     });
 
-    Prouter.route('/about/16/route/18');
+    Router.route('/about/16/route/18');
   });
 
   it("Nested routing with parameters two levels", function (done) {
-    Prouter
+    Router
       .add('/about/:id/todo/:number', function (params) {
       (params.id).should.equal('16');
       (params.number).should.equal('18');
       (params.query.first).should.equal('5');
     });
 
-    Prouter
+    Router
       .to('/about/:id/todo/:number')
       .add('/docs/:id/:number', function (params) {
       (params.id).should.equal('17');
@@ -220,11 +221,11 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/todo/18?first=5/docs/17/19?second=7');
+    Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
   });
 
   it("Nested routing with parameters two levels (keyoff mode)", function (done) {
-    Prouter
+    Router
       .config({
       keys: false
     })
@@ -234,7 +235,7 @@ describe("Routing", function () {
       (query.first).should.equal('5');
     });
 
-    Prouter
+    Router
       .to('/about/:id/todo/:number')
       .add('/docs/:id/:number', function (id, number, query) {
       (id).should.equal('17');
@@ -243,18 +244,18 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/16/todo/18?first=5/docs/17/19?second=7');
+    Router.route('/about/16/todo/18?first=5/docs/17/19?second=7');
   });
 
   it("Remove string expression routing via string", function (done) {
     var flag = false;
 
-    Prouter.add('/about', function () {
+    Router.add('/about', function () {
       flag = true;
     });
 
-    Prouter.remove('/about');
-    Prouter.route('/about');
+    Router.remove('/about');
+    Router.route('/about');
 
     setTimeout(function () {
       flag.should.equal(false);
@@ -264,19 +265,19 @@ describe("Routing", function () {
 
   it("Remove root routing", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    Prouter.remove('/about');
-    Prouter.route('/about/docs');
+    Router.remove('/about');
+    Router.route('/about/docs');
 
     setTimeout(function () {
       sequence.should.equal('');
@@ -286,19 +287,19 @@ describe("Routing", function () {
 
   it("Remove nested routing", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    Prouter.to('/about').remove('/docs');
-    Prouter.route('/about/docs');
+    Router.to('/about').remove('/docs');
+    Router.route('/about/docs');
 
     setTimeout(function () {
       sequence.should.equal('1');
@@ -311,7 +312,7 @@ describe("Routing", function () {
     function (done) {
       var flag = false;
 
-      Prouter
+      Router
         .add('/about', function () {
         flag = true;
       })
@@ -319,10 +320,10 @@ describe("Routing", function () {
         flag = true;
       });
 
-      Prouter.remove('/about');
-      Prouter.remove('/doc');
+      Router.remove('/about');
+      Router.remove('/doc');
 
-      Prouter.check('/about').check('/doc');
+      Router.check('/about').check('/doc');
 
       setTimeout(function () {
         flag.should.equal(false);
@@ -337,10 +338,10 @@ describe("Routing", function () {
       flag = true;
     }
 
-    Prouter.add('/about', callback);
+    Router.add('/about', callback);
 
-    Prouter.remove(callback);
-    Prouter.route('/about');
+    Router.remove(callback);
+    Router.route('/about');
 
     setTimeout(function () {
       flag.should.equal(false);
@@ -353,30 +354,30 @@ describe("Routing", function () {
       name: 'context'
     };
 
-    Prouter.add('/about', function () {
+    Router.add('/about', function () {
       this.should.equal(context);
       done();
     }.bind(context));
 
-    Prouter.route('/about');
+    Router.route('/about');
   });
 
   it("Default routing", function (done) {
-    Prouter.add(function () {
+    Router.add(function () {
       done();
     });
-    Prouter.route('/about');
+    Router.route('/about');
   });
 
   it("Default nested routing", function (done) {
     var sequence = '';
 
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       // stub routing callback
@@ -386,37 +387,37 @@ describe("Routing", function () {
       done();
     });
 
-    Prouter.route('/about/default');
+    Router.route('/about/default');
   });
 
   it("Path routing", function (done) {
-    Prouter.add('/file/*path', function (path) {
+    Router.add('/file/*path', function (path) {
       path.should.equal('dir/file.jpg');
       done();
     });
 
-    Prouter.route('/file/dir/file.jpg');
+    Router.route('/file/dir/file.jpg');
   });
 
   it("Path routing with parameters", function (done) {
-    Prouter.add('/file/*path', function (path, query) {
+    Router.add('/file/*path', function (path, query) {
       path.should.equal('dir/file.jpg');
       (query.first).should.equal('1');
       (query.second).should.equal('2');
       done();
     });
 
-    Prouter.route('/file/dir/file.jpg?first=1&second=2');
+    Router.route('/file/dir/file.jpg?first=1&second=2');
   });
 
   it("() routing", function (done) {
     var counter = 0;
-    Prouter.add('/docs(/)', function () {
+    Router.add('/docs(/)', function () {
       counter++;
     });
 
-    Prouter.route('/docs');
-    Prouter.route('/docs/');
+    Router.route('/docs');
+    Router.route('/docs/');
 
     setTimeout(function () {
       counter.should.equal(2);
@@ -425,43 +426,43 @@ describe("Routing", function () {
   });
 
   it("() routing with parameters", function (done) {
-    Prouter.add('/docs(/)', function (query) {
+    Router.add('/docs(/)', function (query) {
       (query.first).should.equal('1');
       (query.second).should.equal('2');
       done();
     });
 
-    Prouter.route('/docs?first=1&second=2');
+    Router.route('/docs?first=1&second=2');
   });
 
   it("() nested routing with parameters", function (done) {
     var sequence = '';
 
-    Prouter.add('/docs(/)', function (query) {
+    Router.add('/docs(/)', function (query) {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/docs(/)')
       .add('/about', function () {
       sequence.should.equal('1');
       done();
     });
 
-    Prouter.route('/docs?first=1&second=2/about');
+    Router.route('/docs?first=1&second=2/about');
   });
 
   it("() routing", function (done) {
     var counter = 0;
-    Prouter.add('/docs/:section(/:subsection)', function (params) {
+    Router.add('/docs/:section(/:subsection)', function (params) {
       counter += parseInt(params.section, 10);
       if (params.subsection) {
         counter += parseInt(params.subsection, 10);
       }
     });
 
-    Prouter.route('/docs/1');
-    Prouter.route('/docs/2/3');
+    Router.route('/docs/1');
+    Router.route('/docs/2/3');
 
     setTimeout(function () {
       counter.should.equal(6);
@@ -471,48 +472,48 @@ describe("Routing", function () {
 
   it("() routing", function (done) {
     var counter = 0;
-    Prouter.add('/docs/:section(/:subsection)', function (params) {
+    Router.add('/docs/:section(/:subsection)', function (params) {
       counter += parseInt(params.section, 10);
       if (params.subsection) {
         counter += parseInt(params.subsection, 10);
       }
     });
 
-    Prouter
+    Router
       .to('/docs/:section(/:subsection)')
       .add('/about', function () {
       done();
     });
 
-    Prouter.route('/docs/2/3/about');
+    Router.route('/docs/2/3/about');
   });
 
   it("Cancel routing", function (done) {
 
     var sequence = '';
 
-    Prouter.add('about', function () {
+    Router.add('about', function () {
       sequence += '2';
     });
 
-    Prouter.on('route:before', function (newRoute, oldRoute) {
+    Router.on('route:before', function (newRoute, oldRoute) {
       newRoute.should.equal('about');
       oldRoute.should.equal('');
       sequence += '1';
       return false;
     });
 
-    Prouter.on('route:after', function (newRoute, oldRoute) {
+    Router.on('route:after', function (newRoute, oldRoute) {
       oldRoute.should.equal('');
       newRoute.should.equal('about');
       sequence += '3';
     });
 
-    Prouter.route('about');
+    Router.route('about');
 
-    Prouter.off('route:before');
+    Router.off('route:before');
 
-    Prouter.route('about');
+    Router.route('about');
 
     setTimeout(function () {
       sequence.should.equal('123');
@@ -523,7 +524,7 @@ describe("Routing", function () {
   it("() routing with parameters", function (done) {
     var counter = 0,
       queryCounter = 0;
-    Prouter.add('/docs/:section(/:subsection)', function (params) {
+    Router.add('/docs/:section(/:subsection)', function (params) {
       counter += parseInt(params.section, 10);
       if (params.subsection) {
         counter += parseInt(params.subsection, 10);
@@ -531,8 +532,8 @@ describe("Routing", function () {
       queryCounter += parseInt(params.query.first, 10);
     });
 
-    Prouter.route('/docs/1?first=1');
-    Prouter.route('/docs/2/3?first=2');
+    Router.route('/docs/1?first=1');
+    Router.route('/docs/2/3?first=2');
 
     setTimeout(function () {
       counter.should.equal(6);
@@ -543,18 +544,18 @@ describe("Routing", function () {
 
   it("Nested routing (rerouting:true)", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('/about')
       .to('/docs');
 
@@ -566,9 +567,9 @@ describe("Routing", function () {
       sequence += '4';
     });
 
-    Prouter.route('/about/docs');
-    Prouter.route('/about/docs/about');
-    Prouter.route('/about/docs/stub');
+    Router.route('/about/docs');
+    Router.route('/about/docs/about');
+    Router.route('/about/docs/stub');
 
     setTimeout(function () {
       sequence.should.equal('12123124');
@@ -578,7 +579,7 @@ describe("Routing", function () {
 
   it("Nested routing (rerouting:false)", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .config({
       rerouting: false
     })
@@ -586,13 +587,13 @@ describe("Routing", function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('/about')
       .to('/docs');
 
@@ -604,9 +605,9 @@ describe("Routing", function () {
       sequence += '4';
     });
 
-    Prouter.route('/about/docs');
-    Prouter.route('/about/docs/about');
-    Prouter.route('/about/docs/stub');
+    Router.route('/about/docs');
+    Router.route('/about/docs/about');
+    Router.route('/about/docs/stub');
 
     setTimeout(function () {
       sequence.should.equal('1234');
@@ -615,14 +616,14 @@ describe("Routing", function () {
   });
 
   it("Get current URL", function () {
-    Prouter
+    Router
       .add('/about', function () { });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () { });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('/about')
       .to('/docs');
 
@@ -630,29 +631,29 @@ describe("Routing", function () {
       .add('/about', function () { })
       .add('/stub', function () { });
 
-    (Prouter.getCurrent()).should.equal('');
-    Prouter.route('/about/docs');
-    (Prouter.getCurrent()).should.equal('/about/docs');
-    Prouter.route('/about/docs/about');
-    (Prouter.getCurrent()).should.equal('/about/docs/about');
-    Prouter.route('/about/docs/stub');
-    (Prouter.getCurrent()).should.equal('/about/docs/stub');
+    (Router.getCurrent()).should.equal('');
+    Router.route('/about/docs');
+    (Router.getCurrent()).should.equal('/about/docs');
+    Router.route('/about/docs/about');
+    (Router.getCurrent()).should.equal('/about/docs/about');
+    Router.route('/about/docs/stub');
+    (Router.getCurrent()).should.equal('/about/docs/stub');
   });
 
   it("Navigate without saving rote in history", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('/about')
       .to('/docs');
 
@@ -664,10 +665,10 @@ describe("Routing", function () {
       sequence += '4';
     });
 
-    Prouter.check('/about/docs');
-    Prouter.route('/about/docs/about');
-    Prouter.check('/about/docs/stub');
-    (Prouter.getCurrent()).should.equal('/about/docs/about');
+    Router.check('/about/docs');
+    Router.route('/about/docs/about');
+    Router.check('/about/docs/stub');
+    (Router.getCurrent()).should.equal('/about/docs/about');
 
     setTimeout(function () {
       sequence.should.equal('12123124');
@@ -677,18 +678,18 @@ describe("Routing", function () {
 
   it("Saving route in history without navigate", function (done) {
     var sequence = '';
-    Prouter
+    Router
       .add('/about', function () {
       sequence += '1';
     });
 
-    Prouter
+    Router
       .to('/about')
       .add('/docs', function () {
       sequence += '2';
     });
 
-    var aboutDocs = Prouter
+    var aboutDocs = Router
       .to('/about')
       .to('/docs');
 
@@ -700,10 +701,10 @@ describe("Routing", function () {
       sequence += '4';
     });
 
-    Prouter.navigate('/about/docs');
-    Prouter.route('/about/docs/about');
-    Prouter.navigate('/about/docs/stub');
-    (Prouter.getCurrent()).should.equal('/about/docs/stub');
+    Router.navigate('/about/docs');
+    Router.route('/about/docs/about');
+    Router.navigate('/about/docs/stub');
+    (Router.getCurrent()).should.equal('/about/docs/stub');
 
     setTimeout(function () {
       sequence.should.equal('123');

@@ -106,7 +106,7 @@ gulp.task('script', function () {
         .pipe(sourcemaps.init({
         loadMaps: true
     }))
-        .pipe(wrap({ namespace: 'Prouter', exports: 'Prouter' }))
+        .pipe(wrap({ namespace: 'prouter', exports: 'prouter' }))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist'));
 });
