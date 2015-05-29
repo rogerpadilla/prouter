@@ -61,15 +61,15 @@ function reportError(error, taskName) {
 
 function compileTs(srcFiles, done) {
     var self = this;
-    var args = tsArr.concat(srcFiles);     
+    var args = tsArr.concat(srcFiles);
     var tsc = spawn('node', args);
-    tsc.stdout.on('data', function(data) {
+    tsc.stdout.on('data', function (data) {
         reportError.call(self, data);
     });
-    tsc.stderr.on('data', function(data) {
+    tsc.stderr.on('data', function (data) {
         reportError.call(self, data);
     });
-    tsc.on('close', function(code) {
+    tsc.on('close', function (code) {
         done(code);
     });
 }
@@ -86,6 +86,10 @@ gulp.task('test', function (done) {
         autoWatch: false,
         singleRun: true
     }, done);
+});
+
+gulp.task('test:watch', function () {
+    gulp.watch([mainFile, 'test/*.spec.js'], ['test']);
 });
 
 gulp.task('coveralls', ['test'], function () {
@@ -117,29 +121,31 @@ gulp.task('script:minify', ['script'], function () {
 
 gulp.task('lint', function () {
     return gulp.src(tsConfig.filesGlob)
-        .pipe(tslint({ configuration: tslintConfig }))        
+        .pipe(tslint({ configuration: tslintConfig }))
         .pipe(tslint.report('full'));
 });
 
-gulp.task('release', ['lint', 'script:minify', 'test']);
-
-gulp.task('build', function (done) {
-    compileTs.call(this, tsConfig.files, function() {
-        runSequence('release', done);
-    });    
-});  
-
-gulp.task('release:watch', ['build'], function () {
-    gulp.watch([mainFile, 'test/*.spec.js'], ['release']);
+gulp.task('compile', function (done) {
+  compileTs.call(this, tsConfig.files, done);
 });
 
-gulp.task('dev', ['build'], function () {
+gulp.task('compile:watch', function (done) {
     var self = this;
-    gulp.watch(tsConfig.files, function(evt) {
-        compileTs.call(self, evt.path, function() {
-            runSequence('release');
-        });
+  gulp.watch(tsConfig.files, function (evt) {
+    compileTs.call(self, tsConfig.files, function (resp) {
+      console.log('Compiled file: ', evt.path, resp);
+    });
+  });
+});
+
+gulp.task('release', ['compile'], function (done) {
+    runSequence(['lint', 'script:minify', 'test'], done);
+});
+
+gulp.task('dev', ['release'], function () {
+    runSequence(['compile:watch', 'test:watch'], function () {
+        console.log('Dev mode.');
     });
 });
 
-gulp.task('default', ['release:watch']);
+gulp.task('default', ['release']);

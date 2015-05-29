@@ -265,6 +265,7 @@ class Prouter {
 
     static drop(): RoutingLevel {
         this._lastURL = '';
+        this.off();
         return this._firstLevel.drop();
     }
 
@@ -291,7 +292,7 @@ class Prouter {
         return this._firstLevel;
     }
 
-    static navigate(path: string): RoutingLevel {
+    static navigate(path: string): RoutingLevel {        
         const mode = this._firstLevel._options.mode;
         switch (mode) {
             case 'history':
@@ -303,16 +304,22 @@ class Prouter {
             case 'node':
                 this._lastURL = path;
                 break;
-        }
+        }        
         return this._firstLevel;
     }
 
-    static route(path: string): RoutingLevel {
+    static route(path: string): boolean {
+        const current = this.getCurrent();
+        const next = this.trigger('route:before', path, current);
+        if (next === false) {
+            return false;
+        }
         if (this._firstLevel._options.mode === 'node') {
             this.check(path);
         }
         this.navigate(path);
-        return this._firstLevel;
+        this.trigger('route:after', path, current);
+        return true;
     }
 
     static config(options: Options): RoutingLevel {
@@ -371,17 +378,22 @@ class Prouter {
      * @param {Function} callback Method.
      * @returns {History} this history
      */
-    static off(evt: string, callback: Function): Prouter {
-        if (this._eventHandlers[evt]) {
-            const callbacks = this._eventHandlers[evt];
-            for (let i = 0; i < callbacks.length; i++) {
-                if (callbacks[i] === callback) {
-                    callbacks.splice(i, 1);
-                    if (callbacks.length === 0) {
-                        delete this._eventHandlers[evt];
+    static off(evt?: string, callback?: Function): Prouter {
+        if (evt === undefined) {
+            this._eventHandlers = {};
+        } else if (this._eventHandlers[evt]) {
+            if (callback) {
+                const callbacks = this._eventHandlers[evt];
+                for (let i = 0; i < callbacks.length; i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);                    
                     }
-                    break;
                 }
+                if (callbacks.length === 0) {
+                    delete this._eventHandlers[evt];
+                }
+            } else {
+                delete this._eventHandlers[evt];
             }
         }
         return this;
@@ -394,16 +406,16 @@ class Prouter {
      */
     static trigger(evt: string, ...restParams: any[]): boolean {
         const callbacks = this._eventHandlers[evt];
-        if (callbacks === undefined || !callbacks.length) {
+        if (!callbacks || !callbacks.length) {
             return null;
         }
         for (let i = 0; i < callbacks.length; i++) {
-            const respIt = callbacks[i].apply(this, restParams);
+            const respIt = callbacks[i].apply(null, restParams);          
             // check if some listener cancelled the event.
             if (respIt === false) {
                 return false;
             }
-        }
+        }        
         return true;
     }
 

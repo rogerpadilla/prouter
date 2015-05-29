@@ -173,6 +173,7 @@ var Prouter = (function () {
     }
     Prouter.drop = function () {
         this._lastURL = '';
+        this.off();
         return this._firstLevel.drop();
     };
     Prouter._listen = function () {
@@ -213,11 +214,17 @@ var Prouter = (function () {
         return this._firstLevel;
     };
     Prouter.route = function (path) {
+        var current = this.getCurrent();
+        var next = this.trigger('route:before', path, current);
+        if (next === false) {
+            return false;
+        }
         if (this._firstLevel._options.mode === 'node') {
             this.check(path);
         }
         this.navigate(path);
-        return this._firstLevel;
+        this.trigger('route:after', path, current);
+        return true;
     };
     Prouter.config = function (options) {
         return this._firstLevel.config(options);
@@ -268,16 +275,23 @@ var Prouter = (function () {
      * @returns {History} this history
      */
     Prouter.off = function (evt, callback) {
-        if (this._eventHandlers[evt]) {
-            var callbacks = this._eventHandlers[evt];
-            for (var i = 0; i < callbacks.length; i++) {
-                if (callbacks[i] === callback) {
-                    callbacks.splice(i, 1);
-                    if (callbacks.length === 0) {
-                        delete this._eventHandlers[evt];
+        if (evt === undefined) {
+            this._eventHandlers = {};
+        }
+        else if (this._eventHandlers[evt]) {
+            if (callback) {
+                var callbacks = this._eventHandlers[evt];
+                for (var i = 0; i < callbacks.length; i++) {
+                    if (callbacks[i] === callback) {
+                        callbacks.splice(i, 1);
                     }
-                    break;
                 }
+                if (callbacks.length === 0) {
+                    delete this._eventHandlers[evt];
+                }
+            }
+            else {
+                delete this._eventHandlers[evt];
             }
         }
         return this;
@@ -293,11 +307,11 @@ var Prouter = (function () {
             restParams[_i - 1] = arguments[_i];
         }
         var callbacks = this._eventHandlers[evt];
-        if (callbacks === undefined || !callbacks.length) {
+        if (!callbacks || !callbacks.length) {
             return null;
         }
         for (var i = 0; i < callbacks.length; i++) {
-            var respIt = callbacks[i].apply(this, restParams);
+            var respIt = callbacks[i].apply(null, restParams);
             // check if some listener cancelled the event.
             if (respIt === false) {
                 return false;
