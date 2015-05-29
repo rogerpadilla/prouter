@@ -59,7 +59,7 @@ function reportError(error, taskName) {
     }
 }
 
-function compileTs(srcFiles, callback) {
+function compileTs(srcFiles, done) {
     var self = this;
     var args = tsArr.concat(srcFiles);     
     var tsc = spawn('node', args);
@@ -70,13 +70,7 @@ function compileTs(srcFiles, callback) {
         reportError.call(self, data);
     });
     tsc.on('close', function(code) {
-        callback(code);
-    });
-}
-
-function build(changedFiles, done) {
-    compileTs.call(this, changedFiles, function() {
-        runSequence(['lint', 'script:minify', 'test'], done);
+        done(code);
     });
 }
 
@@ -92,10 +86,6 @@ gulp.task('test', function (done) {
         autoWatch: false,
         singleRun: true
     }, done);
-});
-
-gulp.task('test:watch', ['build'], function () {
-    gulp.watch([mainFile, 'test/*.spec.js'], ['build']);
 });
 
 gulp.task('coveralls', ['test'], function () {
@@ -131,17 +121,25 @@ gulp.task('lint', function () {
         .pipe(tslint.report('full'));
 });
 
+gulp.task('release', ['lint', 'script:minify', 'test']);
+
 gulp.task('build', function (done) {
-    build.call(this, tsConfig.files, done);
+    compileTs.call(this, tsConfig.files, function() {
+        runSequence('release', done);
+    });    
 });  
+
+gulp.task('release:watch', ['build'], function () {
+    gulp.watch([mainFile, 'test/*.spec.js'], ['release']);
+});
 
 gulp.task('dev', ['build'], function () {
     var self = this;
     gulp.watch(tsConfig.files, function(evt) {
-        build.call(self, evt.path, function() {
-            console.log('Compiled file: ', evt.path);
+        compileTs.call(self, evt.path, function() {
+            runSequence('release');
         });
     });
 });
 
-gulp.task('default', ['test:watch']);
+gulp.task('default', ['release:watch']);

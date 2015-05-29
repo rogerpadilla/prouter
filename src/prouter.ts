@@ -261,15 +261,14 @@ class Prouter {
     private static _firstLevel = new RoutingLevel();
     private static _eventHandlers: EventHandler = {};
     private static _lastURL = '';
-    private static _rollback = false;
-    private static _listening = false;    
+    private static _listening = false;
 
     static drop(): RoutingLevel {
         this._lastURL = '';
         return this._firstLevel.drop();
     }
 
-    static listen() {
+    static _listen() {
         if (this._listening) {
             throw new Error('Prouter already listening');
         }
@@ -312,10 +311,7 @@ class Prouter {
         if (this._firstLevel._options.mode === 'node') {
             this.check(path);
         }
-        if (!this._rollback) {
-            this.navigate(path);
-        }
-        this._rollback = false;
+        this.navigate(path);
         return this._firstLevel;
     }
 
@@ -410,13 +406,10 @@ class Prouter {
         }
         return true;
     }
-    
+
     private static _applyNested(nodeRoutes: NodeRoute[]): Function {
         return function(param: any) {
-            if (param === false) {
-                Prouter._rollback = true;
-                Prouter.navigate(Prouter._lastURL);
-            } else if (typeof param === 'string') {
+            if (typeof param === 'string') {
                 Prouter.route(param);
             } else if (nodeRoutes && nodeRoutes.length) {
                 Prouter._apply(nodeRoutes);
@@ -425,15 +418,16 @@ class Prouter {
     }
 
     private static _apply(nodeRoutes: NodeRoute[]) {
-        if (nodeRoutes) {
-            let falseToReject: boolean;
-            for (let i = 0; i < nodeRoutes.length; i += 1) {
-                const nodeRoute = nodeRoutes[i];
-                if (nodeRoute.rootRerouting) {
-                    falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
-                }
-                this._applyNested(nodeRoute.routes)(falseToReject);
+        let falseToReject: boolean;
+        for (let i = 0; i < nodeRoutes.length; i += 1) {
+            const nodeRoute = nodeRoutes[i];
+            if (nodeRoute.rootRerouting) {
+                falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
             }
+            this._applyNested(nodeRoute.routes)(falseToReject);
         }
     }
 }
+
+
+Prouter._listen();

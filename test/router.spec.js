@@ -677,31 +677,4 @@ describe("Routing", function() {
     }, 50);
   });
 
-
-  it("Sync rollback", function() {
-    var sequence = '';
-
-    Prouter
-      .add('/about', function() {
-        sequence += '1';
-      });
-
-    Prouter
-      .to('/about')
-      .add('/docs', function() {
-        sequence += '2';
-        return false;
-      });
-
-    Prouter.to('/about').to('/docs')
-      .add('/about', function() {
-        sequence += '3';
-      });
-
-    Prouter.route('/about/docs/about');
-
-    (Prouter.getCurrent()).should.equal('');
-    (sequence).should.equal('12');
-  });
-
 });

@@ -186,7 +186,7 @@ var Prouter = (function () {
         this._lastURL = '';
         return this._firstLevel.drop();
     };
-    Prouter.listen = function () {
+    Prouter._listen = function () {
         var _this = this;
         if (this._listening) {
             throw new Error('Prouter already listening');
@@ -227,10 +227,7 @@ var Prouter = (function () {
         if (this._firstLevel._options.mode === 'node') {
             this.check(path);
         }
-        if (!this._rollback) {
-            this.navigate(path);
-        }
-        this._rollback = false;
+        this.navigate(path);
         return this._firstLevel;
     };
     Prouter.config = function (options) {
@@ -296,13 +293,32 @@ var Prouter = (function () {
         }
         return this;
     };
+    /**
+     * Events triggering.
+     * @param {string} evt Name of the event being triggered.
+     * @return {boolean} null if not suscriptors, false if the event was cancelled for some suscriptor, true otherwise.
+     */
+    Prouter.trigger = function (evt) {
+        var restParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            restParams[_i - 1] = arguments[_i];
+        }
+        var callbacks = this._eventHandlers[evt];
+        if (callbacks === undefined || !callbacks.length) {
+            return null;
+        }
+        for (var i = 0; i < callbacks.length; i++) {
+            var respIt = callbacks[i].apply(this, restParams);
+            // check if some listener cancelled the event.
+            if (respIt === false) {
+                return false;
+            }
+        }
+        return true;
+    };
     Prouter._applyNested = function (nodeRoutes) {
         return function (param) {
-            if (param === false) {
-                Prouter._rollback = true;
-                Prouter.navigate(Prouter._lastURL);
-            }
-            else if (typeof param === 'string') {
+            if (typeof param === 'string') {
                 Prouter.route(param);
             }
             else if (nodeRoutes && nodeRoutes.length) {
@@ -311,24 +327,22 @@ var Prouter = (function () {
         };
     };
     Prouter._apply = function (nodeRoutes) {
-        if (nodeRoutes) {
-            var falseToReject;
-            for (var i = 0; i < nodeRoutes.length; i += 1) {
-                var nodeRoute = nodeRoutes[i];
-                if (nodeRoute.rootRerouting) {
-                    falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
-                }
-                this._applyNested(nodeRoute.routes)(falseToReject);
+        var falseToReject;
+        for (var i = 0; i < nodeRoutes.length; i += 1) {
+            var nodeRoute = nodeRoutes[i];
+            if (nodeRoute.rootRerouting) {
+                falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
             }
+            this._applyNested(nodeRoute.routes)(falseToReject);
         }
     };
     Prouter._firstLevel = new RoutingLevel();
     Prouter._eventHandlers = {};
     Prouter._lastURL = '';
-    Prouter._rollback = false;
     Prouter._listening = false;
     return Prouter;
 })();
+Prouter._listen();
 
 return Prouter;
 
