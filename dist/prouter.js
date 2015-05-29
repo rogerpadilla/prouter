@@ -191,76 +191,75 @@ var prouter;
         function Router() {
         }
         Router.drop = function () {
-            this._lastURL = '';
-            this.off();
-            return this._firstLevel.drop();
+            Router._lastURL = '';
+            Router.off();
+            return Router._firstLevel.drop();
         };
         Router._listen = function () {
-            var _this = this;
-            if (this._listening) {
+            if (Router._listening) {
                 throw new Error('Prouter already listening');
             }
             _global.addEventListener('hashchange', function () {
-                var current = _this.getCurrent();
-                _this.check(current);
+                var current = Router.getCurrent();
+                Router.check(current);
             }, false);
             _global.addEventListener('popstate', function (evt) {
                 if (evt.state !== null && evt.state !== undefined) {
-                    var current = _this.getCurrent();
-                    _this.check(current);
+                    var current = Router.getCurrent();
+                    Router.check(current);
                 }
             }, false);
-            this._listening = true;
+            Router._listening = true;
         };
         Router.check = function (path) {
-            var nodeRoutes = this._firstLevel.check(path, [], this._lastURL);
-            this._apply(nodeRoutes);
-            return this._firstLevel;
+            var nodeRoutes = Router._firstLevel.check(path, [], Router._lastURL);
+            Router._apply(nodeRoutes);
+            return Router._firstLevel;
         };
         Router.navigate = function (path) {
-            var mode = this._firstLevel._options.mode;
+            var mode = Router._firstLevel._options.mode;
             switch (mode) {
                 case 'history':
-                    _global.history.pushState(null, null, this._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                    _global.history.pushState(null, null, Router._firstLevel._options.root + RouteHelper._clearSlashes(path));
                     break;
                 case 'hash':
                     _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
                     break;
                 case 'node':
-                    this._lastURL = path;
+                    Router._lastURL = path;
                     break;
             }
-            return this._firstLevel;
+            return Router._firstLevel;
         };
         Router.route = function (path) {
-            var current = this.getCurrent();
-            var next = this.trigger('route:before', path, current);
+            var current = Router.getCurrent();
+            var next = Router.trigger('route:before', path, current);
             if (next === false) {
                 return false;
             }
-            if (this._firstLevel._options.mode === 'node') {
-                this.check(path);
+            if (Router._firstLevel._options.mode === 'node') {
+                Router.check(path);
             }
-            this.navigate(path);
-            this.trigger('route:after', path, current);
+            Router.navigate(path);
+            Router.trigger('route:after', path, current);
             return true;
         };
         Router.config = function (options) {
-            return this._firstLevel.config(options);
+            return Router._firstLevel.config(options);
         };
         Router.to = function (alias) {
-            return this._firstLevel.to(alias);
+            return Router._firstLevel.to(alias);
         };
         Router.add = function (path, callback) {
-            return this._firstLevel.add(path, callback);
+            return Router._firstLevel.add(path, callback);
         };
         Router.remove = function (alias) {
-            return this._firstLevel.remove(alias);
+            return Router._firstLevel.remove(alias);
         };
         Router.getCurrent = function () {
-            var mode = this._firstLevel._options.mode;
-            var root = this._firstLevel._options.root;
-            var fragment = this._lastURL;
+            var mode = Router._firstLevel._options.mode;
+            var root = Router._firstLevel._options.root;
+            var fragment = Router._lastURL;
             if (mode === 'history') {
                 fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
                 fragment = fragment.replace(/\?(.*)$/, '');
@@ -281,11 +280,11 @@ var prouter;
          * @returns {History} this history
          */
         Router.on = function (evt, callback) {
-            if (this._eventHandlers[evt] === undefined) {
-                this._eventHandlers[evt] = [];
+            if (Router._eventHandlers[evt] === undefined) {
+                Router._eventHandlers[evt] = [];
             }
-            this._eventHandlers[evt].push(callback);
-            return this;
+            Router._eventHandlers[evt].push(callback);
+            return Router;
         };
         /**
          * Remove event listener.
@@ -295,25 +294,25 @@ var prouter;
          */
         Router.off = function (evt, callback) {
             if (evt === undefined) {
-                this._eventHandlers = {};
+                Router._eventHandlers = {};
             }
-            else if (this._eventHandlers[evt]) {
+            else if (Router._eventHandlers[evt]) {
                 if (callback) {
-                    var callbacks = this._eventHandlers[evt];
+                    var callbacks = Router._eventHandlers[evt];
                     for (var i = 0; i < callbacks.length; i++) {
                         if (callbacks[i] === callback) {
                             callbacks.splice(i, 1);
                         }
                     }
                     if (callbacks.length === 0) {
-                        delete this._eventHandlers[evt];
+                        delete Router._eventHandlers[evt];
                     }
                 }
                 else {
-                    delete this._eventHandlers[evt];
+                    delete Router._eventHandlers[evt];
                 }
             }
-            return this;
+            return Router;
         };
         /**
          * Events triggering.
@@ -325,7 +324,7 @@ var prouter;
             for (var _i = 1; _i < arguments.length; _i++) {
                 restParams[_i - 1] = arguments[_i];
             }
-            var callbacks = this._eventHandlers[evt];
+            var callbacks = Router._eventHandlers[evt];
             if (!callbacks || !callbacks.length) {
                 return null;
             }
@@ -355,7 +354,7 @@ var prouter;
                 if (nodeRoute.rootRerouting) {
                     falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
                 }
-                this._applyNested(nodeRoute.routes)(falseToReject);
+                Router._applyNested(nodeRoute.routes)(falseToReject);
             }
         };
         Router._firstLevel = new RoutingLevel();

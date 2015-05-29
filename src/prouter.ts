@@ -262,85 +262,85 @@ module prouter {
         private static _listening = false;
 
         static drop(): RoutingLevel {
-            this._lastURL = '';
-            this.off();
-            return this._firstLevel.drop();
+            Router._lastURL = '';
+            Router.off();
+            return Router._firstLevel.drop();
         }
 
         static _listen() {
-            if (this._listening) {
+            if (Router._listening) {
                 throw new Error('Prouter already listening');
             }
             _global.addEventListener('hashchange', () => {
-                const current = this.getCurrent();
-                this.check(current);
+                const current = Router.getCurrent();
+                Router.check(current);
             }, false);
             _global.addEventListener('popstate', (evt: PopStateEvent) => {
                 if (evt.state !== null && evt.state !== undefined) {
-                    const current = this.getCurrent();
-                    this.check(current);
+                    const current = Router.getCurrent();
+                    Router.check(current);
                 }
             }, false);
-            this._listening = true;
+            Router._listening = true;
         }
 
         static check(path: string): RoutingLevel {
-            const nodeRoutes = this._firstLevel.check(path, [], this._lastURL);
-            this._apply(nodeRoutes);
-            return this._firstLevel;
+            const nodeRoutes = Router._firstLevel.check(path, [], Router._lastURL);
+            Router._apply(nodeRoutes);
+            return Router._firstLevel;
         }
 
         static navigate(path: string): RoutingLevel {
-            const mode = this._firstLevel._options.mode;
+            const mode = Router._firstLevel._options.mode;
             switch (mode) {
                 case 'history':
-                    _global.history.pushState(null, null, this._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                    _global.history.pushState(null, null, Router._firstLevel._options.root + RouteHelper._clearSlashes(path));
                     break;
                 case 'hash':
                     _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
                     break;
                 case 'node':
-                    this._lastURL = path;
+                    Router._lastURL = path;
                     break;
             }
-            return this._firstLevel;
+            return Router._firstLevel;
         }
 
         static route(path: string): boolean {
-            const current = this.getCurrent();
-            const next = this.trigger('route:before', path, current);
+            const current = Router.getCurrent();
+            const next = Router.trigger('route:before', path, current);
             if (next === false) {
                 return false;
             }
-            if (this._firstLevel._options.mode === 'node') {
-                this.check(path);
+            if (Router._firstLevel._options.mode === 'node') {
+                Router.check(path);
             }
-            this.navigate(path);
-            this.trigger('route:after', path, current);
+            Router.navigate(path);
+            Router.trigger('route:after', path, current);
             return true;
         }
 
         static config(options: Options): RoutingLevel {
-            return this._firstLevel.config(options);
+            return Router._firstLevel.config(options);
         }
 
         static to(alias: string): RoutingLevel {
-            return this._firstLevel.to(alias);
+            return Router._firstLevel.to(alias);
         }
 
         static add(path: any, callback?: Function): RoutingLevel {
-            return this._firstLevel.add(path, callback);
+            return Router._firstLevel.add(path, callback);
         }
 
         static remove(alias: string): RoutingLevel {
-            return this._firstLevel.remove(alias);
+            return Router._firstLevel.remove(alias);
         }
 
         static getCurrent(): string {
 
-            const mode = this._firstLevel._options.mode;
-            const root = this._firstLevel._options.root;
-            let fragment = this._lastURL;
+            const mode = Router._firstLevel._options.mode;
+            const root = Router._firstLevel._options.root;
+            let fragment = Router._lastURL;
 
             if (mode === 'history') {
                 fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
@@ -363,11 +363,11 @@ module prouter {
          * @returns {History} this history
          */
         static on(evt: string, callback: Function): Router {
-            if (this._eventHandlers[evt] === undefined) {
-                this._eventHandlers[evt] = [];
+            if (Router._eventHandlers[evt] === undefined) {
+                Router._eventHandlers[evt] = [];
             }
-            this._eventHandlers[evt].push(callback);
-            return this;
+            Router._eventHandlers[evt].push(callback);
+            return Router;
         }
 
         /**
@@ -378,23 +378,23 @@ module prouter {
          */
         static off(evt?: string, callback?: Function): Router {
             if (evt === undefined) {
-                this._eventHandlers = {};
-            } else if (this._eventHandlers[evt]) {
+                Router._eventHandlers = {};
+            } else if (Router._eventHandlers[evt]) {
                 if (callback) {
-                    const callbacks = this._eventHandlers[evt];
+                    const callbacks = Router._eventHandlers[evt];
                     for (let i = 0; i < callbacks.length; i++) {
                         if (callbacks[i] === callback) {
                             callbacks.splice(i, 1);
                         }
                     }
                     if (callbacks.length === 0) {
-                        delete this._eventHandlers[evt];
+                        delete Router._eventHandlers[evt];
                     }
                 } else {
-                    delete this._eventHandlers[evt];
+                    delete Router._eventHandlers[evt];
                 }
             }
-            return this;
+            return Router;
         }
     
         /**
@@ -403,7 +403,7 @@ module prouter {
          * @return {boolean} null if not suscriptors, false if the event was cancelled for some suscriptor, true otherwise.
          */
         static trigger(evt: string, ...restParams: any[]): boolean {
-            const callbacks = this._eventHandlers[evt];
+            const callbacks = Router._eventHandlers[evt];
             if (!callbacks || !callbacks.length) {
                 return null;
             }
@@ -434,7 +434,7 @@ module prouter {
                 if (nodeRoute.rootRerouting) {
                     falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
                 }
-                this._applyNested(nodeRoute.routes)(falseToReject);
+                Router._applyNested(nodeRoute.routes)(falseToReject);
             }
         }
     }
