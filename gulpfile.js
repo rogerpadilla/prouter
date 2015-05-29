@@ -53,8 +53,6 @@ function reportError(error, taskName) {
         title: title,
         message: message,
         sound: true
-    }, function (err, response) {
-      process.exit();
     });
     if (this.emit) {
         this.emit('end');
