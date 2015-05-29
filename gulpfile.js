@@ -61,9 +61,9 @@ function reportError(error, taskName) {
     }
 }
 
-function compileTs(srcFilePath, callback) {
+function compileTs(srcFiles, callback) {
     var self = this;
-    var args = tsArr.concat(srcFilePath);     
+    var args = tsArr.concat(srcFiles);     
     var tsc = spawn('node', args);
     tsc.stdout.on('data', function(data) {
         reportError.call(self, data);
@@ -131,18 +131,12 @@ gulp.task('compile', function (done) {
     compileTs.call(this, 'src/' + mainFileName + '.ts', done);
 });  
 
-gulp.task('build', ['clean'], function (done) {
+gulp.task('build', function (done) {
     runSequence(['lint', 'compile'], ['script:minify', 'test'], done);
 });
 
 gulp.task('dev', ['build'], function () {   
-    var self = this;
-    gulp.watch(['src/' + mainFileName + '.ts'], function (evt) {
-        runSequence('lint');
-        compileTs.call(self, evt.path, function() {
-            runSequence(['script:minify', 'test']);
-        });
-    });
+    gulp.watch(['src/' + mainFileName + '.ts'], ['build']);
 });
 
-gulp.task('default', ['dev']);
+gulp.task('default', ['build']);
