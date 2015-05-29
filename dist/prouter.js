@@ -5,7 +5,7 @@
   } else if (typeof exports === 'object') {
     module.exports = factory(require, exports, module);
   } else {
-    root.Router = factory();
+    root.Prouter = factory();
   }
 }(this, function(require, exports, module) {
 
@@ -129,6 +129,7 @@ var RoutingLevel = (function () {
                 params = RouteHelper._prepareArguments(params, keys);
                 var shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
                 var nodeRoute = {
+                    alias: route.alias,
                     callback: route.callback,
                     params: params,
                     routes: [],
@@ -178,102 +179,138 @@ var RoutingLevel = (function () {
     };
     return RoutingLevel;
 })();
-var Router = (function (facade) {
-    var lastURL = '';
-    var rollback = false;
-    var router = {
-        drop: function () {
-            lastURL = '';
-            return facade.drop();
-        },
-        listen: function () {
-            var _this = this;
-            _global.addEventListener('hashchange', function () {
+var Prouter = (function () {
+    function Prouter() {
+    }
+    Prouter.drop = function () {
+        this._lastURL = '';
+        return this._firstLevel.drop();
+    };
+    Prouter.listen = function () {
+        var _this = this;
+        if (this._listening) {
+            throw new Error('Prouter already listening');
+        }
+        _global.addEventListener('hashchange', function () {
+            var current = _this.getCurrent();
+            _this.check(current);
+        }, false);
+        _global.addEventListener('popstate', function (evt) {
+            if (evt.state !== null && evt.state !== undefined) {
                 var current = _this.getCurrent();
                 _this.check(current);
-            }, false);
-            _global.addEventListener('popstate', function (evt) {
-                if (evt.state !== null && evt.state !== undefined) {
-                    var current = _this.getCurrent();
-                    _this.check(current);
-                }
-            }, false);
-        },
-        check: function (path) {
-            var nodeRoutes = facade.check(path, [], lastURL);
-            apply(nodeRoutes);
-            return facade;
-        },
-        navigate: function (path) {
-            var mode = facade._options.mode;
-            switch (mode) {
-                case 'history':
-                    _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
-                    break;
-                case 'hash':
-                    _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
-                    break;
-                case 'node':
-                    lastURL = path;
-                    break;
             }
-            return facade;
-        },
-        route: function (path) {
-            if (facade._options.mode === 'node') {
-                this.check(path);
-            }
-            if (!rollback) {
-                this.navigate(path);
-            }
-            rollback = false;
-            return facade;
-        },
-        config: function (options) {
-            return facade.config(options);
-        },
-        to: function (alias) {
-            return facade.to(alias);
-        },
-        add: function (path, callback) {
-            return facade.add(path, callback);
-        },
-        remove: function (alias) {
-            return facade.remove(alias);
-        },
-        getCurrent: function () {
-            var mode = facade._options.mode;
-            var root = facade._options.root;
-            var fragment = lastURL;
-            if (mode === 'history') {
-                fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
-                fragment = fragment.replace(/\?(.*)$/, '');
-                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-                fragment = RouteHelper._clearSlashes(fragment);
-            }
-            else if (mode === 'hash') {
-                var match = _global.location.href.match(/#(.*)$/);
-                fragment = match ? match[1] : '';
-                fragment = RouteHelper._clearSlashes(fragment);
-            }
-            return fragment;
-        }
+        }, false);
+        this._listening = true;
     };
-    function applyNested(nodeRoutes) {
+    Prouter.check = function (path) {
+        var nodeRoutes = this._firstLevel.check(path, [], this._lastURL);
+        this._apply(nodeRoutes);
+        return this._firstLevel;
+    };
+    Prouter.navigate = function (path) {
+        var mode = this._firstLevel._options.mode;
+        switch (mode) {
+            case 'history':
+                _global.history.pushState(null, null, this._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                break;
+            case 'hash':
+                _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
+                break;
+            case 'node':
+                this._lastURL = path;
+                break;
+        }
+        return this._firstLevel;
+    };
+    Prouter.route = function (path) {
+        if (this._firstLevel._options.mode === 'node') {
+            this.check(path);
+        }
+        if (!this._rollback) {
+            this.navigate(path);
+        }
+        this._rollback = false;
+        return this._firstLevel;
+    };
+    Prouter.config = function (options) {
+        return this._firstLevel.config(options);
+    };
+    Prouter.to = function (alias) {
+        return this._firstLevel.to(alias);
+    };
+    Prouter.add = function (path, callback) {
+        return this._firstLevel.add(path, callback);
+    };
+    Prouter.remove = function (alias) {
+        return this._firstLevel.remove(alias);
+    };
+    Prouter.getCurrent = function () {
+        var mode = this._firstLevel._options.mode;
+        var root = this._firstLevel._options.root;
+        var fragment = this._lastURL;
+        if (mode === 'history') {
+            fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+            fragment = fragment.replace(/\?(.*)$/, '');
+            fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+            fragment = RouteHelper._clearSlashes(fragment);
+        }
+        else if (mode === 'hash') {
+            var match = _global.location.href.match(/#(.*)$/);
+            fragment = match ? match[1] : '';
+            fragment = RouteHelper._clearSlashes(fragment);
+        }
+        return fragment;
+    };
+    /**
+     * Add event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    Prouter.on = function (evt, callback) {
+        if (this._eventHandlers[evt] === undefined) {
+            this._eventHandlers[evt] = [];
+        }
+        this._eventHandlers[evt].push(callback);
+        return this;
+    };
+    /**
+     * Remove event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    Prouter.off = function (evt, callback) {
+        if (this._eventHandlers[evt]) {
+            var callbacks = this._eventHandlers[evt];
+            for (var i = 0; i < callbacks.length; i++) {
+                if (callbacks[i] === callback) {
+                    callbacks.splice(i, 1);
+                    if (callbacks.length === 0) {
+                        delete this._eventHandlers[evt];
+                    }
+                    break;
+                }
+            }
+        }
+        return this;
+    };
+    Prouter._applyNested = function (nodeRoutes) {
         return function (param) {
             if (param === false) {
-                rollback = true;
-                router.navigate(lastURL);
+                Prouter._rollback = true;
+                Prouter.navigate(Prouter._lastURL);
             }
             else if (typeof param === 'string') {
-                router.route(param);
+                Prouter.route(param);
             }
             else if (nodeRoutes && nodeRoutes.length) {
-                apply(nodeRoutes);
+                Prouter._apply(nodeRoutes);
             }
         };
-    }
-    function apply(nodeRoutes) {
+    };
+    Prouter._apply = function (nodeRoutes) {
         if (nodeRoutes) {
             var falseToReject;
             for (var i = 0; i < nodeRoutes.length; i += 1) {
@@ -281,14 +318,19 @@ var Router = (function (facade) {
                 if (nodeRoute.rootRerouting) {
                     falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
                 }
-                applyNested(nodeRoute.routes)(falseToReject);
+                this._applyNested(nodeRoute.routes)(falseToReject);
             }
         }
-    }
-    return router;
-})(new RoutingLevel());
+    };
+    Prouter._firstLevel = new RoutingLevel();
+    Prouter._eventHandlers = {};
+    Prouter._lastURL = '';
+    Prouter._rollback = false;
+    Prouter._listening = false;
+    return Prouter;
+})();
 
-return Router;
+return Prouter;
 
 }));
 

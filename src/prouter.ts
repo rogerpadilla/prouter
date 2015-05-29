@@ -21,6 +21,7 @@ interface Route {
  * Contract for entry handler.
  */
 interface NodeRoute {
+    alias: string;
     callback: Function;
     params: Object[];
     routes: NodeRoute[];
@@ -42,6 +43,13 @@ interface Options {
  */
 export interface ObjectParam {
     [index: string]: any;
+}
+
+/**
+ * Contract for event handler.
+ */
+interface EventHandler {
+    [index: string]: Function[];
 }
 
 
@@ -80,8 +88,8 @@ class RouteHelper {
         route = route.replace(_ESCAPE_REG_EXP, '\\$&')
             .replace(_OPTIONAL_PARAM, '(?:$1)?')
             .replace(_NAMED_PARAM, function(match, optional) {
-                return optional ? match : '([^/?]+)';
-            })
+            return optional ? match : '([^/?]+)';
+        })
             .replace(_SPLAT_PARAM, '([^?]*)');
         return new RegExp('^' + route + '(?:\\?*([^/]*))');
     }
@@ -190,6 +198,7 @@ class RoutingLevel {
                 const shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
 
                 const nodeRoute: NodeRoute = {
+                    alias: route.alias,
                     callback: route.callback,
                     params: params,
                     routes: [],
@@ -247,118 +256,155 @@ class RoutingLevel {
 }
 
 
-const Router = (function(facade: RoutingLevel) {
+class Prouter {
 
-    let lastURL = '';
-    let rollback = false;
+    private static _firstLevel = new RoutingLevel();
+    private static _eventHandlers: EventHandler = {};
+    private static _lastURL = '';
+    private static _rollback = false;
+    private static _listening = false;    
 
-    const router = {
+    static drop(): RoutingLevel {
+        this._lastURL = '';
+        return this._firstLevel.drop();
+    }
 
-        drop(): RoutingLevel {
-            lastURL = '';
-            return facade.drop();
-        },
-
-        listen() {
-
-            _global.addEventListener('hashchange', () => {
+    static listen() {
+        if (this._listening) {
+            throw new Error('Prouter already listening');
+        }
+        _global.addEventListener('hashchange', () => {
+            const current = this.getCurrent();
+            this.check(current);
+        }, false);
+        _global.addEventListener('popstate', (evt: PopStateEvent) => {
+            if (evt.state !== null && evt.state !== undefined) {
                 const current = this.getCurrent();
                 this.check(current);
-            }, false);
-
-            _global.addEventListener('popstate', (evt: PopStateEvent) => {
-                if (evt.state !== null && evt.state !== undefined) {
-                    const current = this.getCurrent();
-                    this.check(current);
-                }
-            }, false);
-        },
-
-        check(path: string): RoutingLevel {
-            const nodeRoutes = facade.check(path, [], lastURL);
-            apply(nodeRoutes);
-            return facade;
-        },
-
-        navigate(path: string): RoutingLevel {
-            const mode = facade._options.mode;
-            switch (mode) {
-                case 'history':
-                    _global.history.pushState(null, null, facade._options.root + RouteHelper._clearSlashes(path));
-                    break;
-                case 'hash':
-                    _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
-                    break;
-                case 'node':
-                    lastURL = path;
-                    break;
             }
-            return facade;
-        },
+        }, false);
+        this._listening = true;
+    }
 
-        route(path: string): RoutingLevel {
-            if (facade._options.mode === 'node') {
-                this.check(path);
-            }
-            if (!rollback) {
-                this.navigate(path);
-            }
-            rollback = false;
-            return facade;
-        },
+    static check(path: string): RoutingLevel {
+        const nodeRoutes = this._firstLevel.check(path, [], this._lastURL);
+        this._apply(nodeRoutes);
+        return this._firstLevel;
+    }
 
-        config(options: Options): RoutingLevel {
-            return facade.config(options);
-        },
-
-        to(alias: string): RoutingLevel {
-            return facade.to(alias);
-        },
-
-        add(path: any, callback?: Function): RoutingLevel {
-            return facade.add(path, callback);
-        },
-
-        remove(alias: string): RoutingLevel {
-            return facade.remove(alias);
-        },
-
-        getCurrent(): string {
-
-            const mode = facade._options.mode;
-            const root = facade._options.root;
-            let fragment = lastURL;
-
-            if (mode === 'history') {
-                fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
-                fragment = fragment.replace(/\?(.*)$/, '');
-                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-                fragment = RouteHelper._clearSlashes(fragment);
-            } else if (mode === 'hash') {
-                const match = _global.location.href.match(/#(.*)$/);
-                fragment = match ? match[1] : '';
-                fragment = RouteHelper._clearSlashes(fragment);
-            }
-
-            return fragment;
+    static navigate(path: string): RoutingLevel {
+        const mode = this._firstLevel._options.mode;
+        switch (mode) {
+            case 'history':
+                _global.history.pushState(null, null, this._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                break;
+            case 'hash':
+                _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
+                break;
+            case 'node':
+                this._lastURL = path;
+                break;
         }
-    };
+        return this._firstLevel;
+    }
 
+    static route(path: string): RoutingLevel {
+        if (this._firstLevel._options.mode === 'node') {
+            this.check(path);
+        }
+        if (!this._rollback) {
+            this.navigate(path);
+        }
+        this._rollback = false;
+        return this._firstLevel;
+    }
 
-    function applyNested(nodeRoutes: NodeRoute[]): Function {
+    static config(options: Options): RoutingLevel {
+        return this._firstLevel.config(options);
+    }
+
+    static to(alias: string): RoutingLevel {
+        return this._firstLevel.to(alias);
+    }
+
+    static add(path: any, callback?: Function): RoutingLevel {
+        return this._firstLevel.add(path, callback);
+    }
+
+    static remove(alias: string): RoutingLevel {
+        return this._firstLevel.remove(alias);
+    }
+
+    static getCurrent(): string {
+
+        const mode = this._firstLevel._options.mode;
+        const root = this._firstLevel._options.root;
+        let fragment = this._lastURL;
+
+        if (mode === 'history') {
+            fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+            fragment = fragment.replace(/\?(.*)$/, '');
+            fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+            fragment = RouteHelper._clearSlashes(fragment);
+        } else if (mode === 'hash') {
+            const match = _global.location.href.match(/#(.*)$/);
+            fragment = match ? match[1] : '';
+            fragment = RouteHelper._clearSlashes(fragment);
+        }
+
+        return fragment;
+    }
+    
+    /**
+     * Add event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    static on(evt: string, callback: Function): Prouter {
+        if (this._eventHandlers[evt] === undefined) {
+            this._eventHandlers[evt] = [];
+        }
+        this._eventHandlers[evt].push(callback);
+        return this;
+    }
+
+    /**
+     * Remove event listener.
+     * @param {string} evt Name of the event.
+     * @param {Function} callback Method.
+     * @returns {History} this history
+     */
+    static off(evt: string, callback: Function): Prouter {
+        if (this._eventHandlers[evt]) {
+            const callbacks = this._eventHandlers[evt];
+            for (let i = 0; i < callbacks.length; i++) {
+                if (callbacks[i] === callback) {
+                    callbacks.splice(i, 1);
+                    if (callbacks.length === 0) {
+                        delete this._eventHandlers[evt];
+                    }
+                    break;
+                }
+            }
+        }
+        return this;
+    }
+    
+    private static _applyNested(nodeRoutes: NodeRoute[]): Function {
         return function(param: any) {
             if (param === false) {
-                rollback = true;
-                router.navigate(lastURL);
+                Prouter._rollback = true;
+                Prouter.navigate(Prouter._lastURL);
             } else if (typeof param === 'string') {
-                router.route(param);
+                Prouter.route(param);
             } else if (nodeRoutes && nodeRoutes.length) {
-                apply(nodeRoutes);
+                Prouter._apply(nodeRoutes);
             }
         };
     }
 
-    function apply(nodeRoutes: NodeRoute[]) {
+    private static _apply(nodeRoutes: NodeRoute[]) {
         if (nodeRoutes) {
             let falseToReject: boolean;
             for (let i = 0; i < nodeRoutes.length; i += 1) {
@@ -366,11 +412,8 @@ const Router = (function(facade: RoutingLevel) {
                 if (nodeRoute.rootRerouting) {
                     falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
                 }
-                applyNested(nodeRoute.routes)(falseToReject);
+                this._applyNested(nodeRoute.routes)(falseToReject);
             }
         }
     }
-
-    return router;
-
-})(new RoutingLevel());
+}

@@ -28,7 +28,7 @@ var tsArr = [tscPath];
 for (var prop in tsConfig.compilerOptions) {
     tsArr.push('--' + prop);
     var val = tsConfig.compilerOptions[prop];
-    if (Object.prototype.toString.call(val) === '[object String]') {
+    if (typeof val === 'string') {
         tsArr.push(val);
     }
 }
@@ -112,7 +112,7 @@ gulp.task('script', function () {
         .pipe(sourcemaps.init({
         loadMaps: true
     }))
-        .pipe(wrap({ namespace: 'Router', exports: 'Router' }))
+        .pipe(wrap({ namespace: 'Prouter', exports: 'Prouter' }))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist'));
 });
@@ -138,7 +138,9 @@ gulp.task('build', function (done) {
 gulp.task('dev', ['build'], function () {
     var self = this;
     gulp.watch(tsConfig.files, function(evt) {
-        build.call(self, evt.path, console.log);
+        build.call(self, evt.path, function() {
+            console.log('Compiled file: ', evt.path);
+        });
     });
 });
 
