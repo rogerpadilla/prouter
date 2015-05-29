@@ -15,7 +15,7 @@ interface Route {
     callback: Function;
     keys: string[];
     alias: string;
-    facade: RoutingLevel;
+    facade?: RoutingLevel;
 }
 /**
  * Contract for entry handler.
@@ -53,8 +53,7 @@ const _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
 
 const _MODES = ['node', 'hash', 'history'];
-const _DEF_OPTIONS: Options = { mode: 'node', keys: true, root: '/', rerouting: true };
-const _DEF_OPTIONS_STR = JSON.stringify(_DEF_OPTIONS);
+const _DEF_OPTIONS: Options = { mode: 'hash', keys: true, root: '/', rerouting: true };
 
 // Caches for common regexp.
 const _OPTIONAL_PARAM = /\((.*?)\)/g;
@@ -102,7 +101,7 @@ class RouteHelper {
     }
 
     private static _parseQuery(qstr: string): Object {
-        const query = {};
+        const query: any = {};
         const params = qstr.split('&');
         for (let i = 0; i < params.length; i++) {
             const pair = params[i].split('=');
@@ -138,7 +137,7 @@ class RouteHelper {
 class RoutingLevel {
 
     _routes: Route[] = [];
-    _options: Options = JSON.parse(_DEF_OPTIONS_STR);
+    _options: Options = JSON.parse(JSON.stringify(_DEF_OPTIONS));
 
     add(path: any, callback?: Function): RoutingLevel {
 
@@ -158,8 +157,7 @@ class RoutingLevel {
             path: re,
             callback: callback,
             keys: keys,
-            alias: path,
-            facade: null
+            alias: path
         });
 
         return this;
@@ -224,6 +222,7 @@ class RoutingLevel {
             this._options.keys = options.keys;
             this._options.mode = options.mode ? options.mode : this._options.mode;
             this._options.root = options.root ? '/' + RouteHelper._clearSlashes(options.root) + '/' : this._options.root;
+            this._options.root = this._options.root.replace(/\/{2,}/, "/");
             this._options.rerouting = options.rerouting;
         }
         return this;
@@ -276,7 +275,8 @@ const Router = (function(facade: RoutingLevel) {
         },
 
         check(path: string): RoutingLevel {
-            apply(facade.check(path, [], lastURL));
+            const nodeRoutes = facade.check(path, [], lastURL);
+            apply(nodeRoutes);
             return facade;
         },
 

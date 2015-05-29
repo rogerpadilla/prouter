@@ -1,3 +1,5 @@
+_DEF_OPTIONS.mode = 'node';
+
 describe("Routing", function() {
 
   beforeEach(function() {
@@ -58,7 +60,7 @@ describe("Routing", function() {
   it("Expression routing with parameters", function(done) {
     Router.add('/about/:id', function(params) {
       params.should.be.a('object');
-      (params.id).should.equal('16');
+      params.id.should.equal('16');
       done();
     });
 

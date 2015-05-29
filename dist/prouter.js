@@ -9,11 +9,13 @@
   }
 }(this, function(require, exports, module) {
 
+// Establish the root object, `window` (`self`) in the browser, or `global` on the server.
+// We use `self` instead of `window` for `WebWorker` support.
 var _global = (typeof self === 'object' && self.self === self && self) ||
     (typeof global === 'object' && global.global === global && global);
 var _MODES = ['node', 'hash', 'history'];
-var _DEF_OPTIONS = { mode: 'node', keys: true, root: '/', rerouting: true };
-var _DEF_OPTIONS_STR = JSON.stringify(_DEF_OPTIONS);
+var _DEF_OPTIONS = { mode: 'hash', keys: true, root: '/', rerouting: true };
+// Caches for common regexp.
 var _OPTIONAL_PARAM = /\((.*?)\)/g;
 var _NAMED_PARAM = /(\(\?)?:\w+/g;
 var _SPLAT_PARAM = /\*\w+/g;
@@ -86,11 +88,12 @@ var RouteHelper = (function () {
 var RoutingLevel = (function () {
     function RoutingLevel() {
         this._routes = [];
-        this._options = JSON.parse(_DEF_OPTIONS_STR);
+        this._options = JSON.parse(JSON.stringify(_DEF_OPTIONS));
     }
     RoutingLevel.prototype.add = function (path, callback) {
         var keys;
         var re;
+        // If default route.
         if (typeof path === 'function') {
             callback = path;
             re = /.*/;
@@ -103,8 +106,7 @@ var RoutingLevel = (function () {
             path: re,
             callback: callback,
             keys: keys,
-            alias: path,
-            facade: null
+            alias: path
         });
         return this;
     };
@@ -153,6 +155,7 @@ var RoutingLevel = (function () {
             this._options.keys = options.keys;
             this._options.mode = options.mode ? options.mode : this._options.mode;
             this._options.root = options.root ? '/' + RouteHelper._clearSlashes(options.root) + '/' : this._options.root;
+            this._options.root = this._options.root.replace(/\/{2,}/, "/");
             this._options.rerouting = options.rerouting;
         }
         return this;
@@ -197,7 +200,8 @@ var Router = (function (facade) {
             }, false);
         },
         check: function (path) {
-            apply(facade.check(path, [], lastURL));
+            var nodeRoutes = facade.check(path, [], lastURL);
+            apply(nodeRoutes);
             return facade;
         },
         navigate: function (path) {
