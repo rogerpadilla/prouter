@@ -131,15 +131,16 @@ gulp.task('compile', function (done) {
     compileTs.call(this, 'src/' + mainFileName + '.ts', done);
 });  
 
-gulp.task('build', function (done) {
+gulp.task('build', ['clean'], function (done) {
     runSequence(['lint', 'compile'], ['script:minify', 'test'], done);
 });
 
 gulp.task('dev', ['build'], function () {   
     var self = this;
     gulp.watch(['src/' + mainFileName + '.ts'], function (evt) {
+        runSequence('lint');
         compileTs.call(self, evt.path, function() {
-            runSequence('build');
+            runSequence(['script:minify', 'test']);
         });
     });
 });
