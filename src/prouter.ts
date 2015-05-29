@@ -391,6 +391,26 @@ class Prouter {
         return this;
     }
     
+    /**
+     * Events triggering.
+     * @param {string} evt Name of the event being triggered.
+     * @return {boolean} null if not suscriptors, false if the event was cancelled for some suscriptor, true otherwise.
+     */
+    static trigger(evt: string, ...restParams: any[]): boolean {
+        const callbacks = this._eventHandlers[evt];
+        if (callbacks === undefined || !callbacks.length) {
+            return null;
+        }
+        for (let i = 0; i < callbacks.length; i++) {
+            const respIt = callbacks[i].apply(this, restParams);
+            // check if some listener cancelled the event.
+            if (respIt === false) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private static _applyNested(nodeRoutes: NodeRoute[]): Function {
         return function(param: any) {
             if (param === false) {
