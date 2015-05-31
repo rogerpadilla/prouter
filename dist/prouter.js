@@ -281,10 +281,14 @@ var prouter;
             return this;
         };
         Router.reset = function () {
-            _global.removeEventListener('hashchange', this._loadCurrent, false);
-            _global.removeEventListener('popstate', this._loadCurrent, false);
-            _global.history.pushState(null, null, this._options.root);
-            _global.location.hash = '#';
+            if (this._options.mode === 'history') {
+                _global.removeEventListener('popstate', this._loadCurrent, false);
+                _global.history.pushState(null, null, this._options.root);
+            }
+            else {
+                _global.removeEventListener('hashchange', this._loadCurrent, false);
+                _global.location.hash = '#';
+            }
             this._handlers = [];
             this._listening = false;
             return this;
@@ -304,7 +308,6 @@ var prouter;
                 path: pathExp,
                 activate: activate
             });
-            return this;
         };
         Router.getCurrent = function () {
             var mode = this._options.mode;
@@ -386,6 +389,14 @@ var prouter;
         return Router;
     })();
     prouter.Router = Router;
+    var RouteGroup = (function () {
+        function RouteGroup() {
+            this._handlers = [];
+            this.use = Router.use;
+        }
+        return RouteGroup;
+    })();
+    prouter.RouteGroup = RouteGroup;
 })(prouter || (prouter = {}));
 
 return prouter;

@@ -50,11 +50,15 @@ declare module prouter {
         static listen(options: Options): Router;
         static config(options: Options): Router;
         static reset(): Router;
-        static use(path: any, activate?: any): Router;
+        static use(path: any, activate?: any): void;
         static getCurrent(): string;
         static navigate(path: string): Router;
         private static _loadCurrent();
         private static _load(path);
         private static _obtainNodeRoutes(fragment);
+    }
+    class RouteGroup {
+        private _handlers;
+        use: typeof Router.use;
     }
 }

@@ -383,16 +383,19 @@ module prouter {
         }
 
         static reset(): Router {
-            _global.removeEventListener('hashchange', this._loadCurrent, false);
-            _global.removeEventListener('popstate', this._loadCurrent, false);
-            _global.history.pushState(null, null, this._options.root);
-            _global.location.hash = '#';
+            if (this._options.mode === 'history') {
+                _global.removeEventListener('popstate', this._loadCurrent, false);
+                _global.history.pushState(null, null, this._options.root);
+            } else {
+                _global.removeEventListener('hashchange', this._loadCurrent, false);
+                _global.location.hash = '#';
+            }
             this._handlers = [];
             this._listening = false;
             return this;
         }
 
-        static use(path: any, activate?: any): Router {
+        static use(path: any, activate?: any) {
 
             let pathExp: PathExp;
 
@@ -409,8 +412,6 @@ module prouter {
                 path: pathExp,
                 activate: activate
             });
-
-            return this;
         }
 
         static getCurrent(): string {
@@ -510,5 +511,10 @@ module prouter {
 
             return nodeRoutes;
         }
+    }
+
+    export class RouteGroup {
+        private _handlers: Handler[] = [];
+        use = Router.use;
     }
 }
