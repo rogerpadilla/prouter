@@ -7,22 +7,17 @@ module prouter {
     /**
      * Contract for entry handler.
      */
-    export interface Route {
+    export interface Handler {
         path: PathExp;
-        callback: Function;
-        alias: string;
-        facade?: RoutingLevel;
+        activate: Function;
     }
     
     /**
      * Contract for entry handler.
      */
     export interface NodeRoute {
-        alias: string;
-        callback: Function;
-        params: Request;
-        routes: NodeRoute[];
-        rootRerouting: boolean;
+        activate: Function;
+        request: Request;
     }
 
     /**
@@ -31,9 +26,8 @@ module prouter {
     export interface Options {
         mode?: string;
         root?: string;
-        rerouting?: boolean;
     }
-    
+
     export interface ParsedPath {
         path: string;
         query: Object;
@@ -45,6 +39,7 @@ module prouter {
      */
     export interface Request extends ParsedPath {
         params?: Object;
+        old?: string;
     }
 
     export interface PathExpToken {
@@ -71,8 +66,8 @@ module prouter {
     const _global = (typeof self === 'object' && self.self === self && self) ||
         (typeof global === 'object' && global.global === global && global);
 
-    const _MODES = ['node', 'hash', 'history'];
-    const _DEF_OPTIONS: Options = { mode: 'hash', root: '/', rerouting: true };
+    const _MODES = ['hash', 'history'];
+    const _DEF_OPTIONS: Options = { mode: 'hash', root: '/' };
 
 
     /**
@@ -119,7 +114,7 @@ module prouter {
             return group.replace(/([=!:$\/()])/g, '\\$1');
         }
 
-        static _clearSlashes(path: string): string {
+        static clearSlashes(path: string): string {
             return path.replace(/\/$/, '').replace(/^\//, '');
         }
 
@@ -134,36 +129,36 @@ module prouter {
         
         /**
          * Parse a string for the raw tokens.
-         * @param  {String} str
+         * @param  {String} path
          * @return {Array} tokens.
          */
-        private static _parse(str: string): any[] {
+        private static _parse(path: string): any[] {
 
             const tokens: any[] = [];
             let key = 0;
             let index = 0;
-            let path = '';
+            let pathIt = '';
             let res: RegExpExecArray;
 
-            while ((res = PATH_STRIPPER.exec(str))) {
+            while ((res = PATH_STRIPPER.exec(path))) {
 
                 const m = res[0];
                 const escaped = res[1];
                 const offset = res.index;
 
-                path += str.slice(index, offset);
+                pathIt += path.slice(index, offset);
                 index = offset + m.length;
 
                 // Ignore already escaped sequences.
                 if (escaped) {
-                    path += escaped[1];
+                    pathIt += escaped[1];
                     continue;
                 }
 
                 // Push the current path onto the tokens.
-                if (path) {
-                    tokens.push(path);
-                    path = '';
+                if (pathIt) {
+                    tokens.push(pathIt);
+                    pathIt = '';
                 }
 
                 const prefix = res[2];
@@ -189,13 +184,13 @@ module prouter {
             }
 
             // Match any characters still remaining.
-            if (index < str.length) {
-                path += str.substr(index);
+            if (index < path.length) {
+                pathIt += path.substr(index);
             }
 
             // If the path exists, push it onto the end.
-            if (path) {
-                tokens.push(path);
+            if (pathIt) {
+                tokens.push(pathIt);
             }
 
             return tokens;
@@ -263,11 +258,11 @@ module prouter {
 
             return new RegExp('^' + route, RouteHelper._flags(options));
         }
-        
+
         static parseSearchString(search: string): Object {
             const searchParams = {};
             if (search.charAt(0) === '?') {
-                search = search.slice(1);                    
+                search = search.slice(1);
             }
             const paramsArr = search.split('&');
             for (let i = 0; i < paramsArr.length; i++) {
@@ -276,25 +271,25 @@ module prouter {
             }
             return searchParams;
         }
-        
+
         static parsePath(path: string): ParsedPath {
-            
-            path = RouteHelper._clearSlashes(path);
-            
+
             let parser: any;
-            
+
             if (typeof _global.URL === 'function') {
                 parser = new _global.URL(path, 'http://example.com');
             } else {
                 parser = document.createElement('a');
                 parser.href = 'http://example.com/' + path;
-            }                                   
-            
-            return {               
-                path: parser.pathname,
+            }
+
+            const parsedPath: ParsedPath = {
+                path: RouteHelper.clearSlashes(parser.pathname),
                 query: RouteHelper.parseSearchString(parser.search),
-                queryString: parser.search                
+                queryString: parser.search
             };
+
+            return parsedPath;
         }           
         
         /**
@@ -306,9 +301,9 @@ module prouter {
          * @private
          */
         static extractRequest(path: string, pathExp: PathExp): Request {
-            
-            const request: Request = RouteHelper.parsePath(path);   
-            request.params = {};        
+
+            const request: Request = RouteHelper.parsePath(path);
+            request.params = {};
 
             const result = pathExp.exec(request.path);
 
@@ -317,10 +312,12 @@ module prouter {
             }
 
             const args = result.slice(1);
-            const keys = pathExp.keys;                        
+            const keys = pathExp.keys;
 
             for (let i = 0; i < args.length; i++) {
-                request.params[keys[i].name] = _global.decodeURIComponent(args[i]);
+                if (args[i] !== undefined) {
+                    request.params[keys[i].name] = _global.decodeURIComponent(args[i]);
+                }
             }
 
             return request;
@@ -336,8 +333,8 @@ module prouter {
 
             const tokens = RouteHelper._parse(path);
 
-            const pathExp = RouteHelper._tokensToPathExp(tokens, options);  
-            
+            const pathExp = RouteHelper._tokensToPathExp(tokens, options);
+
             const keys: PathExpToken[] = [];                     
 
             // Attach keys back to the regexp.
@@ -350,20 +347,31 @@ module prouter {
             pathExp.keys = keys;
 
             return pathExp;
-        }                                     
+        }
     }
 
 
-    export class RoutingLevel {
+    export class Router {
 
-        _routes: Route[] = [];
-        _options: Options = {};
+        private static _handlers: Handler[] = [];
+        private static _options: Options = {};
+        private static _listening = false;
 
-        constructor(_options: Options = {}) {
-            this.config(_options);
+        static listen(options: Options): Router {
+            if (this._listening) {
+                throw new Error('Router already listening.');
+            }
+            this._listening = true;
+            this.config(options);
+            if (this._options.mode === 'history') {
+                _global.addEventListener('popstate', this._loadCurrent, false);
+            } else {
+                _global.addEventListener('hashchange', this._loadCurrent, false);
+            }
+            return this;
         }
 
-        config(options: Options): RoutingLevel {
+        static config(options: Options): Router {
             for (let prop in _DEF_OPTIONS) {
                 if (options[prop] !== undefined) {
                     this._options[prop] = options[prop];
@@ -374,286 +382,133 @@ module prouter {
             return this;
         }
 
-        add(path: any, callback?: Function): RoutingLevel {
+        static reset(): Router {
+            _global.removeEventListener('hashchange', this._loadCurrent, false);
+            _global.removeEventListener('popstate', this._loadCurrent, false);
+            _global.history.pushState(null, null, this._options.root);
+            _global.location.hash = '#';
+            this._handlers = [];
+            this._listening = false;
+            return this;
+        }
 
-            let re: PathExp;
+        static use(path: any, activate?: any): Router {
+
+            let pathExp: PathExp;
 
             // If default route.
             if (typeof path === 'function') {
-                callback = path;
-                re = /.*/;
+                activate = path;
+                pathExp = /.*/;
             } else {
-                re = RouteHelper.stringToPathExp(path);
+                path = RouteHelper.clearSlashes(path);
+                pathExp = RouteHelper.stringToPathExp(path);
             }
 
-            this._routes.push({
-                path: re,
-                callback: callback,
-                alias: path
+            this._handlers.push({
+                path: pathExp,
+                activate: activate
             });
 
             return this;
         }
 
-        remove(alias: any): RoutingLevel {
+        static getCurrent(): string {
 
-            for (let i = this._routes.length - 1; i >= 0; i--) {
-                const r = this._routes[i];
-                if (alias === r.alias || alias === r.callback || alias === r.path) {
-                    this._routes.splice(i, 1);
-                }
+            const mode = this._options.mode;
+            const root = this._options.root;
+            let fragment: string;
+
+            if (mode === 'history') {
+                fragment = RouteHelper.clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+                fragment = fragment.replace(/\?(.*)$/, '');
+                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+            } else {
+                const match = _global.location.href.match(/#(.*)$/);
+                fragment = match ? match[1] : '';
+            }
+
+            fragment = RouteHelper.clearSlashes(fragment);
+
+            return fragment;
+        }
+
+        static navigate(path: string): Router {
+
+            path = RouteHelper.clearSlashes(path);
+
+            const mode = this._options.mode;
+
+            switch (mode) {
+                case 'history':
+                    this._load(path);
+                    _global.history.pushState(null, null, this._options.root + path);
+                    break;
+                case 'hash':
+                    const oldPath = this.getCurrent();
+                    // Force load since 'hashchange' event is not triggered if the path has not changed
+                    if (path === oldPath) {
+                        this._load(path);
+                    }
+                    _global.location.hash = '#' + path;
+                    break;
             }
 
             return this;
         }
 
-        check(fragment: string, nodeRoutes: NodeRoute[], lastURL: string): NodeRoute[] {
+        private static _loadCurrent(): boolean {
+            const path = this.getCurrent();
+            return this._load(path);
+        }
 
-            for (let i = 0; i < this._routes.length; i++) {
+        private static _load(path: string): boolean {
 
-                const route = this._routes[i];
-                const match = fragment.match(route.path);
+            const nodeRoutes = this._obtainNodeRoutes(path);
+            const nodeRoutesLength = nodeRoutes.length;
+            const current = this.getCurrent();
+
+            let count = 0;
+
+            for (let i = 0; i < nodeRoutesLength; i++) {
+                const nodeRoute = nodeRoutes[i];
+                nodeRoute.request.old = current;
+                const next = nodeRoute.activate.call(null, nodeRoute.request);
+                if (next === false) {
+                    break;
+                } else {
+                    count++;
+                }
+            }
+
+            return count > 0;
+        }
+
+        private static _obtainNodeRoutes(fragment: string): NodeRoute[] {
+
+            const parsedPath = RouteHelper.parsePath(fragment);
+
+            const nodeRoutes: NodeRoute[] = [];
+
+            for (let i = 0; i < this._handlers.length; i++) {
+
+                const route = this._handlers[i];
+                const match = parsedPath.path.match(route.path);
 
                 if (match) {
 
                     const params = RouteHelper.extractRequest(fragment, route.path);
-                    const shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
 
                     const nodeRoute: NodeRoute = {
-                        alias: route.alias,
-                        callback: route.callback,
-                        params: params,
-                        routes: [],
-                        rootRerouting: this._options.rerouting || shouldReroute
+                        activate: route.activate,
+                        request: params
                     };
 
                     nodeRoutes.push(nodeRoute);
-
-                    if (route.facade) {
-                        fragment = fragment.slice(match[0].length, fragment.length);
-                        lastURL = lastURL.slice(match[0].length, lastURL.length);
-                        route.facade.check(fragment, nodeRoute.routes, lastURL);
-                    }
-
-                    break;
                 }
             }
 
             return nodeRoutes;
         }
-
-        drop(): RoutingLevel {
-            this._routes = [];
-            this.config(_DEF_OPTIONS);
-            return this;
-        }
-
-        to(alias: string): RoutingLevel {
-            let subrouter: RoutingLevel;
-            for (let i = 0; i < this._routes.length; i++) {
-                const route = this._routes[i];
-                if (alias === route.alias) {
-                    subrouter = route.facade;
-                    if (!subrouter) {
-                        subrouter = new RoutingLevel(this._options);
-                        route.facade = subrouter;
-                    }
-                    break;
-                }
-            }
-            return subrouter;
-        }
     }
-
-
-    export class Router {
-
-        private static facade = new RoutingLevel();
-        private static _eventHandlers: EventHandler = {};
-        private static _lastURL = '';
-        private static _listening = false;
-
-        static drop(): RoutingLevel {
-            Router._lastURL = '';
-            Router.off();
-            return Router.facade.drop();
-        }
-
-        static _listen() {
-            if (Router._listening) {
-                throw new Error('Prouter already listening');
-            }
-            _global.addEventListener('hashchange', () => {
-                const current = Router.getCurrent();
-                Router.check(current);
-            }, false);
-            _global.addEventListener('popstate', (evt: PopStateEvent) => {
-                if (evt.state !== null && evt.state !== undefined) {
-                    const current = Router.getCurrent();
-                    Router.check(current);
-                }
-            }, false);
-            Router._listening = true;
-        }
-
-        static check(path: string): RoutingLevel {
-            const nodeRoutes = Router.facade.check(path, [], Router._lastURL);
-            Router._apply(nodeRoutes);
-            return Router.facade;
-        }
-
-        static navigate(path: string): RoutingLevel {
-            const mode = Router.facade._options.mode;
-            switch (mode) {
-                case 'history':
-                    _global.history.pushState(null, null, Router.facade._options.root + RouteHelper._clearSlashes(path));
-                    break;
-                case 'hash':
-                    _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
-                    break;
-                case 'node':
-                    Router._lastURL = path;
-                    break;
-            }
-            return Router.facade;
-        }
-
-        static route(path: string): boolean {            
-            const current = Router.getCurrent();
-            const next = Router.trigger('route:before', path, current);
-            console.log('route current', current);
-            if (next === false) {
-                return false;
-            }            
-            Router.check(path);
-            Router.navigate(path);            
-            Router.trigger('route:after', path, current);
-            console.log('route path', path);
-            return true;
-        }
-
-        static config(options: Options): RoutingLevel {
-            return Router.facade.config(options);
-        }
-
-        static to(alias: string): RoutingLevel {
-            return Router.facade.to(alias);
-        }
-
-        static add(path: any, callback?: Function): RoutingLevel {
-            return Router.facade.add(path, callback);
-        }
-
-        static remove(alias: string): RoutingLevel {
-            return Router.facade.remove(alias);
-        }
-
-        static getCurrent(): string {
-
-            const mode = Router.facade._options.mode;
-            const root = Router.facade._options.root;
-            let fragment: string;
-
-            if (mode === 'history') {
-                fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
-                fragment = fragment.replace(/\?(.*)$/, '');
-                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-                fragment = RouteHelper._clearSlashes(fragment);
-            } else if (mode === 'hash') {
-                const match = _global.location.href.match(/#(.*)$/);
-                fragment = match ? match[1] : '';
-                fragment = RouteHelper._clearSlashes(fragment);
-            } else {
-                fragment = Router._lastURL;
-            }
-
-            return fragment;
-        }
-    
-        /**
-         * Add event listener.
-         * @param {string} evt Name of the event.
-         * @param {Function} callback Method.
-         * @returns {History} this history
-         */
-        static on(evt: string, callback: Function): Router {
-            if (Router._eventHandlers[evt] === undefined) {
-                Router._eventHandlers[evt] = [];
-            }
-            Router._eventHandlers[evt].push(callback);
-            return Router;
-        }
-
-        /**
-         * Remove event listener.
-         * @param {string} evt Name of the event.
-         * @param {Function} callback Method.
-         * @returns {History} this history
-         */
-        static off(evt?: string, callback?: Function): Router {
-            if (evt === undefined) {
-                Router._eventHandlers = {};
-            } else if (Router._eventHandlers[evt]) {
-                if (callback) {
-                    const callbacks = Router._eventHandlers[evt];
-                    for (let i = 0; i < callbacks.length; i++) {
-                        if (callbacks[i] === callback) {
-                            callbacks.splice(i, 1);
-                        }
-                    }
-                    if (callbacks.length === 0) {
-                        delete Router._eventHandlers[evt];
-                    }
-                } else {
-                    delete Router._eventHandlers[evt];
-                }
-            }
-            return Router;
-        }
-    
-        /**
-         * Events triggering.
-         * @param {string} evt Name of the event being triggered.
-         * @return {boolean} null if not suscriptors, false if the event was cancelled for some suscriptor, true otherwise.
-         */
-        static trigger(evt: string, ...restParams: any[]): boolean {
-            const callbacks = Router._eventHandlers[evt];
-            if (!callbacks || !callbacks.length) {
-                return null;
-            }
-            for (let i = 0; i < callbacks.length; i++) {
-                const respIt = callbacks[i].apply(null, restParams);          
-                // check if some listener cancelled the event.
-                if (respIt === false) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private static _applyNested(nodeRoutes: NodeRoute[]): Function {
-            return function(param: any) {
-                if (typeof param === 'string') {
-                    Router.route(param);
-                } else if (nodeRoutes && nodeRoutes.length) {
-                    Router._apply(nodeRoutes);
-                }
-            };
-        }
-
-        private static _apply(nodeRoutes: NodeRoute[]) {
-            let falseToReject: boolean;
-            for (let i = 0; i < nodeRoutes.length; i++) {
-                const nodeRoute = nodeRoutes[i];
-                if (nodeRoute.rootRerouting) {
-                    falseToReject = nodeRoute.callback.call(null, nodeRoute.params);
-                }
-                Router._applyNested(nodeRoute.routes)(falseToReject);
-            }
-        }
-    }
-
-
-    Router._listen();
-
 }

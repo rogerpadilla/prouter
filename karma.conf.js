@@ -28,8 +28,8 @@ module.exports = function (config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
-      'PhantomJS_without_security'
-//      , 'Chrome_without_security'
+//      'Chrome_without_security',
+      'PhantomJS_without_security'      
     ],
 
     // you can define custom flags
