@@ -1,22 +1,26 @@
 module prouter {
 
+    export interface PathExp extends RegExp {
+        keys?: PathExpToken[];
+    }
+
     /**
      * Contract for entry handler.
      */
     export interface Route {
-        path: RegExp;
+        path: PathExp;
         callback: Function;
-        keys: string[];
         alias: string;
         facade?: RoutingLevel;
     }
+    
     /**
      * Contract for entry handler.
      */
     export interface NodeRoute {
         alias: string;
         callback: Function;
-        params: Object[];
+        params: Request;
         routes: NodeRoute[];
         rootRerouting: boolean;
     }
@@ -26,16 +30,30 @@ module prouter {
      */
     export interface Options {
         mode?: string;
-        keys?: boolean;
         root?: string;
         rerouting?: boolean;
+    }
+    
+    export interface ParsedPath {
+        path: string;
+        query: Object;
+        queryString: string;
     }
 
     /**
      * Contract for object param.
      */
-    export interface ObjectParam {
-        [index: string]: any;
+    export interface Request extends ParsedPath {
+        params?: Object;
+    }
+
+    export interface PathExpToken {
+        name: string;
+        prefix: string;
+        delimiter: string;
+        optional: boolean;
+        repeat: boolean;
+        pattern: string;
     }
 
     /**
@@ -54,96 +72,295 @@ module prouter {
         (typeof global === 'object' && global.global === global && global);
 
     const _MODES = ['node', 'hash', 'history'];
-    const _DEF_OPTIONS: Options = { mode: 'hash', keys: true, root: '/', rerouting: true };
-
-    // Caches for common regexp.
-    const _OPTIONAL_PARAM = /\((.*?)\)/g;
-    const _NAMED_PARAM = /(\(\?)?:\w+/g;
-    const _SPLAT_PARAM = /\*\w+/g;
-    const _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+    const _DEF_OPTIONS: Options = { mode: 'hash', root: '/', rerouting: true };
 
 
-    class RouteHelper {
+    /**
+     * The main path matching regexp utility.
+     * @type {RegExp} path regexp.
+     */
+    const PATH_STRIPPER = new RegExp([
+    // Match escaped characters that would otherwise appear in future matches.
+    // This allows the user to escape special characters that won't transform.
+        '(\\\\.)',
+    // Match Express-style parameters and un-named parameters with a prefix
+    // and optional suffixes. Matches appear as:
+    //
+    // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+    // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+    // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+        '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
+    ].join('|'), 'g');
 
-        static _extractKeys(path: string): string[] {
-            const keys = path.match(/:([^\/]+)/g);
-            if (keys) {
-                const resp: string[] = [];
-                for (let i = 0; i < keys.length; i++) {
-                    resp[i] = keys[i].replace(/[:\(\)]/g, '');
-                }
-                return resp;
-            }
-            return null;
+    // Cached regex for stripping a leading hash/slash and trailing space.
+    const ROUTE_STRIPPER = /^[#\/]|\s+$/g;
+
+    // Cached regex for stripping urls of hash.
+    const HASH_STRIPPER = /#.*$/;
+
+
+    class RouteHelper {             
+
+        /**
+         * Escape a regular expression string.
+         * @param  {String} str the string to scape
+         * @return {String} the escaped string
+         */
+        private static _escapeString(str: string): string {
+            return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1');
         }
 
-        static _routeToRegExp(route: string): RegExp {
-            route = route.replace(_ESCAPE_REG_EXP, '\\$&')
-                .replace(_OPTIONAL_PARAM, '(?:$1)?')
-                .replace(_NAMED_PARAM, function(match, optional) {
-                return optional ? match : '([^/?]+)';
-            })
-                .replace(_SPLAT_PARAM, '([^?]*)');
-            return new RegExp('^' + route + '(?:\\?*([^/]*))');
+        /**
+         * Escape the capturing group by escaping special characters and meaning.
+         * @param  {String} group the group to escape
+         * @return {String} escaped group.
+         */
+        private static _escapeGroup(group: string): string {
+            return group.replace(/([=!:$\/()])/g, '\\$1');
         }
 
         static _clearSlashes(path: string): string {
             return path.replace(/\/$/, '').replace(/^\//, '');
         }
 
-        static _extractParameters(route: RegExp, fragment: string): Object[] {
-            const params = route.exec(fragment).slice(1);
-            const resp: Object[] = [];
-            if (params) {
-                const n = params.length - 1;
-                for (let i = 0; i < n; i++) {
-                    resp.push(params[i] || null);
+        /**
+         * Get the flags for a regexp from the options.
+         * @param  {Object} opts the options object for building the flags.
+         * @return {String} flags.
+         */
+        private static _flags(opts: Object): string {
+            return opts['sensitive'] ? '' : 'i';
+        }        
+        
+        /**
+         * Parse a string for the raw tokens.
+         * @param  {String} str
+         * @return {Array} tokens.
+         */
+        private static _parse(str: string): any[] {
+
+            const tokens: any[] = [];
+            let key = 0;
+            let index = 0;
+            let path = '';
+            let res: RegExpExecArray;
+
+            while ((res = PATH_STRIPPER.exec(str))) {
+
+                const m = res[0];
+                const escaped = res[1];
+                const offset = res.index;
+
+                path += str.slice(index, offset);
+                index = offset + m.length;
+
+                // Ignore already escaped sequences.
+                if (escaped) {
+                    path += escaped[1];
+                    continue;
                 }
-                resp.push(params[n] ? _global.decodeURIComponent(params[n]) : null);
+
+                // Push the current path onto the tokens.
+                if (path) {
+                    tokens.push(path);
+                    path = '';
+                }
+
+                const prefix = res[2];
+                const name = res[3];
+                const capture = res[4];
+                const group = res[5];
+                const suffix = res[6];
+                const asterisk = res[7];
+
+                const repeat = suffix === '+' || suffix === '*';
+                const optional = suffix === '?' || suffix === '*';
+                const delimiter = prefix || '/';
+                const pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?');
+
+                tokens.push({
+                    name: name || (key++).toString(),
+                    prefix: prefix || '',
+                    delimiter: delimiter,
+                    optional: optional,
+                    repeat: repeat,
+                    pattern: RouteHelper._escapeGroup(pattern)
+                });
             }
-            return resp;
+
+            // Match any characters still remaining.
+            if (index < str.length) {
+                path += str.substr(index);
+            }
+
+            // If the path exists, push it onto the end.
+            if (path) {
+                tokens.push(path);
+            }
+
+            return tokens;
         }
 
-        private static _parseQuery(qstr: string): Object {
-            const query: any = {};
-            const params = qstr.split('&');
-            for (let i = 0; i < params.length; i++) {
-                const pair = params[i].split('=');
-                const prop = _global.decodeURIComponent(pair[0]);
-                query[prop] = _global.decodeURIComponent(pair[1]);
+        /**
+         * Expose a function for taking tokens and returning a RegExp.
+         * @param  {Array}  tokens
+         * @param  {Object} options
+         * @return {RegExp} the regexp.
+         */
+        private static _tokensToPathExp(tokens: string[], options: Object = {}): PathExp {
+
+            const strict = options['strict'];
+            const end = options['end'] !== false;
+            let route = '';
+            const lastToken = tokens[tokens.length - 1];
+            const endsWithSlash = typeof lastToken === 'string' && lastToken.length && lastToken.charAt(lastToken.length - 1) === '/';
+
+            // Iterate over the tokens and create our regexp string.
+            for (let i = 0; i < tokens.length; i++) {
+
+                const token: any = tokens[i];
+
+                if (typeof token === 'string') {
+                    route += RouteHelper._escapeString(token);
+                } else {
+
+                    const prefix = RouteHelper._escapeString(token.prefix);
+                    let capture = token.pattern;
+
+                    if (token.repeat) {
+                        capture += '(?:' + prefix + capture + ')*';
+                    }
+
+                    if (token.optional) {
+                        if (prefix) {
+                            capture = '(?:' + prefix + '(' + capture + '))?';
+                        } else {
+                            capture = '(' + capture + ')?';
+                        }
+                    } else {
+                        capture = prefix + '(' + capture + ')';
+                    }
+
+                    route += capture;
+                }
             }
-            return query;
+
+            // In non-strict mode we allow a slash at the end of match. If the path to
+            // match already ends with a slash, we remove it for consistency. The slash
+            // is valid at the end of a path match, not in the middle. This is important
+            // in non-ending mode, where "/test/" shouldn't match "/test//route".
+            if (!strict) {
+                route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
+            }
+
+            if (end) {
+                route += '$';
+            } else {
+                // In non-ending mode, we need the capturing groups to match as much as
+                // possible by using a positive lookahead to the end or next path segment.
+                route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+            }
+
+            return new RegExp('^' + route, RouteHelper._flags(options));
+        }
+        
+        static parseSearchString(search: string): Object {
+            const searchParams = {};
+            if (search.charAt(0) === '?') {
+                search = search.slice(1);                    
+            }
+            const paramsArr = search.split('&');
+            for (let i = 0; i < paramsArr.length; i++) {
+                const pair = paramsArr[i].split('=');
+                searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            return searchParams;
+        }
+        
+        static parsePath(path: string): ParsedPath {
+            
+            path = RouteHelper._clearSlashes(path);
+            
+            let parser: any;
+            
+            if (typeof _global.URL === 'function') {
+                parser = new _global.URL(path, 'http://example.com');
+            } else {
+                parser = document.createElement('a');
+                parser.href = 'http://example.com/' + path;
+            }                                   
+            
+            return {               
+                path: parser.pathname,
+                query: RouteHelper.parseSearchString(parser.search),
+                queryString: parser.search                
+            };
+        }           
+        
+        /**
+         * Given a route, and a path that it matches, return the object of
+         * extracted decoded parameters.
+         * @param {string} path The uri's path part.
+         * @param {PathExp} route The alias         
+         * @returns {NavigationParams} the extracted parameters
+         * @private
+         */
+        static extractRequest(path: string, pathExp: PathExp): Request {
+            
+            const request: Request = RouteHelper.parsePath(path);   
+            request.params = {};        
+
+            const result = pathExp.exec(request.path);
+
+            if (!result) {
+                return request;
+            }
+
+            const args = result.slice(1);
+            const keys = pathExp.keys;                        
+
+            for (let i = 0; i < args.length; i++) {
+                request.params[keys[i].name] = _global.decodeURIComponent(args[i]);
+            }
+
+            return request;
         }
 
-        static _prepareArguments(parameters: any[], keys?: string[]): Object[] {
+        /**
+         * Create a path regexp from string input.
+         * @param  {String} path
+         * @param  {Object} options
+         * @return {RegExp} the regexp
+         */
+        static stringToPathExp(path: string, options?: Object): PathExp {
 
-            const lastIndex = parameters.length - 1;
-            const query = parameters[lastIndex];
+            const tokens = RouteHelper._parse(path);
 
-            if (keys && keys.length) {
-                const objectParam: ObjectParam = {};
-                for (let i = 0; i < keys.length; i++) {
-                    objectParam[keys[i]] = parameters[i];
+            const pathExp = RouteHelper._tokensToPathExp(tokens, options);  
+            
+            const keys: PathExpToken[] = [];                     
+
+            // Attach keys back to the regexp.
+            for (let i = 0; i < tokens.length; i++) {
+                if (typeof tokens[i] !== 'string') {
+                    keys.push(tokens[i]);
                 }
-                if (parameters[keys.length]) {
-                    objectParam['query'] = RouteHelper._parseQuery(parameters[keys.length]);
-                }
-                parameters = [objectParam];
-            } else if (query && query.indexOf('=') >= 0) {
-                parameters[lastIndex] = RouteHelper._parseQuery(query);
             }
 
-            return parameters;
-        }
+            pathExp.keys = keys;
+
+            return pathExp;
+        }                                     
     }
 
 
     export class RoutingLevel {
 
         _routes: Route[] = [];
+        _options: Options = {};
 
-        constructor(public _options: Options = {}) {
-            this.config(this._options);
+        constructor(_options: Options = {}) {
+            this.config(_options);
         }
 
         config(options: Options): RoutingLevel {
@@ -159,22 +376,19 @@ module prouter {
 
         add(path: any, callback?: Function): RoutingLevel {
 
-            let keys: string[];
-            let re: RegExp;
+            let re: PathExp;
 
             // If default route.
             if (typeof path === 'function') {
                 callback = path;
                 re = /.*/;
             } else {
-                keys = RouteHelper._extractKeys(path);
-                re = RouteHelper._routeToRegExp(path);
+                re = RouteHelper.stringToPathExp(path);
             }
 
             this._routes.push({
                 path: re,
                 callback: callback,
-                keys: keys,
                 alias: path
             });
 
@@ -202,9 +416,7 @@ module prouter {
 
                 if (match) {
 
-                    let params = RouteHelper._extractParameters(route.path, fragment);
-                    const keys = this._options.keys ? route.keys : null;
-                    params = RouteHelper._prepareArguments(params, keys);
+                    const params = RouteHelper.extractRequest(fragment, route.path);
                     const shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
 
                     const nodeRoute: NodeRoute = {
@@ -256,7 +468,7 @@ module prouter {
 
     export class Router {
 
-        private static _firstLevel = new RoutingLevel();
+        private static facade = new RoutingLevel();
         private static _eventHandlers: EventHandler = {};
         private static _lastURL = '';
         private static _listening = false;
@@ -264,7 +476,7 @@ module prouter {
         static drop(): RoutingLevel {
             Router._lastURL = '';
             Router.off();
-            return Router._firstLevel.drop();
+            return Router.facade.drop();
         }
 
         static _listen() {
@@ -285,16 +497,16 @@ module prouter {
         }
 
         static check(path: string): RoutingLevel {
-            const nodeRoutes = Router._firstLevel.check(path, [], Router._lastURL);
+            const nodeRoutes = Router.facade.check(path, [], Router._lastURL);
             Router._apply(nodeRoutes);
-            return Router._firstLevel;
+            return Router.facade;
         }
 
         static navigate(path: string): RoutingLevel {
-            const mode = Router._firstLevel._options.mode;
+            const mode = Router.facade._options.mode;
             switch (mode) {
                 case 'history':
-                    _global.history.pushState(null, null, Router._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                    _global.history.pushState(null, null, Router.facade._options.root + RouteHelper._clearSlashes(path));
                     break;
                 case 'hash':
                     _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
@@ -303,44 +515,44 @@ module prouter {
                     Router._lastURL = path;
                     break;
             }
-            return Router._firstLevel;
+            return Router.facade;
         }
 
-        static route(path: string): boolean {
+        static route(path: string): boolean {            
             const current = Router.getCurrent();
             const next = Router.trigger('route:before', path, current);
+            console.log('route current', current);
             if (next === false) {
                 return false;
-            }
-            if (Router._firstLevel._options.mode === 'node') {
-                Router.check(path);
-            }
-            Router.navigate(path);
+            }            
+            Router.check(path);
+            Router.navigate(path);            
             Router.trigger('route:after', path, current);
+            console.log('route path', path);
             return true;
         }
 
         static config(options: Options): RoutingLevel {
-            return Router._firstLevel.config(options);
+            return Router.facade.config(options);
         }
 
         static to(alias: string): RoutingLevel {
-            return Router._firstLevel.to(alias);
+            return Router.facade.to(alias);
         }
 
         static add(path: any, callback?: Function): RoutingLevel {
-            return Router._firstLevel.add(path, callback);
+            return Router.facade.add(path, callback);
         }
 
         static remove(alias: string): RoutingLevel {
-            return Router._firstLevel.remove(alias);
+            return Router.facade.remove(alias);
         }
 
         static getCurrent(): string {
 
-            const mode = Router._firstLevel._options.mode;
-            const root = Router._firstLevel._options.root;
-            let fragment = Router._lastURL;
+            const mode = Router.facade._options.mode;
+            const root = Router.facade._options.root;
+            let fragment: string;
 
             if (mode === 'history') {
                 fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
@@ -351,6 +563,8 @@ module prouter {
                 const match = _global.location.href.match(/#(.*)$/);
                 fragment = match ? match[1] : '';
                 fragment = RouteHelper._clearSlashes(fragment);
+            } else {
+                fragment = Router._lastURL;
             }
 
             return fragment;
@@ -432,7 +646,7 @@ module prouter {
             for (let i = 0; i < nodeRoutes.length; i++) {
                 const nodeRoute = nodeRoutes[i];
                 if (nodeRoute.rootRerouting) {
-                    falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
+                    falseToReject = nodeRoute.callback.call(null, nodeRoute.params);
                 }
                 Router._applyNested(nodeRoute.routes)(falseToReject);
             }

@@ -5,86 +5,246 @@ var prouter;
     var _global = (typeof self === 'object' && self.self === self && self) ||
         (typeof global === 'object' && global.global === global && global);
     var _MODES = ['node', 'hash', 'history'];
-    var _DEF_OPTIONS = { mode: 'hash', keys: true, root: '/', rerouting: true };
-    // Caches for common regexp.
-    var _OPTIONAL_PARAM = /\((.*?)\)/g;
-    var _NAMED_PARAM = /(\(\?)?:\w+/g;
-    var _SPLAT_PARAM = /\*\w+/g;
-    var _ESCAPE_REG_EXP = /[\-{}\[\]+?.,\\\^$|#\s]/g;
+    var _DEF_OPTIONS = { mode: 'hash', root: '/', rerouting: true };
+    /**
+     * The main path matching regexp utility.
+     * @type {RegExp} path regexp.
+     */
+    var PATH_STRIPPER = new RegExp([
+        // Match escaped characters that would otherwise appear in future matches.
+        // This allows the user to escape special characters that won't transform.
+        '(\\\\.)',
+        // Match Express-style parameters and un-named parameters with a prefix
+        // and optional suffixes. Matches appear as:
+        //
+        // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+        // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+        // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+        '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
+    ].join('|'), 'g');
+    // Cached regex for stripping a leading hash/slash and trailing space.
+    var ROUTE_STRIPPER = /^[#\/]|\s+$/g;
+    // Cached regex for stripping urls of hash.
+    var HASH_STRIPPER = /#.*$/;
     var RouteHelper = (function () {
         function RouteHelper() {
         }
-        RouteHelper._extractKeys = function (path) {
-            var keys = path.match(/:([^\/]+)/g);
-            if (keys) {
-                var resp = [];
-                for (var i = 0; i < keys.length; i++) {
-                    resp[i] = keys[i].replace(/[:\(\)]/g, '');
-                }
-                return resp;
-            }
-            return null;
+        /**
+         * Escape a regular expression string.
+         * @param  {String} str the string to scape
+         * @return {String} the escaped string
+         */
+        RouteHelper._escapeString = function (str) {
+            return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1');
         };
-        RouteHelper._routeToRegExp = function (route) {
-            route = route.replace(_ESCAPE_REG_EXP, '\\$&')
-                .replace(_OPTIONAL_PARAM, '(?:$1)?')
-                .replace(_NAMED_PARAM, function (match, optional) {
-                return optional ? match : '([^/?]+)';
-            })
-                .replace(_SPLAT_PARAM, '([^?]*)');
-            return new RegExp('^' + route + '(?:\\?*([^/]*))');
+        /**
+         * Escape the capturing group by escaping special characters and meaning.
+         * @param  {String} group the group to escape
+         * @return {String} escaped group.
+         */
+        RouteHelper._escapeGroup = function (group) {
+            return group.replace(/([=!:$\/()])/g, '\\$1');
         };
         RouteHelper._clearSlashes = function (path) {
             return path.replace(/\/$/, '').replace(/^\//, '');
         };
-        RouteHelper._extractParameters = function (route, fragment) {
-            var params = route.exec(fragment).slice(1);
-            var resp = [];
-            if (params) {
-                var n = params.length - 1;
-                for (var i = 0; i < n; i++) {
-                    resp.push(params[i] || null);
-                }
-                resp.push(params[n] ? _global.decodeURIComponent(params[n]) : null);
-            }
-            return resp;
+        /**
+         * Get the flags for a regexp from the options.
+         * @param  {Object} opts the options object for building the flags.
+         * @return {String} flags.
+         */
+        RouteHelper._flags = function (opts) {
+            return opts['sensitive'] ? '' : 'i';
         };
-        RouteHelper._parseQuery = function (qstr) {
-            var query = {};
-            var params = qstr.split('&');
-            for (var i = 0; i < params.length; i++) {
-                var pair = params[i].split('=');
-                var prop = _global.decodeURIComponent(pair[0]);
-                query[prop] = _global.decodeURIComponent(pair[1]);
+        /**
+         * Parse a string for the raw tokens.
+         * @param  {String} str
+         * @return {Array} tokens.
+         */
+        RouteHelper._parse = function (str) {
+            var tokens = [];
+            var key = 0;
+            var index = 0;
+            var path = '';
+            var res;
+            while ((res = PATH_STRIPPER.exec(str))) {
+                var m = res[0];
+                var escaped = res[1];
+                var offset = res.index;
+                path += str.slice(index, offset);
+                index = offset + m.length;
+                // Ignore already escaped sequences.
+                if (escaped) {
+                    path += escaped[1];
+                    continue;
+                }
+                // Push the current path onto the tokens.
+                if (path) {
+                    tokens.push(path);
+                    path = '';
+                }
+                var prefix = res[2];
+                var name_1 = res[3];
+                var capture = res[4];
+                var group = res[5];
+                var suffix = res[6];
+                var asterisk = res[7];
+                var repeat = suffix === '+' || suffix === '*';
+                var optional = suffix === '?' || suffix === '*';
+                var delimiter = prefix || '/';
+                var pattern = capture || group || (asterisk ? '.*' : '[^' + delimiter + ']+?');
+                tokens.push({
+                    name: name_1 || (key++).toString(),
+                    prefix: prefix || '',
+                    delimiter: delimiter,
+                    optional: optional,
+                    repeat: repeat,
+                    pattern: RouteHelper._escapeGroup(pattern)
+                });
             }
-            return query;
+            // Match any characters still remaining.
+            if (index < str.length) {
+                path += str.substr(index);
+            }
+            // If the path exists, push it onto the end.
+            if (path) {
+                tokens.push(path);
+            }
+            return tokens;
         };
-        RouteHelper._prepareArguments = function (parameters, keys) {
-            var lastIndex = parameters.length - 1;
-            var query = parameters[lastIndex];
-            if (keys && keys.length) {
-                var objectParam = {};
-                for (var i = 0; i < keys.length; i++) {
-                    objectParam[keys[i]] = parameters[i];
+        /**
+         * Expose a function for taking tokens and returning a RegExp.
+         * @param  {Array}  tokens
+         * @param  {Object} options
+         * @return {RegExp} the regexp.
+         */
+        RouteHelper._tokensToPathExp = function (tokens, options) {
+            if (options === void 0) { options = {}; }
+            var strict = options['strict'];
+            var end = options['end'] !== false;
+            var route = '';
+            var lastToken = tokens[tokens.length - 1];
+            var endsWithSlash = typeof lastToken === 'string' && lastToken.length && lastToken.charAt(lastToken.length - 1) === '/';
+            // Iterate over the tokens and create our regexp string.
+            for (var i = 0; i < tokens.length; i++) {
+                var token = tokens[i];
+                if (typeof token === 'string') {
+                    route += RouteHelper._escapeString(token);
                 }
-                if (parameters[keys.length]) {
-                    objectParam['query'] = RouteHelper._parseQuery(parameters[keys.length]);
+                else {
+                    var prefix = RouteHelper._escapeString(token.prefix);
+                    var capture = token.pattern;
+                    if (token.repeat) {
+                        capture += '(?:' + prefix + capture + ')*';
+                    }
+                    if (token.optional) {
+                        if (prefix) {
+                            capture = '(?:' + prefix + '(' + capture + '))?';
+                        }
+                        else {
+                            capture = '(' + capture + ')?';
+                        }
+                    }
+                    else {
+                        capture = prefix + '(' + capture + ')';
+                    }
+                    route += capture;
                 }
-                parameters = [objectParam];
             }
-            else if (query && query.indexOf('=') >= 0) {
-                parameters[lastIndex] = RouteHelper._parseQuery(query);
+            // In non-strict mode we allow a slash at the end of match. If the path to
+            // match already ends with a slash, we remove it for consistency. The slash
+            // is valid at the end of a path match, not in the middle. This is important
+            // in non-ending mode, where "/test/" shouldn't match "/test//route".
+            if (!strict) {
+                route = (endsWithSlash ? route.slice(0, -2) : route) + '(?:\\/(?=$))?';
             }
-            return parameters;
+            if (end) {
+                route += '$';
+            }
+            else {
+                // In non-ending mode, we need the capturing groups to match as much as
+                // possible by using a positive lookahead to the end or next path segment.
+                route += strict && endsWithSlash ? '' : '(?=\\/|$)';
+            }
+            return new RegExp('^' + route, RouteHelper._flags(options));
+        };
+        RouteHelper.parseSearchString = function (search) {
+            var searchParams = {};
+            if (search.charAt(0) === '?') {
+                search = search.slice(1);
+            }
+            var paramsArr = search.split('&');
+            for (var i = 0; i < paramsArr.length; i++) {
+                var pair = paramsArr[i].split('=');
+                searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            return searchParams;
+        };
+        RouteHelper.parsePath = function (path) {
+            path = RouteHelper._clearSlashes(path);
+            var parser;
+            if (typeof _global.URL === 'function') {
+                parser = new _global.URL(path, 'http://example.com');
+            }
+            else {
+                parser = document.createElement('a');
+                parser.href = 'http://example.com/' + path;
+            }
+            return {
+                path: parser.pathname,
+                query: RouteHelper.parseSearchString(parser.search),
+                queryString: parser.search
+            };
+        };
+        /**
+         * Given a route, and a path that it matches, return the object of
+         * extracted decoded parameters.
+         * @param {string} path The uri's path part.
+         * @param {PathExp} route The alias
+         * @returns {NavigationParams} the extracted parameters
+         * @private
+         */
+        RouteHelper.extractRequest = function (path, pathExp) {
+            var request = RouteHelper.parsePath(path);
+            request.params = {};
+            var result = pathExp.exec(request.path);
+            if (!result) {
+                return request;
+            }
+            var args = result.slice(1);
+            var keys = pathExp.keys;
+            for (var i = 0; i < args.length; i++) {
+                request.params[keys[i].name] = _global.decodeURIComponent(args[i]);
+            }
+            return request;
+        };
+        /**
+         * Create a path regexp from string input.
+         * @param  {String} path
+         * @param  {Object} options
+         * @return {RegExp} the regexp
+         */
+        RouteHelper.stringToPathExp = function (path, options) {
+            var tokens = RouteHelper._parse(path);
+            var pathExp = RouteHelper._tokensToPathExp(tokens, options);
+            var keys = [];
+            // Attach keys back to the regexp.
+            for (var i = 0; i < tokens.length; i++) {
+                if (typeof tokens[i] !== 'string') {
+                    keys.push(tokens[i]);
+                }
+            }
+            pathExp.keys = keys;
+            return pathExp;
         };
         return RouteHelper;
     })();
     var RoutingLevel = (function () {
         function RoutingLevel(_options) {
             if (_options === void 0) { _options = {}; }
-            this._options = _options;
             this._routes = [];
-            this.config(this._options);
+            this._options = {};
+            this.config(_options);
         }
         RoutingLevel.prototype.config = function (options) {
             for (var prop in _DEF_OPTIONS) {
@@ -98,7 +258,6 @@ var prouter;
             return this;
         };
         RoutingLevel.prototype.add = function (path, callback) {
-            var keys;
             var re;
             // If default route.
             if (typeof path === 'function') {
@@ -106,13 +265,11 @@ var prouter;
                 re = /.*/;
             }
             else {
-                keys = RouteHelper._extractKeys(path);
-                re = RouteHelper._routeToRegExp(path);
+                re = RouteHelper.stringToPathExp(path);
             }
             this._routes.push({
                 path: re,
                 callback: callback,
-                keys: keys,
                 alias: path
             });
             return this;
@@ -131,9 +288,7 @@ var prouter;
                 var route = this._routes[i];
                 var match = fragment.match(route.path);
                 if (match) {
-                    var params = RouteHelper._extractParameters(route.path, fragment);
-                    var keys = this._options.keys ? route.keys : null;
-                    params = RouteHelper._prepareArguments(params, keys);
+                    var params = RouteHelper.extractRequest(fragment, route.path);
                     var shouldReroute = (fragment.slice(0, match[0].length) !== lastURL.slice(0, match[0].length));
                     var nodeRoute = {
                         alias: route.alias,
@@ -182,7 +337,7 @@ var prouter;
         Router.drop = function () {
             Router._lastURL = '';
             Router.off();
-            return Router._firstLevel.drop();
+            return Router.facade.drop();
         };
         Router._listen = function () {
             if (Router._listening) {
@@ -201,15 +356,15 @@ var prouter;
             Router._listening = true;
         };
         Router.check = function (path) {
-            var nodeRoutes = Router._firstLevel.check(path, [], Router._lastURL);
+            var nodeRoutes = Router.facade.check(path, [], Router._lastURL);
             Router._apply(nodeRoutes);
-            return Router._firstLevel;
+            return Router.facade;
         };
         Router.navigate = function (path) {
-            var mode = Router._firstLevel._options.mode;
+            var mode = Router.facade._options.mode;
             switch (mode) {
                 case 'history':
-                    _global.history.pushState(null, null, Router._firstLevel._options.root + RouteHelper._clearSlashes(path));
+                    _global.history.pushState(null, null, Router.facade._options.root + RouteHelper._clearSlashes(path));
                     break;
                 case 'hash':
                     _global.location.href = _global.location.href.replace(/#(.*)$/, '') + '#' + path;
@@ -218,37 +373,37 @@ var prouter;
                     Router._lastURL = path;
                     break;
             }
-            return Router._firstLevel;
+            return Router.facade;
         };
         Router.route = function (path) {
             var current = Router.getCurrent();
             var next = Router.trigger('route:before', path, current);
+            console.log('route current', current);
             if (next === false) {
                 return false;
             }
-            if (Router._firstLevel._options.mode === 'node') {
-                Router.check(path);
-            }
+            Router.check(path);
             Router.navigate(path);
             Router.trigger('route:after', path, current);
+            console.log('route path', path);
             return true;
         };
         Router.config = function (options) {
-            return Router._firstLevel.config(options);
+            return Router.facade.config(options);
         };
         Router.to = function (alias) {
-            return Router._firstLevel.to(alias);
+            return Router.facade.to(alias);
         };
         Router.add = function (path, callback) {
-            return Router._firstLevel.add(path, callback);
+            return Router.facade.add(path, callback);
         };
         Router.remove = function (alias) {
-            return Router._firstLevel.remove(alias);
+            return Router.facade.remove(alias);
         };
         Router.getCurrent = function () {
-            var mode = Router._firstLevel._options.mode;
-            var root = Router._firstLevel._options.root;
-            var fragment = Router._lastURL;
+            var mode = Router.facade._options.mode;
+            var root = Router.facade._options.root;
+            var fragment;
             if (mode === 'history') {
                 fragment = RouteHelper._clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
                 fragment = fragment.replace(/\?(.*)$/, '');
@@ -259,6 +414,9 @@ var prouter;
                 var match = _global.location.href.match(/#(.*)$/);
                 fragment = match ? match[1] : '';
                 fragment = RouteHelper._clearSlashes(fragment);
+            }
+            else {
+                fragment = Router._lastURL;
             }
             return fragment;
         };
@@ -341,12 +499,12 @@ var prouter;
             for (var i = 0; i < nodeRoutes.length; i++) {
                 var nodeRoute = nodeRoutes[i];
                 if (nodeRoute.rootRerouting) {
-                    falseToReject = nodeRoute.callback.apply(null, nodeRoute.params);
+                    falseToReject = nodeRoute.callback.call(null, nodeRoute.params);
                 }
                 Router._applyNested(nodeRoute.routes)(falseToReject);
             }
         };
-        Router._firstLevel = new RoutingLevel();
+        Router.facade = new RoutingLevel();
         Router._eventHandlers = {};
         Router._lastURL = '';
         Router._listening = false;

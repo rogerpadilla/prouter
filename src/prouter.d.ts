@@ -1,11 +1,13 @@
 declare module prouter {
+    interface PathExp extends RegExp {
+        keys?: PathExpToken[];
+    }
     /**
      * Contract for entry handler.
      */
     interface Route {
-        path: RegExp;
+        path: PathExp;
         callback: Function;
-        keys: string[];
         alias: string;
         facade?: RoutingLevel;
     }
@@ -15,7 +17,7 @@ declare module prouter {
     interface NodeRoute {
         alias: string;
         callback: Function;
-        params: Object[];
+        params: Request;
         routes: NodeRoute[];
         rootRerouting: boolean;
     }
@@ -24,19 +26,31 @@ declare module prouter {
      */
     interface Options {
         mode?: string;
-        keys?: boolean;
         root?: string;
         rerouting?: boolean;
+    }
+    interface ParsedPath {
+        path: string;
+        query: Object;
+        queryString: string;
     }
     /**
      * Contract for object param.
      */
-    interface ObjectParam {
-        [index: string]: any;
+    interface Request extends ParsedPath {
+        params?: Object;
+    }
+    interface PathExpToken {
+        name: string;
+        prefix: string;
+        delimiter: string;
+        optional: boolean;
+        repeat: boolean;
+        pattern: string;
     }
     class RoutingLevel {
-        _options: Options;
         _routes: Route[];
+        _options: Options;
         constructor(_options?: Options);
         config(options: Options): RoutingLevel;
         add(path: any, callback?: Function): RoutingLevel;
@@ -46,7 +60,7 @@ declare module prouter {
         to(alias: string): RoutingLevel;
     }
     class Router {
-        private static _firstLevel;
+        private static facade;
         private static _eventHandlers;
         private static _lastURL;
         private static _listening;

@@ -2,7 +2,7 @@
 // For example:
 // npm install karma-firefox-launcher
 // karma start --browsers=Firefox
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
 
     frameworks: ['mocha', 'chai'],
@@ -27,7 +27,10 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS_without_security'],
+    browsers: [
+      'PhantomJS_without_security'
+//      , 'Chrome_without_security'
+    ],
 
     // you can define custom flags
     customLaunchers: {
