@@ -3,3 +3,4 @@
 /npm-debug.log
 /.coveralls.yml
 /.travis.yml
+/typings
