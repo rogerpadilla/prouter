@@ -29,19 +29,24 @@ module.exports = function (config) {
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
 //      'Chrome_without_security',
+//      'Firefox_without_security',
       'PhantomJS_without_security'      
     ],
 
     // you can define custom flags
     customLaunchers: {
-      PhantomJS_without_security: {
-        base: 'PhantomJS',
-        flags: ['--web-security=no']
-      },
       Chrome_without_security: {
         base: 'Chrome',
         flags: ['--disable-web-security']
-      }
+      },
+      Firefox_without_security: {
+        base: 'Firefox',
+        flags: ['--disable-web-security']
+      },
+      PhantomJS_without_security: {
+        base: 'PhantomJS',
+        flags: ['--web-security=no']
+      }      
     },
 
     // Continuous Integration mode
