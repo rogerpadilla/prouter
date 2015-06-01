@@ -32,7 +32,7 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-tslint": "^3.0.1-beta",
     "gulp-uglify": "^1.2.0",
-    "gulp-util": "^3.0.4",
+    "gulp-util": "^3.0.5",
     "gulp-wrap-umd": "^0.2.1",
     "karma": "^0.12.35",
     "karma-chai": "^0.1.0",
