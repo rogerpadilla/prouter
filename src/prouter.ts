@@ -1,19 +1,26 @@
+/**
+ * Unobtrusive, forward-thinking and lightweight JavaScript router library.
+ */
 module prouter {
 
+    /**
+     * Contracts for static type checking.
+     */
     export interface Options {
         mode?: string;
         root?: string;
+        silent?: boolean;
+    }
+
+    export interface Path {
+        path: string;
+        query: Object;
+        queryString: string;
     }
 
     export interface PathExp extends RegExp {
         keys?: PathExpToken[];
     }
-    
-    export interface Path {
-        path: string;
-        query: Object;
-        queryString: string;
-    }    
 
     export interface PathExpToken {
         name: string;
@@ -33,29 +40,37 @@ module prouter {
         path: any;
         activate: Function;
     }
-    
-    export interface Param {
+
+    export interface RequestParams {
         [index: string]: string;
     }
-    
+
     export interface Request extends Path {
-        params?: Param;
-        old?: string;
+        params?: RequestParams;
+        oldPath?: string;
     }
 
-    export interface RequestEvent {
-        activate: Function;
+    export interface RequestProcessor {
         request: Request;
-    }    
+        activate: Function;
+    }
 
+    /** @type {global} Allows to access the global var in the IDE, just for compilation. */
     declare const global: any;
 
-    // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
-    // We use `self` instead of `window` for `WebWorker` support.
+    /**
+     * Stablish the root object, `window` (`self`) in the browser, or `global` on the server.
+     * We use `self` instead of `window` for `WebWorker` support.
+     * @type {window} the root object
+     */
     const _global = (typeof self === 'object' && self.self === self && self) ||
         (typeof global === 'object' && global.global === global && global);
 
-    const _DEF_OPTIONS: Options = { mode: 'hash', root: '/' };
+    /** @type {RegExp} Cached regex for stripping out leading slashes. */
+    const LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
+
+    /** @type {RegExp} Cached regex for default route. */
+    const DEF_ROUTE = /.*/;
 
     /**
      * The main path matching regexp utility.
@@ -73,12 +88,12 @@ module prouter {
     // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
         '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
     ].join('|'), 'g');
-    
-    // Cached regex for default route.
-    const DEF_ROUTE = /.*/;
 
 
-    class RouteHelper {             
+    /**
+     * Collection of helpers for processing routes.
+     */
+    class RouteHelper {
 
         /**
          * Escape a regular expression string.
@@ -98,8 +113,13 @@ module prouter {
             return group.replace(/([=!:$\/()])/g, '\\$1');
         }
 
+        /**
+         * Removes leading slashes from the given string.
+         * @param  {string} path the uri fragment.
+         * @return {string} string without leading slashes.
+         */
         static clearSlashes(path: string): string {
-            return path.replace(/\/$/, '').replace(/^\//, '');
+            return path.replace(LEADING_SLASHES_STRIPPER, '');
         }
 
         /**
@@ -109,12 +129,12 @@ module prouter {
          */
         private static _flags(opts: Object): string {
             return opts['sensitive'] ? '' : 'i';
-        }        
-        
+        }
+
         /**
          * Parse a string for the raw tokens.
-         * @param  {String} path
-         * @return {Array} tokens.
+         * @param  {String} path the fragment to pase.
+         * @return {Array} tokens the extracted tokens.
          */
         private static _parse(path: string): any[] {
 
@@ -182,9 +202,9 @@ module prouter {
 
         /**
          * Expose a function for taking tokens and returning a RegExp.
-         * @param  {Array}  tokens
-         * @param  {Object} options
-         * @return {RegExp} the regexp.
+         * @param  {Array} tokens used for create the expression.
+         * @param  {Object} [options] configuration.
+         * @return {PathExp} the resulting path expression.
          */
         private static _tokensToPathExp(tokens: any[], options: Object = {}): PathExp {
 
@@ -243,12 +263,17 @@ module prouter {
             return new RegExp('^' + route, RouteHelper._flags(options));
         }
 
-        static parseSearchString(search: string): Object {
+        /**
+         * Transform a query-string to an object.
+         * @param  {string} search the query string.
+         * @return {Object} the resulting object.
+         */
+        static parseQuery(queryString: string): Object {
             const searchParams = {};
-            if (search.charAt(0) === '?') {
-                search = search.slice(1);
+            if (queryString.charAt(0) === '?') {
+                queryString = queryString.slice(1);
             }
-            const paramsArr = search.split('&');
+            const paramsArr = queryString.split('&');
             for (let i = 0; i < paramsArr.length; i++) {
                 const pair = paramsArr[i].split('=');
                 searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
@@ -256,6 +281,11 @@ module prouter {
             return searchParams;
         }
 
+        /**
+         * Transform a fragment to a Path object.
+         * @param  {string} path the fragment to parse.
+         * @return {Path} the resulting object.
+         */
         static parsePath(path: string): Path {
 
             let parser: any;
@@ -269,18 +299,18 @@ module prouter {
 
             const parsedPath: Path = {
                 path: RouteHelper.clearSlashes(parser.pathname),
-                query: RouteHelper.parseSearchString(parser.search),
+                query: RouteHelper.parseQuery(parser.search),
                 queryString: parser.search
             };
 
             return parsedPath;
-        }                           
+        }
 
         /**
          * Create a path regexp from string input.
-         * @param  {String} path
-         * @param  {Object} options
-         * @return {RegExp} the regexp
+         * @param  {String} path the given url fragment.
+         * @param  {Object} [options] configuration.
+         * @return {PathExp} the resulting path expression.
          */
         static stringToPathExp(path: string, options?: Object): PathExp {
 
@@ -288,7 +318,7 @@ module prouter {
 
             const pathExp = RouteHelper._tokensToPathExp(tokens, options);
 
-            pathExp.keys = [];                   
+            pathExp.keys = [];
 
             // Attach keys back to the regexp.
             for (let i = 0; i < tokens.length; i++) {
@@ -301,19 +331,42 @@ module prouter {
         }
     }
 
-
+    /**
+     * Core component for the routing system.
+     */
     export class Router {
 
+        /** @type {Options} Default options for initializing the router. */
+        private static _DEF_OPTIONS: Options = { mode: 'hash', root: '/', silent: false };
+        /** @type {Options} Options used when initializing the routing system. */
+        private static _options: Options;
+        /** @type {string} Current loaded path. */
+        private static _loadedPath: string;
+        /** @type {Handler[]} Handlers for the routing system. */
         private static _handlers: Handler[] = [];
-        private static _options: Options = {};
-        private static _listening = false;
 
-        static listen(options: Options): Router {
-            if (this._listening) {
+        /**
+         * Start the routing system, returning `true` if the current URL was loaded,
+         * and `false` otherwise.
+         * @param {Object} [options] Options
+         * @return {boolean} true if the current fragment matched some handler, false otherwise.
+         */
+        static listen(options: Options): boolean {
+
+            if (this._options) {
                 throw new Error('Router already listening.');
             }
-            this._listening = true;
-            this.config(options);
+
+            this._options = {};
+
+            for (let prop in Router._DEF_OPTIONS) {
+                if (options[prop] !== undefined) {
+                    this._options[prop] = options[prop];
+                } else if (this._options[prop] === undefined) {
+                    this._options[prop] = Router._DEF_OPTIONS[prop];
+                }
+            }
+
             switch (this._options.mode) {
                 case 'history':
                     addEventListener('popstate', this._loadCurrent, false);
@@ -324,20 +377,21 @@ module prouter {
                 default:
                     throw new Error("Invalid mode '" + this._options.mode + "'. Valid modes are: 'history', 'hash'.");
             }
-            return this;
-        }
 
-        static config(options: Options): Router {
-            for (let prop in _DEF_OPTIONS) {
-                if (options[prop] !== undefined) {
-                    this._options[prop] = options[prop];
-                } else if (this._options[prop] === undefined) {
-                    this._options[prop] = _DEF_OPTIONS[prop];
-                }
+            let loaded = false;
+
+            if (!this._options.silent) {
+                loaded = this._loadCurrent();
             }
-            return this;
+
+            return loaded;
         }
 
+        /**
+         * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
+         * Not useful in a real app; but useful for unit testing.
+         * @return {Router} the router.
+         */
         static stop(): Router {
             if (this._options.mode === 'history') {
                 removeEventListener('popstate', this._loadCurrent, false);
@@ -347,51 +401,41 @@ module prouter {
                 location.hash = '#';
             }
             this._handlers = [];
-            this._listening = false;
+            this._loadedPath = null;
+            this._options = null;
             return this;
-        }        
-
-        static getCurrent(): string {
-            
-            let fragment: string;
-
-            if (this._options.mode === 'history') {
-                const root = this._options.root;
-                fragment = RouteHelper.clearSlashes(decodeURI(location.pathname + location.search));
-                fragment = fragment.replace(/\?(.*)$/, '');
-                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
-            } else {
-                const match = location.href.match(/#(.*)$/);
-                fragment = match ? match[1] : '';
-            }
-
-            fragment = RouteHelper.clearSlashes(fragment);
-
-            return fragment;
         }
 
-        static navigate(path: string) {
+        /**
+         * Retrieve the current path without the root prefix.
+         * @return {string} the current path.
+         */
+        static getCurrent(): string {
+
+            let path: string;
+
+            if (this._options.mode === 'history') {
+                const decodedUri = decodeURI(location.pathname + location.search);
+                path = RouteHelper.clearSlashes(decodedUri);
+                path = this._options.root === '/' ? path : path.slice(this._options.root.length);
+            } else {
+                const match = location.href.match(/#(.*)$/);
+                path = match ? match[1] : '';
+            }
 
             path = RouteHelper.clearSlashes(path);
 
-            switch (this._options.mode) {
-                case 'history':
-                    this._load(path);
-                    history.pushState(null, null, this._options.root + path);
-                    break;
-                case 'hash':
-                    const oldPath = this.getCurrent();
-                    // If the path has not changed, force _loadPath since the 'hashchange' event will not be triggered.
-                    if (path === oldPath) {
-                        this._load(path);
-                    }
-                    location.hash = '#' + path;
-                    break;
-            }
+            return path;
         }
-        
+
+        /**
+         * Add the given middleware as a handler for the given path (defaulting to any path).
+         * @param {string|Function|RouteGroup} path the fragment or the callback.
+         * @param {Function|RouteGroup} [activate] the activate callback or the group of routes.
+         * @return {Router} the router.
+         */
         static use(path: any, activate?: any): Router {
-            
+
             if (activate instanceof RouteGroup || path instanceof RouteGroup) {
                 let parentPath: string;
                 if (path instanceof RouteGroup) {
@@ -399,7 +443,7 @@ module prouter {
                 } else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                this._handlers = this._obtainHandlers(parentPath, activate);
+                this._handlers = this._extractHandlers(parentPath, activate);
             } else {
                 let pathExp: PathExp;
                 // If default route.
@@ -410,39 +454,84 @@ module prouter {
                     path = RouteHelper.clearSlashes(path);
                     pathExp = RouteHelper.stringToPathExp(path);
                 }
-                this._handlers.push({pathExp, activate});
+                this._handlers.push({ pathExp, activate });
             }
-            
+
             return this;
         }
 
-        private static _loadCurrent(): boolean {
-            const path = this.getCurrent();
+        /**
+         * Change the current path and load it.
+         * @param {string} path The fragment to navigate to
+         * @returns {boolean} true if the path matched some handler, false otherwise.
+         */
+        static navigate(path: string): boolean {
+
+            if (!this._options) {
+                throw new Error("It is required to call the 'listen' function before navigating.");
+            }
+
+            path = RouteHelper.clearSlashes(path);
+
+            switch (this._options.mode) {
+                case 'history':
+                    history.pushState(null, null, this._options.root + path);
+                    break;
+                case 'hash':
+                    location.hash = '#' + path;
+                    break;
+            }
+
             return this._load(path);
         }
 
+        /**
+         * Load the current path if already not loaded.
+         * @return {boolean} true if loaded, false otherwise.
+         */
+        private static _loadCurrent(): boolean {
+            const currentPath = this.getCurrent();
+            return currentPath === this._loadedPath ? false : this._load(currentPath);
+        }
+
+        /**
+         * Attempt to load the given URL fragment. If a route succeeds with a
+         * match, returns `true`; if no defined routes matches the fragment,
+         * returns `false`.
+         * @param {string} path E.g.: 'user/pepito'
+         * @returns {boolean} true if the fragment matched some handler, false otherwise.
+         */
         private static _load(path: string): boolean {
 
             const requestProcessors = this._obtainRequestProcessors(path);
-            const current = this.getCurrent();
 
             let count = 0;
 
             for (let i = 0; i < requestProcessors.length; i++) {
                 const requestProcessor = requestProcessors[i];
-                requestProcessor.request.old = current;
+                requestProcessor.request.oldPath = this._loadedPath;
                 const next = requestProcessor.activate.call(null, requestProcessor.request);
                 if (next === false) {
                     break;
-                } else {
-                    count++;
                 }
+                count++;
             }
 
-            return count > 0;
-        }                
+            const navigated = count > 0;
 
-        private static _obtainHandlers(parentPath: string, routeGroup: RouteGroup, handlers: Handler[] = []): Handler[] {
+            this._loadedPath = path;
+
+            return navigated;
+        }
+
+        /**
+         * Extract the handlers from the given arguments.
+         * @param  {string} parentPath The parent path of the group of routes.
+         * @param  {RouteGroup} routeGroup The group of routes.
+         * @param  {Handler[]=[]} [handlers] The holder for extracted handlers.
+         * @return {Handler[]} The extracted handlers.
+         */
+        private static _extractHandlers(parentPath: string, routeGroup: RouteGroup, handlers: Handler[] = []): Handler[] {
 
             const groupHandlers = routeGroup._handlers;
 
@@ -479,16 +568,43 @@ module prouter {
 
             return handlers;
         }
-        
+
         /**
-         * Given a route, and a path that it matches, return the object of
-         * extracted decoded parameters.
-         * @param {string} path The uri's path part.
-         * @param {PathExp} route The alias         
-         * @returns {NavigationParams} the extracted parameters
-         * @private
+         * Obtain the request processors for the given path according to the current handlers in the router.
+         * @param  {string} path The url fragment to check.
+         * @return {RequestProcessor[]} The obtained request processors.
          */
-        private static _obtainRequest(path: string, pathExp: PathExp): Request {
+        private static _obtainRequestProcessors(path: string): RequestProcessor[] {
+
+            const parsedPath = RouteHelper.parsePath(path);
+
+            const requestProcessors: RequestProcessor[] = [];
+
+            for (let i = 0; i < this._handlers.length; i++) {
+
+                const handler = this._handlers[i];
+                const match = handler.pathExp.test(parsedPath.path);
+
+                if (match) {
+
+                    const request = this._extractRequest(path, handler.pathExp);
+
+                    const requestProcessor: RequestProcessor = { activate: handler.activate, request };
+
+                    requestProcessors.push(requestProcessor);
+                }
+            }
+
+            return requestProcessors;
+        }
+
+        /**
+         * Extract a request from the given arguments, using decoded parameters.
+         * @param {string} path The url fragment.
+         * @param {PathExp} [pathExp] The path expression.
+         * @returns {Request} The extracted request.
+         */
+        private static _extractRequest(path: string, pathExp?: PathExp): Request {
 
             const request: Request = RouteHelper.parsePath(path);
             request.params = {};
@@ -510,37 +626,25 @@ module prouter {
 
             return request;
         }
-
-        private static _obtainRequestProcessors(path: string): RequestEvent[] {
-
-            const parsedPath = RouteHelper.parsePath(path);
-
-            const requestProcessors: RequestEvent[] = [];
-
-            for (let i = 0; i < this._handlers.length; i++) {
-
-                const handler = this._handlers[i];
-                const match = handler.pathExp.test(parsedPath.path);
-
-                if (match) {
-
-                    const request = this._obtainRequest(path, handler.pathExp);
-
-                    const requestProcessor: RequestEvent = {activate: handler.activate, request};
-
-                    requestProcessors.push(requestProcessor);
-                }
-            }
-
-            return requestProcessors;
-        }
     }
 
-
+    /**
+     * Allows to use a group of routes as middleware.
+     */
     export class RouteGroup {
+
+        /** @type {GroupHandler[]} The list of handlers for this group. */
         _handlers: GroupHandler[] = [];
-        use(path: any, activate?: Function) {
+
+        /**
+         * Add the given middleware function as handler for the given path (defaulting to any path).
+         * @param {string|Function} path The fragment or the callback.
+         * @param {Function} [activate] The activate callback or the group of routes.
+         * @return {RouteGroup} The router group.
+         */
+        use(path: any, activate?: Function): RouteGroup {
             this._handlers.push({ path, activate });
+            return this;
         }
     }
 

@@ -9,13 +9,22 @@
   }
 }(this, function(require, exports, module) {
 
+/**
+ * Unobtrusive, forward-thinking and lightweight JavaScript router library.
+ */
 var prouter;
 (function (prouter) {
-    // Establish the root object, `window` (`self`) in the browser, or `global` on the server.
-    // We use `self` instead of `window` for `WebWorker` support.
+    /**
+     * Stablish the root object, `window` (`self`) in the browser, or `global` on the server.
+     * We use `self` instead of `window` for `WebWorker` support.
+     * @type {window} the root object
+     */
     var _global = (typeof self === 'object' && self.self === self && self) ||
         (typeof global === 'object' && global.global === global && global);
-    var _DEF_OPTIONS = { mode: 'hash', root: '/' };
+    /** @type {RegExp} Cached regex for stripping out leading slashes. */
+    var LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
+    /** @type {RegExp} Cached regex for default route. */
+    var DEF_ROUTE = /.*/;
     /**
      * The main path matching regexp utility.
      * @type {RegExp} path regexp.
@@ -32,8 +41,9 @@ var prouter;
         // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
         '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
     ].join('|'), 'g');
-    // Cached regex for default route.
-    var DEF_ROUTE = /.*/;
+    /**
+     * Collection of helpers for processing routes.
+     */
     var RouteHelper = (function () {
         function RouteHelper() {
         }
@@ -53,8 +63,13 @@ var prouter;
         RouteHelper._escapeGroup = function (group) {
             return group.replace(/([=!:$\/()])/g, '\\$1');
         };
+        /**
+         * Removes leading slashes from the given string.
+         * @param  {string} path the uri fragment.
+         * @return {string} string without leading slashes.
+         */
         RouteHelper.clearSlashes = function (path) {
-            return path.replace(/\/$/, '').replace(/^\//, '');
+            return path.replace(LEADING_SLASHES_STRIPPER, '');
         };
         /**
          * Get the flags for a regexp from the options.
@@ -66,8 +81,8 @@ var prouter;
         };
         /**
          * Parse a string for the raw tokens.
-         * @param  {String} path
-         * @return {Array} tokens.
+         * @param  {String} path the fragment to pase.
+         * @return {Array} tokens the extracted tokens.
          */
         RouteHelper._parse = function (path) {
             var tokens = [];
@@ -122,9 +137,9 @@ var prouter;
         };
         /**
          * Expose a function for taking tokens and returning a RegExp.
-         * @param  {Array}  tokens
-         * @param  {Object} options
-         * @return {RegExp} the regexp.
+         * @param  {Array} tokens used for create the expression.
+         * @param  {Object} [options] configuration.
+         * @return {PathExp} the resulting path expression.
          */
         RouteHelper._tokensToPathExp = function (tokens, options) {
             if (options === void 0) { options = {}; }
@@ -176,18 +191,28 @@ var prouter;
             }
             return new RegExp('^' + route, RouteHelper._flags(options));
         };
-        RouteHelper.parseSearchString = function (search) {
+        /**
+         * Transform a query-string to an object.
+         * @param  {string} search the query string.
+         * @return {Object} the resulting object.
+         */
+        RouteHelper.parseQuery = function (queryString) {
             var searchParams = {};
-            if (search.charAt(0) === '?') {
-                search = search.slice(1);
+            if (queryString.charAt(0) === '?') {
+                queryString = queryString.slice(1);
             }
-            var paramsArr = search.split('&');
+            var paramsArr = queryString.split('&');
             for (var i = 0; i < paramsArr.length; i++) {
                 var pair = paramsArr[i].split('=');
                 searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
             }
             return searchParams;
         };
+        /**
+         * Transform a fragment to a Path object.
+         * @param  {string} path the fragment to parse.
+         * @return {Path} the resulting object.
+         */
         RouteHelper.parsePath = function (path) {
             var parser;
             if (typeof _global.URL === 'function') {
@@ -199,16 +224,16 @@ var prouter;
             }
             var parsedPath = {
                 path: RouteHelper.clearSlashes(parser.pathname),
-                query: RouteHelper.parseSearchString(parser.search),
+                query: RouteHelper.parseQuery(parser.search),
                 queryString: parser.search
             };
             return parsedPath;
         };
         /**
          * Create a path regexp from string input.
-         * @param  {String} path
-         * @param  {Object} options
-         * @return {RegExp} the regexp
+         * @param  {String} path the given url fragment.
+         * @param  {Object} [options] configuration.
+         * @return {PathExp} the resulting path expression.
          */
         RouteHelper.stringToPathExp = function (path, options) {
             var tokens = RouteHelper._parse(path);
@@ -224,15 +249,31 @@ var prouter;
         };
         return RouteHelper;
     })();
+    /**
+     * Core component for the routing system.
+     */
     var Router = (function () {
         function Router() {
         }
+        /**
+         * Start the routing system, returning `true` if the current URL was loaded,
+         * and `false` otherwise.
+         * @param {Object} [options] Options
+         * @return {boolean} true if the current fragment matched some handler, false otherwise.
+         */
         Router.listen = function (options) {
-            if (this._listening) {
+            if (this._options) {
                 throw new Error('Router already listening.');
             }
-            this._listening = true;
-            this.config(options);
+            this._options = {};
+            for (var prop in Router._DEF_OPTIONS) {
+                if (options[prop] !== undefined) {
+                    this._options[prop] = options[prop];
+                }
+                else if (this._options[prop] === undefined) {
+                    this._options[prop] = Router._DEF_OPTIONS[prop];
+                }
+            }
             switch (this._options.mode) {
                 case 'history':
                     addEventListener('popstate', this._loadCurrent, false);
@@ -243,19 +284,17 @@ var prouter;
                 default:
                     throw new Error("Invalid mode '" + this._options.mode + "'. Valid modes are: 'history', 'hash'.");
             }
-            return this;
-        };
-        Router.config = function (options) {
-            for (var prop in _DEF_OPTIONS) {
-                if (options[prop] !== undefined) {
-                    this._options[prop] = options[prop];
-                }
-                else if (this._options[prop] === undefined) {
-                    this._options[prop] = _DEF_OPTIONS[prop];
-                }
+            var loaded = false;
+            if (!this._options.silent) {
+                loaded = this._loadCurrent();
             }
-            return this;
+            return loaded;
         };
+        /**
+         * Disables the route change handling and reset state, perhaps temporarily.
+         * Not useful in a real app but for unit testing.
+         * @return {Router} the router.
+         */
         Router.stop = function () {
             if (this._options.mode === 'history') {
                 removeEventListener('popstate', this._loadCurrent, false);
@@ -266,41 +305,34 @@ var prouter;
                 location.hash = '#';
             }
             this._handlers = [];
-            this._listening = false;
+            this._loadedPath = null;
+            this._options = null;
             return this;
         };
+        /**
+         * Retrieves the current path without the root prefix.
+         * @return {string} the current path.
+         */
         Router.getCurrent = function () {
-            var fragment;
+            var path;
             if (this._options.mode === 'history') {
-                var root = this._options.root;
-                fragment = RouteHelper.clearSlashes(decodeURI(location.pathname + location.search));
-                fragment = fragment.replace(/\?(.*)$/, '');
-                fragment = root !== '/' ? fragment.replace(root, '') : fragment;
+                var decodedUri = decodeURI(location.pathname + location.search);
+                path = RouteHelper.clearSlashes(decodedUri);
+                path = this._options.root === '/' ? path : path.slice(this._options.root.length);
             }
             else {
                 var match = location.href.match(/#(.*)$/);
-                fragment = match ? match[1] : '';
+                path = match ? match[1] : '';
             }
-            fragment = RouteHelper.clearSlashes(fragment);
-            return fragment;
-        };
-        Router.navigate = function (path) {
             path = RouteHelper.clearSlashes(path);
-            switch (this._options.mode) {
-                case 'history':
-                    this._load(path);
-                    history.pushState(null, null, this._options.root + path);
-                    break;
-                case 'hash':
-                    var oldPath = this.getCurrent();
-                    // If the path has not changed, force _loadPath since the 'hashchange' event will not be triggered.
-                    if (path === oldPath) {
-                        this._load(path);
-                    }
-                    location.hash = '#' + path;
-                    break;
-            }
+            return path;
         };
+        /**
+         * Adds the given middleware as a handler for the given path (defaulting to any path).
+         * @param {string|Function|RouteGroup} path the fragment or the callback.
+         * @param {Function|RouteGroup} [activate] the activate callback or the group of routes.
+         * @return {Router} the router.
+         */
         Router.use = function (path, activate) {
             if (activate instanceof RouteGroup || path instanceof RouteGroup) {
                 var parentPath;
@@ -310,7 +342,7 @@ var prouter;
                 else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                this._handlers = this._obtainHandlers(parentPath, activate);
+                this._handlers = this._extractHandlers(parentPath, activate);
             }
             else {
                 var pathExp;
@@ -327,28 +359,65 @@ var prouter;
             }
             return this;
         };
-        Router._loadCurrent = function () {
-            var path = this.getCurrent();
+        /**
+         * Change the current path and load it.
+         * @param {string} path The fragment to navigate to
+         * @returns {boolean} true if the path matched some handler, false otherwise.
+         */
+        Router.navigate = function (path) {
+            if (!this._options) {
+                throw new Error("It is required to call the 'listen' function before navigating.");
+            }
+            path = RouteHelper.clearSlashes(path);
+            switch (this._options.mode) {
+                case 'history':
+                    history.pushState(null, null, this._options.root + path);
+                    break;
+                case 'hash':
+                    location.hash = '#' + path;
+                    break;
+            }
             return this._load(path);
         };
+        /**
+         * Loads the current path if already not loaded.
+         * @return {boolean} true if loaded, false otherwise.
+         */
+        Router._loadCurrent = function () {
+            var currentPath = this.getCurrent();
+            return currentPath === this._loadedPath ? false : this._load(currentPath);
+        };
+        /**
+         * Attempts to load the given URL fragment. If a route succeeds with a
+         * match, returns `true`; if no defined routes matches the fragment,
+         * returns `false`.
+         * @param {string} path E.g.: 'user/pepito'
+         * @returns {boolean} true if the fragment matched some handler, false otherwise.
+         */
         Router._load = function (path) {
             var requestProcessors = this._obtainRequestProcessors(path);
-            var current = this.getCurrent();
             var count = 0;
             for (var i = 0; i < requestProcessors.length; i++) {
                 var requestProcessor = requestProcessors[i];
-                requestProcessor.request.old = current;
+                requestProcessor.request.oldPath = this._loadedPath;
                 var next = requestProcessor.activate.call(null, requestProcessor.request);
                 if (next === false) {
                     break;
                 }
-                else {
-                    count++;
-                }
+                count++;
             }
-            return count > 0;
+            var navigated = count > 0;
+            this._loadedPath = path;
+            return navigated;
         };
-        Router._obtainHandlers = function (parentPath, routeGroup, handlers) {
+        /**
+         * Extracts the handlers from the given arguments.
+         * @param  {string} parentPath The parent path of the group of routes.
+         * @param  {RouteGroup} routeGroup The group of routes.
+         * @param  {Handler[]=[]} [handlers] The holder for extracted handlers.
+         * @return {Handler[]} The extracted handlers.
+         */
+        Router._extractHandlers = function (parentPath, routeGroup, handlers) {
             if (handlers === void 0) { handlers = []; }
             var groupHandlers = routeGroup._handlers;
             for (var i = 0; i < groupHandlers.length; i++) {
@@ -383,14 +452,31 @@ var prouter;
             return handlers;
         };
         /**
-         * Given a route, and a path that it matches, return the object of
-         * extracted decoded parameters.
-         * @param {string} path The uri's path part.
-         * @param {PathExp} route The alias
-         * @returns {NavigationParams} the extracted parameters
-         * @private
+         * Obtains the request processors for the given path according to the current handlers in the router.
+         * @param  {string} path The url fragment to check.
+         * @return {RequestProcessor[]} The obtained request processors.
          */
-        Router._obtainRequest = function (path, pathExp) {
+        Router._obtainRequestProcessors = function (path) {
+            var parsedPath = RouteHelper.parsePath(path);
+            var requestProcessors = [];
+            for (var i = 0; i < this._handlers.length; i++) {
+                var handler = this._handlers[i];
+                var match = handler.pathExp.test(parsedPath.path);
+                if (match) {
+                    var request = this._extractRequest(path, handler.pathExp);
+                    var requestProcessor = { activate: handler.activate, request: request };
+                    requestProcessors.push(requestProcessor);
+                }
+            }
+            return requestProcessors;
+        };
+        /**
+         * Extracts a request from the given arguments, using decoded parameters.
+         * @param {string} path The url fragment.
+         * @param {PathExp} [pathExp] The path expression.
+         * @returns {Request} The extracted request.
+         */
+        Router._extractRequest = function (path, pathExp) {
             var request = RouteHelper.parsePath(path);
             request.params = {};
             var result = pathExp ? pathExp.exec(request.path) : null;
@@ -406,32 +492,30 @@ var prouter;
             }
             return request;
         };
-        Router._obtainRequestProcessors = function (path) {
-            var parsedPath = RouteHelper.parsePath(path);
-            var requestProcessors = [];
-            for (var i = 0; i < this._handlers.length; i++) {
-                var handler = this._handlers[i];
-                var match = handler.pathExp.test(parsedPath.path);
-                if (match) {
-                    var request = this._obtainRequest(path, handler.pathExp);
-                    var requestProcessor = { activate: handler.activate, request: request };
-                    requestProcessors.push(requestProcessor);
-                }
-            }
-            return requestProcessors;
-        };
+        /** @type {Options} Default options for initializing the router. */
+        Router._DEF_OPTIONS = { mode: 'hash', root: '/', silent: false };
+        /** @type {Handler[]} Handlers for the routing system. */
         Router._handlers = [];
-        Router._options = {};
-        Router._listening = false;
         return Router;
     })();
     prouter.Router = Router;
+    /**
+     * Allows to use a group of routes as middleware.
+     */
     var RouteGroup = (function () {
         function RouteGroup() {
+            /** @type {GroupHandler[]} The list of handlers for this group. */
             this._handlers = [];
         }
+        /**
+         * Adds the given middleware function as handler for the given path (defaulting to any path).
+         * @param {string|Function} path The fragment or the callback.
+         * @param {Function} [activate] The activate callback or the group of routes.
+         * @return {RouteGroup} The router group.
+         */
         RouteGroup.prototype.use = function (path, activate) {
             this._handlers.push({ path: path, activate: activate });
+            return this;
         };
         return RouteGroup;
     })();

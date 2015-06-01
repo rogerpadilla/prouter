@@ -8,10 +8,10 @@ describe("Routing -", function () {
   this.timeout(500);
 
   beforeEach(function () {
-    Router.stop().listen({ mode: 'history' });
+    Router.listen({ mode: 'history' });
   });
 
-  after(function () {
+  afterEach(function() {
     Router.stop();
   });
 
@@ -175,12 +175,12 @@ describe("Routing -", function () {
 
     Router.use('some', function (req) {
       expect(req.path).eq('some');
-      expect(req.old).eq('');
+      expect(req.oldPath).eq('');
     });
 
     Router.use('another', function (req) {
       expect(req.path).eq('another');
-      expect(req.old).eq('some');
+      expect(req.oldPath).eq('some');
     });
 
     Router.navigate('some');
@@ -193,7 +193,7 @@ describe("Routing -", function () {
 
     Router.use(function (req) {
       expect(req.path).eq('about');
-      expect(req.old).eq('');
+      expect(req.oldPath).eq('');
       return false;
     });
 
