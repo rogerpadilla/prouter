@@ -291,8 +291,8 @@ var prouter;
             return loaded;
         };
         /**
-         * Disables the route change handling and reset state, perhaps temporarily.
-         * Not useful in a real app but for unit testing.
+         * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
+         * Not useful in a real app; but useful for unit testing.
          * @return {Router} the router.
          */
         Router.stop = function () {
@@ -310,7 +310,7 @@ var prouter;
             return this;
         };
         /**
-         * Retrieves the current path without the root prefix.
+         * Retrieve the current path without the root prefix.
          * @return {string} the current path.
          */
         Router.getCurrent = function () {
@@ -328,7 +328,7 @@ var prouter;
             return path;
         };
         /**
-         * Adds the given middleware as a handler for the given path (defaulting to any path).
+         * Add the given middleware as a handler for the given path (defaulting to any path).
          * @param {string|Function|RouteGroup} path the fragment or the callback.
          * @param {Function|RouteGroup} [activate] the activate callback or the group of routes.
          * @return {Router} the router.
@@ -380,7 +380,7 @@ var prouter;
             return this._load(path);
         };
         /**
-         * Loads the current path if already not loaded.
+         * Load the current path if already not loaded.
          * @return {boolean} true if loaded, false otherwise.
          */
         Router._loadCurrent = function () {
@@ -388,7 +388,7 @@ var prouter;
             return currentPath === this._loadedPath ? false : this._load(currentPath);
         };
         /**
-         * Attempts to load the given URL fragment. If a route succeeds with a
+         * Attempt to load the given URL fragment. If a route succeeds with a
          * match, returns `true`; if no defined routes matches the fragment,
          * returns `false`.
          * @param {string} path E.g.: 'user/pepito'
@@ -411,7 +411,7 @@ var prouter;
             return navigated;
         };
         /**
-         * Extracts the handlers from the given arguments.
+         * Extract the handlers from the given arguments.
          * @param  {string} parentPath The parent path of the group of routes.
          * @param  {RouteGroup} routeGroup The group of routes.
          * @param  {Handler[]=[]} [handlers] The holder for extracted handlers.
@@ -452,7 +452,7 @@ var prouter;
             return handlers;
         };
         /**
-         * Obtains the request processors for the given path according to the current handlers in the router.
+         * Obtain the request processors for the given path according to the current handlers in the router.
          * @param  {string} path The url fragment to check.
          * @return {RequestProcessor[]} The obtained request processors.
          */
@@ -471,7 +471,7 @@ var prouter;
             return requestProcessors;
         };
         /**
-         * Extracts a request from the given arguments, using decoded parameters.
+         * Extract a request from the given arguments, using decoded parameters.
          * @param {string} path The url fragment.
          * @param {PathExp} [pathExp] The path expression.
          * @returns {Request} The extracted request.
@@ -508,7 +508,7 @@ var prouter;
             this._handlers = [];
         }
         /**
-         * Adds the given middleware function as handler for the given path (defaulting to any path).
+         * Add the given middleware function as handler for the given path (defaulting to any path).
          * @param {string|Function} path The fragment or the callback.
          * @param {Function} [activate] The activate callback or the group of routes.
          * @return {RouteGroup} The router group.
