@@ -10,8 +10,8 @@ describe("Routing -", function () {
   beforeEach(function () {
     Router.stop().listen({ mode: 'history' });
   });
-  
-  after(function() {
+
+  after(function () {
     Router.stop();
   });
 
@@ -299,7 +299,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/18/docs/17/19?first=3&second=7');
   });
 
-  it("basic groups", function (done) {
+  it("groups", function (done) {
 
     var sequence = '';
 
@@ -374,6 +374,6 @@ describe("Routing -", function () {
 
     done();
   });
- 
+
 
 });
