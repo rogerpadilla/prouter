@@ -15,7 +15,6 @@ var prouter;
     // We use `self` instead of `window` for `WebWorker` support.
     var _global = (typeof self === 'object' && self.self === self && self) ||
         (typeof global === 'object' && global.global === global && global);
-    var _MODES = ['hash', 'history'];
     var _DEF_OPTIONS = { mode: 'hash', root: '/' };
     /**
      * The main path matching regexp utility.
@@ -33,10 +32,8 @@ var prouter;
         // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
         '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
     ].join('|'), 'g');
-    // Cached regex for stripping a leading hash/slash and trailing space.
-    var ROUTE_STRIPPER = /^[#\/]|\s+$/g;
-    // Cached regex for stripping urls of hash.
-    var HASH_STRIPPER = /#.*$/;
+    // Cached regex for default route.
+    var DEF_ROUTE = /.*/;
     var RouteHelper = (function () {
         function RouteHelper() {
         }
@@ -208,30 +205,6 @@ var prouter;
             return parsedPath;
         };
         /**
-         * Given a route, and a path that it matches, return the object of
-         * extracted decoded parameters.
-         * @param {string} path The uri's path part.
-         * @param {PathExp} route The alias
-         * @returns {NavigationParams} the extracted parameters
-         * @private
-         */
-        RouteHelper.extractRequest = function (path, pathExp) {
-            var request = RouteHelper.parsePath(path);
-            request.params = {};
-            var result = pathExp.exec(request.path);
-            if (!result) {
-                return request;
-            }
-            var args = result.slice(1);
-            var keys = pathExp.keys;
-            for (var i = 0; i < args.length; i++) {
-                if (args[i] !== undefined) {
-                    request.params[keys[i].name] = _global.decodeURIComponent(args[i]);
-                }
-            }
-            return request;
-        };
-        /**
          * Create a path regexp from string input.
          * @param  {String} path
          * @param  {Object} options
@@ -240,14 +213,13 @@ var prouter;
         RouteHelper.stringToPathExp = function (path, options) {
             var tokens = RouteHelper._parse(path);
             var pathExp = RouteHelper._tokensToPathExp(tokens, options);
-            var keys = [];
+            pathExp.keys = [];
             // Attach keys back to the regexp.
             for (var i = 0; i < tokens.length; i++) {
                 if (typeof tokens[i] !== 'string') {
-                    keys.push(tokens[i]);
+                    pathExp.keys.push(tokens[i]);
                 }
             }
-            pathExp.keys = keys;
             return pathExp;
         };
         return RouteHelper;
@@ -261,11 +233,15 @@ var prouter;
             }
             this._listening = true;
             this.config(options);
-            if (this._options.mode === 'history') {
-                _global.addEventListener('popstate', this._loadCurrent, false);
-            }
-            else {
-                _global.addEventListener('hashchange', this._loadCurrent, false);
+            switch (this._options.mode) {
+                case 'history':
+                    addEventListener('popstate', this._loadCurrent, false);
+                    break;
+                case 'hash':
+                    addEventListener('hashchange', this._loadCurrent, false);
+                    break;
+                default:
+                    throw new Error("Invalid mode '" + this._options.mode + "'. Valid modes are: 'history', 'hash'.");
             }
             return this;
         };
@@ -280,46 +256,29 @@ var prouter;
             }
             return this;
         };
-        Router.reset = function () {
+        Router.stop = function () {
             if (this._options.mode === 'history') {
-                _global.removeEventListener('popstate', this._loadCurrent, false);
-                _global.history.pushState(null, null, this._options.root);
+                removeEventListener('popstate', this._loadCurrent, false);
+                history.pushState(null, null, this._options.root);
             }
             else {
-                _global.removeEventListener('hashchange', this._loadCurrent, false);
-                _global.location.hash = '#';
+                removeEventListener('hashchange', this._loadCurrent, false);
+                location.hash = '#';
             }
             this._handlers = [];
             this._listening = false;
             return this;
         };
-        Router.use = function (path, activate) {
-            var pathExp;
-            // If default route.
-            if (typeof path === 'function') {
-                activate = path;
-                pathExp = /.*/;
-            }
-            else {
-                path = RouteHelper.clearSlashes(path);
-                pathExp = RouteHelper.stringToPathExp(path);
-            }
-            this._handlers.push({
-                path: pathExp,
-                activate: activate
-            });
-        };
         Router.getCurrent = function () {
-            var mode = this._options.mode;
-            var root = this._options.root;
             var fragment;
-            if (mode === 'history') {
-                fragment = RouteHelper.clearSlashes(_global.decodeURI(_global.location.pathname + _global.location.search));
+            if (this._options.mode === 'history') {
+                var root = this._options.root;
+                fragment = RouteHelper.clearSlashes(decodeURI(location.pathname + location.search));
                 fragment = fragment.replace(/\?(.*)$/, '');
                 fragment = root !== '/' ? fragment.replace(root, '') : fragment;
             }
             else {
-                var match = _global.location.href.match(/#(.*)$/);
+                var match = location.href.match(/#(.*)$/);
                 fragment = match ? match[1] : '';
             }
             fragment = RouteHelper.clearSlashes(fragment);
@@ -327,20 +286,44 @@ var prouter;
         };
         Router.navigate = function (path) {
             path = RouteHelper.clearSlashes(path);
-            var mode = this._options.mode;
-            switch (mode) {
+            switch (this._options.mode) {
                 case 'history':
                     this._load(path);
-                    _global.history.pushState(null, null, this._options.root + path);
+                    history.pushState(null, null, this._options.root + path);
                     break;
                 case 'hash':
                     var oldPath = this.getCurrent();
-                    // Force load since 'hashchange' event is not triggered if the path has not changed
+                    // If the path has not changed, force _loadPath since the 'hashchange' event will not be triggered.
                     if (path === oldPath) {
                         this._load(path);
                     }
-                    _global.location.hash = '#' + path;
+                    location.hash = '#' + path;
                     break;
+            }
+        };
+        Router.use = function (path, activate) {
+            if (activate instanceof RouteGroup || path instanceof RouteGroup) {
+                var parentPath;
+                if (path instanceof RouteGroup) {
+                    activate = path;
+                }
+                else {
+                    parentPath = RouteHelper.clearSlashes(path);
+                }
+                this._handlers = this._obtainHandlers(parentPath, activate);
+            }
+            else {
+                var pathExp;
+                // If default route.
+                if (typeof path === 'function') {
+                    activate = path;
+                    pathExp = DEF_ROUTE;
+                }
+                else {
+                    path = RouteHelper.clearSlashes(path);
+                    pathExp = RouteHelper.stringToPathExp(path);
+                }
+                this._handlers.push({ pathExp: pathExp, activate: activate });
             }
             return this;
         };
@@ -349,14 +332,13 @@ var prouter;
             return this._load(path);
         };
         Router._load = function (path) {
-            var nodeRoutes = this._obtainNodeRoutes(path);
-            var nodeRoutesLength = nodeRoutes.length;
+            var requestProcessors = this._obtainRequestProcessors(path);
             var current = this.getCurrent();
             var count = 0;
-            for (var i = 0; i < nodeRoutesLength; i++) {
-                var nodeRoute = nodeRoutes[i];
-                nodeRoute.request.old = current;
-                var next = nodeRoute.activate.call(null, nodeRoute.request);
+            for (var i = 0; i < requestProcessors.length; i++) {
+                var requestProcessor = requestProcessors[i];
+                requestProcessor.request.old = current;
+                var next = requestProcessor.activate.call(null, requestProcessor.request);
                 if (next === false) {
                     break;
                 }
@@ -366,22 +348,77 @@ var prouter;
             }
             return count > 0;
         };
-        Router._obtainNodeRoutes = function (fragment) {
-            var parsedPath = RouteHelper.parsePath(fragment);
-            var nodeRoutes = [];
-            for (var i = 0; i < this._handlers.length; i++) {
-                var route = this._handlers[i];
-                var match = parsedPath.path.match(route.path);
-                if (match) {
-                    var params = RouteHelper.extractRequest(fragment, route.path);
-                    var nodeRoute = {
-                        activate: route.activate,
-                        request: params
-                    };
-                    nodeRoutes.push(nodeRoute);
+        Router._obtainHandlers = function (parentPath, routeGroup, handlers) {
+            if (handlers === void 0) { handlers = []; }
+            var groupHandlers = routeGroup._handlers;
+            for (var i = 0; i < groupHandlers.length; i++) {
+                var itHandler = groupHandlers[i];
+                var subPath = void 0;
+                var activate = void 0;
+                if (typeof itHandler.path === 'function') {
+                    activate = itHandler.path;
+                }
+                else {
+                    activate = itHandler.activate;
+                    subPath = RouteHelper.clearSlashes(itHandler.path);
+                }
+                var pathExp = void 0;
+                if (parentPath === undefined || subPath === undefined) {
+                    if (parentPath === undefined && subPath === undefined) {
+                        pathExp = DEF_ROUTE;
+                    }
+                    else if (parentPath === undefined) {
+                        pathExp = RouteHelper.stringToPathExp(subPath);
+                    }
+                    else {
+                        pathExp = RouteHelper.stringToPathExp(parentPath);
+                    }
+                }
+                else {
+                    var path = parentPath + '/' + subPath;
+                    pathExp = RouteHelper.stringToPathExp(path);
+                }
+                handlers.push({ pathExp: pathExp, activate: activate });
+            }
+            return handlers;
+        };
+        /**
+         * Given a route, and a path that it matches, return the object of
+         * extracted decoded parameters.
+         * @param {string} path The uri's path part.
+         * @param {PathExp} route The alias
+         * @returns {NavigationParams} the extracted parameters
+         * @private
+         */
+        Router._obtainRequest = function (path, pathExp) {
+            var request = RouteHelper.parsePath(path);
+            request.params = {};
+            var result = pathExp ? pathExp.exec(request.path) : null;
+            if (!result) {
+                return request;
+            }
+            var args = result.slice(1);
+            var keys = pathExp.keys;
+            for (var i = 0; i < args.length; i++) {
+                if (args[i] !== undefined) {
+                    request.params[keys[i].name] = decodeURIComponent(args[i]);
                 }
             }
-            return nodeRoutes;
+            return request;
+        };
+        Router._obtainRequestProcessors = function (path) {
+            var parsedPath = RouteHelper.parsePath(path);
+            var requestProcessors = [];
+            for (var i = 0; i < this._handlers.length; i++) {
+                var handler = this._handlers[i];
+                var match = handler.pathExp.test(parsedPath.path);
+                if (match) {
+                    var request = this._obtainRequest(path, handler.pathExp);
+                    var requestProcessor = { activate: handler.activate, request: request };
+                    requestProcessors.push(requestProcessor);
+                }
+            }
+            return requestProcessors;
         };
         Router._handlers = [];
         Router._options = {};
@@ -392,8 +429,10 @@ var prouter;
     var RouteGroup = (function () {
         function RouteGroup() {
             this._handlers = [];
-            this.use = Router.use;
         }
+        RouteGroup.prototype.use = function (path, activate) {
+            this._handlers.push({ path: path, activate: activate });
+        };
         return RouteGroup;
     })();
     prouter.RouteGroup = RouteGroup;

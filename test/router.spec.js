@@ -1,14 +1,18 @@
 'use strict';
 
 var Router = prouter.Router;
+var RouteGroup = prouter.RouteGroup;
 
 describe("Routing -", function () {
 
   this.timeout(500);
 
   beforeEach(function () {
-    Router.reset();
-    Router.listen({ mode: 'history' });
+    Router.stop().listen({ mode: 'history' });
+  });
+  
+  after(function() {
+    Router.stop();
   });
 
   it("basic", function (done) {
@@ -294,5 +298,82 @@ describe("Routing -", function () {
 
     Router.navigate('/about/16/18/docs/17/19?first=3&second=7');
   });
+
+  it("basic groups", function (done) {
+
+    var sequence = '';
+
+    var userGroup = new RouteGroup();
+
+    userGroup.use('', function () {
+      sequence += '1';
+    });
+
+    userGroup.use(':id', function () {
+      sequence += '2';
+    });
+
+    Router.use('users', userGroup);
+
+    Router.navigate('users');
+    Router.navigate('users/9');
+
+    expect(sequence).eq('12');
+
+    done();
+  });
+
+  it("groups with default route", function (done) {
+
+    var sequence = '';
+
+    var userGroup = new RouteGroup();
+
+    userGroup.use(function () {
+      sequence += '*';
+    });
+
+    userGroup.use(':id', function () {
+      sequence += '2';
+    });
+
+    Router.use('users', userGroup);
+
+    Router.navigate('users');
+    Router.navigate('users/9');
+
+    expect(sequence).eq('*2');
+
+    done();
+  });
+
+  it("groups with default route mounted in default", function (done) {
+
+    var sequence = '';
+
+    var userGroup = new RouteGroup();
+
+    userGroup.use('users', function () {
+      sequence += '1';
+    });
+
+    userGroup.use('users/:id', function () {
+      sequence += '2';
+    });
+
+    userGroup.use(function () {
+      sequence += '*';
+    });
+
+    Router.use(userGroup);
+
+    Router.navigate('users');
+    Router.navigate('users/9');
+
+    expect(sequence).eq('1*2*');
+
+    done();
+  });
+ 
 
 });

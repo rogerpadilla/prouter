@@ -55,7 +55,7 @@ module.exports = function (config) {
     ],
 
     preprocessors: {
-      'dist/prouter.js': 'coverage'
+      'src/prouter.js': ['coverage']
     },
 
     coverageReporter: {

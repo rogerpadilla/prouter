@@ -1,39 +1,15 @@
 declare module prouter {
-    interface PathExp extends RegExp {
-        keys?: PathExpToken[];
-    }
-    /**
-     * Contract for entry handler.
-     */
-    interface Handler {
-        path: PathExp;
-        activate: Function;
-    }
-    /**
-     * Contract for entry handler.
-     */
-    interface NodeRoute {
-        activate: Function;
-        request: Request;
-    }
-    /**
-     * Contract for entry handler.
-     */
     interface Options {
         mode?: string;
         root?: string;
     }
-    interface ParsedPath {
+    interface PathExp extends RegExp {
+        keys?: PathExpToken[];
+    }
+    interface Path {
         path: string;
         query: Object;
         queryString: string;
-    }
-    /**
-     * Contract for object param.
-     */
-    interface Request extends ParsedPath {
-        params?: Object;
-        old?: string;
     }
     interface PathExpToken {
         name: string;
@@ -43,22 +19,51 @@ declare module prouter {
         repeat: boolean;
         pattern: string;
     }
+    interface Handler {
+        pathExp: PathExp;
+        activate: Function;
+    }
+    interface GroupHandler {
+        path: any;
+        activate: Function;
+    }
+    interface Param {
+        [index: string]: string;
+    }
+    interface Request extends Path {
+        params?: Param;
+        old?: string;
+    }
+    interface RequestEvent {
+        activate: Function;
+        request: Request;
+    }
     class Router {
         private static _handlers;
         private static _options;
         private static _listening;
         static listen(options: Options): Router;
         static config(options: Options): Router;
-        static reset(): Router;
-        static use(path: any, activate?: any): void;
+        static stop(): Router;
         static getCurrent(): string;
-        static navigate(path: string): Router;
+        static navigate(path: string): void;
+        static use(path: any, activate?: any): Router;
         private static _loadCurrent();
         private static _load(path);
-        private static _obtainNodeRoutes(fragment);
+        private static _obtainHandlers(parentPath, routeGroup, handlers?);
+        /**
+         * Given a route, and a path that it matches, return the object of
+         * extracted decoded parameters.
+         * @param {string} path The uri's path part.
+         * @param {PathExp} route The alias
+         * @returns {NavigationParams} the extracted parameters
+         * @private
+         */
+        private static _obtainRequest(path, pathExp);
+        private static _obtainRequestProcessors(path);
     }
     class RouteGroup {
-        private _handlers;
-        use: typeof Router.use;
+        _handlers: GroupHandler[];
+        use(path: any, activate?: Function): void;
     }
 }
