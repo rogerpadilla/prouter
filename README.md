@@ -211,7 +211,7 @@ console.log(sequence);
 // 1*2*3*
 ```
 
-#### ###<a name="routeGroup"></a>route group
+####<a name="routeGroup"></a>route group
 
 ``` js
 var Router = prouter.Router;
