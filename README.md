@@ -78,7 +78,7 @@ Router.listen({root: '/', usePushState: false, hashChange: true, silent: false})
 Router.navigate('/about');
 
 console.log(Router.getCurrent());
-// about
+// 'about'
 ```
 
 #### leading slashes (/) does not affect paths
@@ -88,27 +88,29 @@ var Router = prouter.Router;
 
 var counter = 0;
 
-Router.use('docs', function () {
+Router.use('docs', function (req) {
   counter++;
+  console.log(req.path);
+  // 'docs'
 });
 
 Router.listen();
 
 Router.navigate('docs');
 console.log(Router.getCurrent());
-// about
+// 'about'
 
 Router.navigate('/docs');
 console.log(Router.getCurrent());
-// about
+// 'about'
 
 Router.navigate('/docs/');
 console.log(Router.getCurrent());
-// about
+// 'about'
 
 Router.navigate('docs/');
 console.log(Router.getCurrent());
-// about
+// 'about'
 
 console.log(counter);
 // 4
@@ -234,7 +236,7 @@ Router.navigate('/about/docs/about');
 Router.navigate('/about/docs/stub');
 
 console.log(sequence);
-// 1*2*3*
+// '1*2*3*''
 ```
 
 #### <a name="routeGroup"></a>route group
@@ -268,7 +270,7 @@ Router.navigate('about/owner');
 Router.navigate('about/year/2015');
 
 console.log(sequence);
-// 1234
+// '1234'
 ```
 ___
 
