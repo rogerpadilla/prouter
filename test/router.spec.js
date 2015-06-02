@@ -208,7 +208,6 @@ describe('Routing -', function () {
     Router.use(function (req) {
       expect(req.path).eq('about');
       expect(req.oldPath).eq(originalPath);
-      return false;
     }).use('/about', function () {
       expect(false);
     });
@@ -224,6 +223,7 @@ describe('Routing -', function () {
 
     Router.use('/about/:part', function () {
       sequence += '1';
+      return true;
     }).use('/about/docs', function () {
       expect(false);
     }).use(function () {
@@ -240,10 +240,13 @@ describe('Routing -', function () {
 
     Router.use('/about/docs', function () {
       sequence += '1';
+      return true;
     }).use('about/docs/about', function () {
       sequence += '2';
+      return true;
     }).use('/about/docs/stub', function () {
       sequence += '3';
+      return true;
     }).use('/about/*', function () {
       sequence += '*';
     });
@@ -266,6 +269,7 @@ describe('Routing -', function () {
 
     Router.use('/about/:id/:dynamic', function (req) {
       sequence = req.params;
+      return true;
     }).use('/about/:id/fixed', function () {
       expect(sequence).a('object');
       expect(sequence.id).eq('16');
@@ -282,6 +286,7 @@ describe('Routing -', function () {
 
     Router.use('/about/:id/:num/*', function (req) {
       first = req;
+      return true;
     }).use('/about/:id/:num/docs/:id/:num', function (req) {
       expect(first.params).a('object');
       expect(first.params.id).eq('16');
@@ -306,6 +311,7 @@ describe('Routing -', function () {
 
     userGroup.use('', function () {
       sequence += '1';
+      return true;
     }).use(':id', function () {
       sequence += '2';
     });
@@ -383,8 +389,10 @@ describe('Routing -', function () {
 
     userGroup.use('users', function () {
       sequence += '1';
+      return true;
     }).use('users/:id', function () {
       sequence += '2';
+      return true;
     }).use(function () {
       sequence += '*';
     });

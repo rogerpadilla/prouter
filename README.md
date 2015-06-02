@@ -22,7 +22,7 @@ commonJs, AMD. And as global browser.
 * [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 * Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 * [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
-* [End the routing cycle](#endRoutingCycle) (by returning `false` from a callback).
+* [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle is by returning `true` from the callback.
 
 ### Routing
 
@@ -55,24 +55,32 @@ Router.use('/about', function (req) {
   // {params: {}, query: {}, path: 'about', oldPath: ''}
 });
 
-// Initializes the path-changes handling using default options.
+// Initialize the path-changes handling using default options.
 Router.listen();
 
-// Navigates to the path 'about'.
+// Navigate to path 'about'.
 Router.navigate('/about');
 ```
 
-#### basic with custom options
+#### with custom options and several handlers including default.
 
 ``` js
 var Router = prouter.Router;
 
-Router.use('/about', function (req) {
+Router.use('/', function(req) {
+  
+}).use('/login', function(req) {
+  
+}).use('/signup', function(req) {
+  
+}).use('/about', function (req) {
   console.log(req);
   // {params: {}, query: {}, path: 'about', oldPath: ''}
+}).use(function() {
+  
 });
 
-// Initializes with given options (same as default in this case).
+// Initialize the Router with custom options (same as default for the example).
 Router.listen({root: '/', usePushState: false, hashChange: true, silent: false});
 
 Router.navigate('/about');
@@ -125,6 +133,7 @@ Router.use('other', function (req) {
   console.log(req);
   // {params: {}, query: {}, path: 'other', oldPath: ''}
   req.params.something = 'any';
+  return true;
 }).use(function (req) {
   console.log(req);
   // {params: {something: 'any'}, query: {}, path: 'other', oldPath: ''}
@@ -202,9 +211,8 @@ var Router = prouter.Router;
 
 Router.use(function (req) {
   // This callback will be executed.
-  return false;
 }).use('/about', function () {
-  // Will not enter here.
+  // Will not enter here since the previous callback did not returned `true`.
 });
 
 Router.listen();
@@ -221,10 +229,13 @@ var sequence = '';
 
 Router.use('/about/docs', function () {
   sequence += '1';
+  return true;
 }).use('about/docs/about', function () {
   sequence += '2';
+  return true;
 }).use('/about/docs/stub', function () {
   sequence += '3';
+  return true;
 }).use('/about/*', function () {
   sequence += '*';
 });

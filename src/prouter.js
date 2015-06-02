@@ -405,7 +405,7 @@ var prouter;
                 requestProcessor.request.oldPath = this._loadedPath;
                 var next = requestProcessor.activate.call(null, requestProcessor.request);
                 // If some of the handlers returns 'false', then stop propagation.
-                if (next === false) {
+                if (next !== true) {
                     break;
                 }
                 count++;
