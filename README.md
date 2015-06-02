@@ -98,19 +98,19 @@ Router.listen();
 
 Router.navigate('docs');
 console.log(Router.getCurrent());
-// 'about'
+// 'docs'
 
 Router.navigate('/docs');
 console.log(Router.getCurrent());
-// 'about'
+// 'docs'
 
 Router.navigate('/docs/');
 console.log(Router.getCurrent());
-// 'about'
+// 'docs'
 
 Router.navigate('docs/');
 console.log(Router.getCurrent());
-// 'about'
+// 'docs'
 
 console.log(counter);
 // 4
@@ -168,7 +168,7 @@ var Router = prouter.Router;
 
 Router.use('/about/:id/:num', function (req) {
   console.log(req);
-  // {params: {id: '16', num: '18'}, query: {first: '5', second: '6'}, path: 'about', oldPath: ''}}
+  // {params: {id: '16', num: '18'}, query: {first: '5', second: '6'}, path: 'about/16/18', oldPath: ''}}
 }).listen();
 
 Router.navigate('/about/16/18?first=5&second=6');
