@@ -11,8 +11,8 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 
 * __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
 * __Absence of dependencies__ and still __really lightweight:__ (6kb).
-* __Forward-thinking:__ learns from other Router components like the ones from Backbone, Aurelia and Express. Written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
-[commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and global browser.
+* __Forward-thinking:__ learns from other Router components like the ones from Express, Backbone and Aurelia. Written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
+commonJs, AMD. And as global browser.
 * KISS principle: unnecessary complexity avoided.
 * Proper JSDoc comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
