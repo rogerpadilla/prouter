@@ -21,11 +21,10 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
 
 ### Special features
-* [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files.
-* Supports **preventing navigation** by returning `false` from the `activate` callback of a handler.
-* Complete __request data__ is passed as a parameter (object with properties) to the `activate` callback.
-* Default routing - you may set a callback function for any routing; this function will be executed for any path.
-* End the routing cycle (by returning `false` from a callback).
+* [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
+* Complete [__request data__](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
+* [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
+* [End the routing cycle](#endRoutingCycle) (by returning `false` from a callback).
 
 ### Routing
 
@@ -88,7 +87,7 @@ console.log(counter);
 // 4
 ```
 
-#### default handler
+#### <a name="defaultHandler"></a>default handler
 
 ``` js
 var Router = prouter.Router;
@@ -133,7 +132,7 @@ Router.use('about', function (req) {
 Router.navigate('about?first=5&second=6');
 ```
 
-#### parameters and query
+#### <a name="parametersAndQuery"></a>parameters and query
 
 ``` js
 var Router = prouter.Router;
@@ -167,7 +166,7 @@ console.log(counter);
 // 6
 ```
 
-#### end routing cycle
+#### <a name="endRoutingCycle"></a>end routing cycle
 
 ``` js
 var Router = prouter.Router;
@@ -211,7 +210,7 @@ console.log(sequence);
 // 1*2*3*
 ```
 
-####<a name="routeGroup"></a>route group
+#### <a name="routeGroup"></a>route group
 
 ``` js
 var Router = prouter.Router;
