@@ -170,7 +170,7 @@ console.log(counter);
 // 6
 ```
 
-#### Cancel routing cycle
+#### End routing cycle
 
 ``` js
 var Router = prouter.Router;

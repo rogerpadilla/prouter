@@ -354,7 +354,7 @@ var prouter;
                 else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                this._handlers = this._extractHandlers(parentPath, activate);
+                this._handlers = this._extractHandlers(parentPath, activate, this._handlers);
             }
             else {
                 var pathExp;

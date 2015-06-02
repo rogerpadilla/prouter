@@ -325,7 +325,6 @@ describe('Routing -', function () {
     var sequence = '';
 
     var userGroup = new RouteGroup();
-
     userGroup.use('', function () {
       sequence += '1';
     }).use(':id', function () {
@@ -333,7 +332,6 @@ describe('Routing -', function () {
     });
     
     var aboutGroup = new RouteGroup();
-
     aboutGroup.use('owner', function () {
       sequence += '3';
     }).use('year/:num', function () {
