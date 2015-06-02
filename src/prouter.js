@@ -404,11 +404,12 @@ var prouter;
                 var requestProcessor = requestProcessors[i];
                 requestProcessor.request.oldPath = this._loadedPath;
                 var next = requestProcessor.activate.call(null, requestProcessor.request);
-                // If handler returns anything different of 'true', then end routing cycle.
+                count++;
+                // the only way of continuing the routing cycle (processing next handler in the queue)
+                // is by returning `true` from callbacks.
                 if (next !== true) {
                     break;
                 }
-                count++;
             }
             var navigated = count > 0;
             this._loadedPath = path;
