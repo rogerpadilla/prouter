@@ -528,7 +528,7 @@ module prouter {
                 const requestProcessor = requestProcessors[i];
                 requestProcessor.request.oldPath = this._loadedPath;
                 const next = requestProcessor.activate.call(null, requestProcessor.request);
-                // If some of the handlers returns 'false', then stop propagation.
+                // If handler returns anything different of 'true', then end routing cycle.
                 if (next !== true) {
                     break;
                 }
