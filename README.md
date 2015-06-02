@@ -9,11 +9,8 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 
 ### Why prouter?
 
-* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like  [Polymer](https://www.polymer-project.org/),
-[Handlebars](http://handlebarsjs.com/),
-[React](https://facebook.github.io/react/)  or just vanilla JS? Have an existing project and want to modernize it? Looking for a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
-* __No dependencies:__ no jQuery, no underscore... no dependencies at all.
-* __Lightweight:__ 6kb.
+* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
+* __Absence of dependencies__ and still __really lightweight:__ (6kb).
 * __Forward-thinking:__ learns from other Router components like the ones from Backbone, Aurelia and Express. Written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
 [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and global browser.
 * KISS principle: unnecessary complexity avoided.
@@ -21,6 +18,7 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
 
 ### Special features
+* Express [routing-expressions's style](#parametersAndQuery) compatibility.
 * [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 * Complete [__request data__](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 * [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
