@@ -6,7 +6,8 @@ declare module prouter {
      * Contracts for static type checking.
      */
     interface Options {
-        mode?: string;
+        usePushState?: boolean;
+        hashChange?: boolean;
         root?: string;
         silent?: boolean;
     }
@@ -49,58 +50,58 @@ declare module prouter {
      * Core component for the routing system.
      */
     class Router {
-        /** @type {Options} Default options for initializing the router. */
-        private static _DEF_OPTIONS;
-        /** @type {Options} Options used when initializing the routing system. */
-        private static _options;
-        /** @type {string} Current loaded path. */
-        private static _loadedPath;
+        /** @type {string} Root path. */
+        private static _root;
         /** @type {Handler[]} Handlers for the routing system. */
         private static _handlers;
+        /** @type {string} Last loaded path. */
+        private static _loadedPath;
+        /** @type {boolean} Is hashChange desired? */
+        private static _wantsHashChange;
+        /** @type {boolean} Is pushState desired and supportted in the current browser? */
+        private static _usePushState;
         /**
-         * Start the routing system, returning `true` if the current URL was loaded,
+         * Start the routing system, returning `true` if the current URL was loaded for some handler,
          * and `false` otherwise.
-         * @param {Object} [options] Options
+         * @param {Object = {}} [options] The initialization options for the Router.
          * @return {boolean} true if the current fragment matched some handler, false otherwise.
          */
-        static listen(options: Options): boolean;
+        static listen(options?: Options): boolean;
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
          * Not useful in a real app; but useful for unit testing.
-         * @return {Router} the router.
+         * @return {Router} The router.
          */
         static stop(): Router;
         /**
          * Retrieve the current path without the root prefix.
-         * @return {string} the current path.
+         * @return {string} The current path.
          */
         static getCurrent(): string;
         /**
          * Add the given middleware as a handler for the given path (defaulting to any path).
-         * @param {string|Function|RouteGroup} path the fragment or the callback.
-         * @param {Function|RouteGroup} [activate] the activate callback or the group of routes.
-         * @return {Router} the router.
+         * @param {string|Function|RouteGroup} path The fragment or the callback.
+         * @param {Function|RouteGroup} [activate] The activate callback or the group of routes.
+         * @return {Router} The router.
          */
         static use(path: any, activate?: any): Router;
         /**
          * Change the current path and load it.
-         * @param {string} path The fragment to navigate to
+         * @param {string} path The fragment to navigate to.
          * @returns {boolean} true if the path matched some handler, false otherwise.
          */
         static navigate(path: string): boolean;
         /**
-         * Load the current path if already not loaded.
+         * Load the current path only if it has not been already heeded.
          * @return {boolean} true if loaded, false otherwise.
          */
-        private static _loadCurrent();
+        static heedCurrent(): boolean;
         /**
-         * Attempt to load the given URL fragment. If a route succeeds with a
-         * match, returns `true`; if no defined routes matches the fragment,
-         * returns `false`.
-         * @param {string} path E.g.: 'user/pepito'
+         * Attempt to loads the handlers matching the given URL fragment.
+         * @param {string} path The url fragment, e.g.: 'users/pinocho'
          * @returns {boolean} true if the fragment matched some handler, false otherwise.
          */
-        private static _load(path);
+        static load(path: string): boolean;
         /**
          * Extract the handlers from the given arguments.
          * @param  {string} parentPath The parent path of the group of routes.

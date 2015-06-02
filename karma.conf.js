@@ -12,9 +12,6 @@ module.exports = function (config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress', 'coverage'],
 
-    // web server port
-    port: 9877,
-
     // enable / disable colors in the output (reporters and logs)
     colors: true,
 
@@ -28,25 +25,19 @@ module.exports = function (config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
-//      'Chrome_without_security',
-//      'Firefox_without_security',
-      'PhantomJS_without_security'      
+//      'Chrome',
+//      'Firefox',
+//      'IE',
+//      'IE9',
+      'PhantomJS'
     ],
 
     // you can define custom flags
     customLaunchers: {
-      Chrome_without_security: {
-        base: 'Chrome',
-        flags: ['--disable-web-security']
-      },
-      Firefox_without_security: {
-        base: 'Firefox',
-        flags: ['--disable-web-security']
-      },
-      PhantomJS_without_security: {
-        base: 'PhantomJS',
-        flags: ['--web-security=no']
-      }      
+      IE9: {
+        base: 'IE',
+        'x-ua-compatible': 'IE=EmulateIE9'
+      }
     },
 
     // Continuous Integration mode

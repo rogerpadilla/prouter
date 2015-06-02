@@ -7,7 +7,8 @@ module prouter {
      * Contracts for static type checking.
      */
     export interface Options {
-        mode?: string;
+        usePushState?: boolean;
+        hashChange?: boolean;
         root?: string;
         silent?: boolean;
     }
@@ -55,7 +56,7 @@ module prouter {
         activate: Function;
     }
 
-    /** @type {global} Allows to access the global var in the IDE, just for compilation. */
+    /** @type {global} Allow accessing the global var in the IDE, only required for compilation. */
     declare const global: any;
 
     /**
@@ -71,6 +72,9 @@ module prouter {
 
     /** @type {RegExp} Cached regex for default route. */
     const DEF_ROUTE = /.*/;
+
+    /** @type {Options} Default options for initializing the router. */
+    const DEF_OPTIONS: Options = { hashChange: true, usePushState: false, root: '/', silent: false };
 
     /**
      * The main path matching regexp utility.
@@ -96,18 +100,79 @@ module prouter {
     class RouteHelper {
 
         /**
-         * Escape a regular expression string.
-         * @param  {String} str the string to scape
-         * @return {String} the escaped string
+         * Transform a query-string to an object.
+         * @param  {string} search The query string.
+         * @return {Object} The resulting object.
          */
-        private static _escapeString(str: string): string {
+        static parseQuery(queryString: string): Object {
+            const searchParams = {};
+            if (queryString.charAt(0) === '?') {
+                queryString = queryString.slice(1);
+            }
+            const paramsArr = queryString.split('&');
+            for (let i = 0; i < paramsArr.length; i++) {
+                const pair = paramsArr[i].split('=');
+                searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+            }
+            return searchParams;
+        }
+
+        /**
+         * Transform a fragment to a Path object.
+         * @param  {string} path The fragment to parse.
+         * @return {Path} The resulting object.
+         */
+        static parsePath(path: string): Path {
+
+            let parser: any;
+
+            if (typeof _global.URL === 'function') {
+                parser = new _global.URL(path, 'http://example.com');
+            } else {
+                parser = document.createElement('a');
+                parser.href = 'http://example.com/' + path;
+            }
+
+            const parsedPath: Path = {
+                path: RouteHelper.clearSlashes(parser.pathname),
+                query: RouteHelper.parseQuery(parser.search),
+                queryString: parser.search
+            };
+
+            return parsedPath;
+        }
+
+        /**
+         * Ensure the given string has leading slashes.
+         * @param  {string} str The string.
+         * @return {string} The string with leading slashes.
+         */
+        static ensureSlashes(str: string): string {
+            if (str === '/') {
+                return str;
+            }
+            if (str.charAt(0) !== '/') {
+                str = '/' + str;
+            }
+            if (str.charAt(str.length - 1) !== '/') {
+                str += '/';
+            }
+            return str;
+        }
+
+        /**
+         * Escape a regular expression string.
+         * @param  {String} str The string to scape
+         * @return {String} The escaped string
+         */
+        static escapeString(str: string): string {
             return str.replace(/([.+*?=^!:${}()[\]|\/])/g, '\\$1');
         }
 
         /**
          * Escape the capturing group by escaping special characters and meaning.
-         * @param  {String} group the group to escape
-         * @return {String} escaped group.
+         * @param  {String} group The group to escape
+         * @return {String} The escaped group.
          */
         private static _escapeGroup(group: string): string {
             return group.replace(/([=!:$\/()])/g, '\\$1');
@@ -115,8 +180,8 @@ module prouter {
 
         /**
          * Removes leading slashes from the given string.
-         * @param  {string} path the uri fragment.
-         * @return {string} string without leading slashes.
+         * @param  {string} path The uri fragment.
+         * @return {string} The string without leading slashes.
          */
         static clearSlashes(path: string): string {
             return path.replace(LEADING_SLASHES_STRIPPER, '');
@@ -124,8 +189,8 @@ module prouter {
 
         /**
          * Get the flags for a regexp from the options.
-         * @param  {Object} opts the options object for building the flags.
-         * @return {String} flags.
+         * @param  {Object} opts The options object for building the flags.
+         * @return {String} The flags.
          */
         private static _flags(opts: Object): string {
             return opts['sensitive'] ? '' : 'i';
@@ -133,8 +198,8 @@ module prouter {
 
         /**
          * Parse a string for the raw tokens.
-         * @param  {String} path the fragment to pase.
-         * @return {Array} tokens the extracted tokens.
+         * @param  {String} path The fragment to pase.
+         * @return {Array} The tokens the extracted tokens.
          */
         private static _parse(path: string): any[] {
 
@@ -202,9 +267,9 @@ module prouter {
 
         /**
          * Expose a function for taking tokens and returning a RegExp.
-         * @param  {Array} tokens used for create the expression.
-         * @param  {Object} [options] configuration.
-         * @return {PathExp} the resulting path expression.
+         * @param  {Array} tokens The array of tokens used to create the expression.
+         * @param  {Object} [options] The configuration.
+         * @return {PathExp} The resulting path expression.
          */
         private static _tokensToPathExp(tokens: any[], options: Object = {}): PathExp {
 
@@ -220,10 +285,10 @@ module prouter {
                 const token = tokens[i];
 
                 if (typeof token === 'string') {
-                    route += RouteHelper._escapeString(token);
+                    route += RouteHelper.escapeString(token);
                 } else {
 
-                    const prefix = RouteHelper._escapeString(token.prefix);
+                    const prefix = RouteHelper.escapeString(token.prefix);
                     let capture = token.pattern;
 
                     if (token.repeat) {
@@ -264,53 +329,10 @@ module prouter {
         }
 
         /**
-         * Transform a query-string to an object.
-         * @param  {string} search the query string.
-         * @return {Object} the resulting object.
-         */
-        static parseQuery(queryString: string): Object {
-            const searchParams = {};
-            if (queryString.charAt(0) === '?') {
-                queryString = queryString.slice(1);
-            }
-            const paramsArr = queryString.split('&');
-            for (let i = 0; i < paramsArr.length; i++) {
-                const pair = paramsArr[i].split('=');
-                searchParams[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
-            }
-            return searchParams;
-        }
-
-        /**
-         * Transform a fragment to a Path object.
-         * @param  {string} path the fragment to parse.
-         * @return {Path} the resulting object.
-         */
-        static parsePath(path: string): Path {
-
-            let parser: any;
-
-            if (typeof _global.URL === 'function') {
-                parser = new _global.URL(path, 'http://example.com');
-            } else {
-                parser = document.createElement('a');
-                parser.href = 'http://example.com/' + path;
-            }
-
-            const parsedPath: Path = {
-                path: RouteHelper.clearSlashes(parser.pathname),
-                query: RouteHelper.parseQuery(parser.search),
-                queryString: parser.search
-            };
-
-            return parsedPath;
-        }
-
-        /**
          * Create a path regexp from string input.
-         * @param  {String} path the given url fragment.
-         * @param  {Object} [options] configuration.
-         * @return {PathExp} the resulting path expression.
+         * @param  {String} path The given url fragment.
+         * @param  {Object} [options] The configuration.
+         * @return {PathExp} The resulting path expression.
          */
         static stringToPathExp(path: string, options?: Object): PathExp {
 
@@ -336,52 +358,50 @@ module prouter {
      */
     export class Router {
 
-        /** @type {Options} Default options for initializing the router. */
-        private static _DEF_OPTIONS: Options = { mode: 'hash', root: '/', silent: false };
-        /** @type {Options} Options used when initializing the routing system. */
-        private static _options: Options;
-        /** @type {string} Current loaded path. */
-        private static _loadedPath: string;
+        /** @type {string} Root path. */
+        private static _root: string;
         /** @type {Handler[]} Handlers for the routing system. */
-        private static _handlers: Handler[] = [];
+        private static _handlers: Handler[];
+        /** @type {string} Last loaded path. */
+        private static _loadedPath: string;
+        /** @type {boolean} Is hashChange desired? */
+        private static _wantsHashChange: boolean;
+        /** @type {boolean} Is pushState desired and supportted in the current browser? */
+        private static _usePushState: boolean;
 
         /**
-         * Start the routing system, returning `true` if the current URL was loaded,
+         * Start the routing system, returning `true` if the current URL was loaded for some handler,
          * and `false` otherwise.
-         * @param {Object} [options] Options
+         * @param {Object = {}} [options] The initialization options for the Router.
          * @return {boolean} true if the current fragment matched some handler, false otherwise.
          */
-        static listen(options: Options): boolean {
+        static listen(options: Options = {}): boolean {
 
-            if (this._options) {
+            if (this._root !== undefined && this._root !== null) {
                 throw new Error('Router already listening.');
             }
 
-            this._options = {};
-
-            for (let prop in Router._DEF_OPTIONS) {
-                if (options[prop] !== undefined) {
-                    this._options[prop] = options[prop];
-                } else if (this._options[prop] === undefined) {
-                    this._options[prop] = Router._DEF_OPTIONS[prop];
+            for (let prop in DEF_OPTIONS) {
+                if (options[prop] === undefined) {
+                    options[prop] = DEF_OPTIONS[prop];
                 }
             }
 
-            switch (this._options.mode) {
-                case 'history':
-                    addEventListener('popstate', this._loadCurrent, false);
-                    break;
-                case 'hash':
-                    addEventListener('hashchange', this._loadCurrent, false);
-                    break;
-                default:
-                    throw new Error("Invalid mode '" + this._options.mode + "'. Valid modes are: 'history', 'hash'.");
+            this._wantsHashChange = options.hashChange;
+            this._usePushState    = options.usePushState && !!(_global.history && _global.history.pushState);
+            this._root = RouteHelper.ensureSlashes(options.root);
+            this._handlers = [];
+
+            if (this._usePushState) {
+                addEventListener('popstate', this.heedCurrent, false);
+            } else if (this._wantsHashChange) {
+                addEventListener('hashchange', this.heedCurrent, false);
             }
 
             let loaded = false;
 
-            if (!this._options.silent) {
-                loaded = this._loadCurrent();
+            if (!options.silent) {
+                loaded = this.heedCurrent();
             }
 
             return loaded;
@@ -390,34 +410,31 @@ module prouter {
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
          * Not useful in a real app; but useful for unit testing.
-         * @return {Router} the router.
+         * @return {Router} The router.
          */
         static stop(): Router {
-            if (this._options.mode === 'history') {
-                removeEventListener('popstate', this._loadCurrent, false);
-                history.pushState(null, null, this._options.root);
-            } else {
-                removeEventListener('hashchange', this._loadCurrent, false);
-                location.hash = '#';
+            removeEventListener('popstate', this.heedCurrent, false);
+            removeEventListener('hashchange', this.heedCurrent, false);
+            for (let propName in this) {
+                if (this.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
+                    this[propName] = null;
+                }
             }
-            this._handlers = [];
-            this._loadedPath = null;
-            this._options = null;
             return this;
         }
 
         /**
          * Retrieve the current path without the root prefix.
-         * @return {string} the current path.
+         * @return {string} The current path.
          */
         static getCurrent(): string {
 
             let path: string;
 
-            if (this._options.mode === 'history') {
-                const decodedUri = decodeURI(location.pathname + location.search);
-                path = RouteHelper.clearSlashes(decodedUri);
-                path = this._options.root === '/' ? path : path.slice(this._options.root.length);
+            if (this._usePushState || !this._wantsHashChange) {
+                path = decodeURI(location.pathname + location.search);
+                // removes the root prefix from the path.
+                path = path.slice(this._root.length);
             } else {
                 const match = location.href.match(/#(.*)$/);
                 path = match ? match[1] : '';
@@ -430,9 +447,9 @@ module prouter {
 
         /**
          * Add the given middleware as a handler for the given path (defaulting to any path).
-         * @param {string|Function|RouteGroup} path the fragment or the callback.
-         * @param {Function|RouteGroup} [activate] the activate callback or the group of routes.
-         * @return {Router} the router.
+         * @param {string|Function|RouteGroup} path The fragment or the callback.
+         * @param {Function|RouteGroup} [activate] The activate callback or the group of routes.
+         * @return {Router} The router.
          */
         static use(path: any, activate?: any): Router {
 
@@ -462,46 +479,46 @@ module prouter {
 
         /**
          * Change the current path and load it.
-         * @param {string} path The fragment to navigate to
+         * @param {string} path The fragment to navigate to.
          * @returns {boolean} true if the path matched some handler, false otherwise.
          */
         static navigate(path: string): boolean {
 
-            if (!this._options) {
+            if (this._root === undefined || this._root === null) {
                 throw new Error("It is required to call the 'listen' function before navigating.");
             }
 
             path = RouteHelper.clearSlashes(path);
 
-            switch (this._options.mode) {
-                case 'history':
-                    history.pushState(null, null, this._options.root + path);
-                    break;
-                case 'hash':
-                    location.hash = '#' + path;
-                    break;
+            if (this._usePushState) {
+                history.pushState(null, null, this._root + path);
+            } else if (this._wantsHashChange) {
+                location.hash = '#' + path;
+            } else {
+                // If you've told us that you explicitly don't want fallback hashchange-
+                // based history, then `navigate` becomes a page refresh.
+                location.assign(this._root + path);
+                return true;
             }
 
-            return this._load(path);
+            return this.load(path);
         }
 
         /**
-         * Load the current path if already not loaded.
+         * Load the current path only if it has not been already heeded.
          * @return {boolean} true if loaded, false otherwise.
          */
-        private static _loadCurrent(): boolean {
+        static heedCurrent(): boolean {
             const currentPath = this.getCurrent();
-            return currentPath === this._loadedPath ? false : this._load(currentPath);
+            return currentPath === this._loadedPath ? false : this.load(currentPath);
         }
 
         /**
-         * Attempt to load the given URL fragment. If a route succeeds with a
-         * match, returns `true`; if no defined routes matches the fragment,
-         * returns `false`.
-         * @param {string} path E.g.: 'user/pepito'
+         * Attempt to loads the handlers matching the given URL fragment.
+         * @param {string} path The url fragment, e.g.: 'users/pinocho'
          * @returns {boolean} true if the fragment matched some handler, false otherwise.
          */
-        private static _load(path: string): boolean {
+        static load(path: string): boolean {
 
             const requestProcessors = this._obtainRequestProcessors(path);
 
@@ -511,6 +528,7 @@ module prouter {
                 const requestProcessor = requestProcessors[i];
                 requestProcessor.request.oldPath = this._loadedPath;
                 const next = requestProcessor.activate.call(null, requestProcessor.request);
+                // If some of the handlers returns 'false', then stop propagation.
                 if (next === false) {
                     break;
                 }
@@ -609,12 +627,7 @@ module prouter {
             const request: Request = RouteHelper.parsePath(path);
             request.params = {};
 
-            const result = pathExp ? pathExp.exec(request.path) : null;
-
-            if (!result) {
-                return request;
-            }
-
+            const result = pathExp.exec(request.path);
             const args = result.slice(1);
             const keys = pathExp.keys;
 
@@ -627,6 +640,10 @@ module prouter {
             return request;
         }
     }
+
+    // This function is used as callback for event listeners of different objects,
+    // and we want to maintain its context linked to the Router instance.
+    Router.heedCurrent = Router.heedCurrent.bind(Router);
 
     /**
      * Allows to use a group of routes as middleware.

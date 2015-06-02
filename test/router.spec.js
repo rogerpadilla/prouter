@@ -1,28 +1,40 @@
 'use strict';
 
-var Router = prouter.Router;
-var RouteGroup = prouter.RouteGroup;
+describe('Routing -', function () {
 
-describe("Routing -", function () {
+  // This library must be fast.
+  // Ensure each test is completed this limit of time.  
+  this.timeout(50);
 
-  this.timeout(500);
+  var Router = prouter.Router;
+  var RouteGroup = prouter.RouteGroup;
 
   beforeEach(function () {
-    Router.listen({ mode: 'history' });
-  });
+    var usePushState = Math.random() > 0.5;
+    var randomRoot = Math.random() > 0.5 ? '/' : 'some-root';
+    var options = { usePushState: usePushState, root: randomRoot };
+    Router.listen(options);
+  })
 
-  afterEach(function() {
+  afterEach(function () {
     Router.stop();
   });
 
-  it("basic", function (done) {
+  it('basic', function (done) {
     Router.use('about', function () {
       done();
     });
     Router.navigate('/about');
   });
 
-  it("parameters", function (done) {
+  it('default', function (done) {
+    Router.use(function () {
+      done();
+    });
+    Router.navigate('about');
+  });
+
+  it('parameters', function (done) {
     Router.use('/about/:id/:num', function (req) {
       expect(req.params.id).eq('16');
       expect(req.params.num).eq('18');
@@ -31,7 +43,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/18');
   });
 
-  it("query", function (done) {
+  it('query', function (done) {
     Router.use('/about', function (req) {
       expect(req.query).a('object');
       expect(req.query.first).eq('5');
@@ -41,7 +53,7 @@ describe("Routing -", function () {
     Router.navigate('/about?first=5&second=6');
   });
 
-  it("parameters & query", function (done) {
+  it('parameters & query', function (done) {
     Router.use('/about/:id/:num', function (req) {
       expect(req.params).a('object');
       expect(req.params.id).eq('16');
@@ -53,7 +65,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/18?first=5&second=6');
   });
 
-  it("divided parameters", function (done) {
+  it('divided parameters', function (done) {
     Router.use('/about/:id/route/:num', function (req) {
       expect(req.params).a('object');
       expect(req.params.id).eq('16');
@@ -63,7 +75,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/route/18');
   });
 
-  it("context", function (done) {
+  it('context', function (done) {
     var context = {
       name: 'context'
     };
@@ -76,14 +88,7 @@ describe("Routing -", function () {
     Router.navigate('/about');
   });
 
-  it("default", function (done) {
-    Router.use(function () {
-      done();
-    });
-    Router.navigate('about');
-  });
-
-  it("shift /", function (done) {
+  it('shift /', function (done) {
 
     var counter = 0;
 
@@ -100,7 +105,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("path", function (done) {
+  it('path', function (done) {
     Router.use('/file/:path*', function (req) {
       expect(req.params.path).eq('dir/file.jpg');
       done();
@@ -108,17 +113,18 @@ describe("Routing -", function () {
     Router.navigate('/file/dir/file.jpg');
   });
 
-  it("path with parameters", function (done) {
+  it('path with parameters', function (done) {
     Router.use('/file/:path*', function (req) {
       expect(req.params.path).eq('dir/file.jpg');
       expect(req.query.first).eq('1');
       expect(req.query.second).eq('2');
+      expect(req.path).eq('file/dir/file.jpg');
       done();
     });
     Router.navigate('/file/dir/file.jpg?first=1&second=2');
   });
 
-  it("optional param", function (done) {
+  it('optional param', function (done) {
 
     var counter = 0;
 
@@ -136,7 +142,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("optional parameters", function (done) {
+  it('optional parameters', function (done) {
 
     var counter = 0;
     var queryCounter = 0;
@@ -157,12 +163,13 @@ describe("Routing -", function () {
     done();
   });
 
-  it("get current URL", function () {
+  it('get current URL', function () {
+    var originalPath = Router.getCurrent();
     Router.use('/about', function () { });
     Router.use('/about/docs', function () { });
     Router.use('/about/docs/about', function () { });
     Router.use('/about/docs/stub', function () { });
-    expect(Router.getCurrent()).eq('');
+    expect(Router.getCurrent()).eq(originalPath);
     Router.navigate('/about/docs');
     expect(Router.getCurrent()).eq('about/docs');
     Router.navigate('/about/docs/about');
@@ -171,11 +178,13 @@ describe("Routing -", function () {
     expect(Router.getCurrent()).eq('about/docs/stub');
   });
 
-  it("new and old routes", function (done) {
+  it('new and old routes', function (done) {
+
+    var originalPath = Router.getCurrent();
 
     Router.use('some', function (req) {
       expect(req.path).eq('some');
-      expect(req.oldPath).eq('');
+      expect(req.oldPath).eq(originalPath);
     });
 
     Router.use('another', function (req) {
@@ -189,11 +198,13 @@ describe("Routing -", function () {
     done();
   });
 
-  it("cancel navigation", function (done) {
+  it('cancel navigation', function (done) {
+
+    var originalPath = Router.getCurrent();
 
     Router.use(function (req) {
       expect(req.path).eq('about');
-      expect(req.oldPath).eq('');
+      expect(req.oldPath).eq(originalPath);
       return false;
     });
 
@@ -206,7 +217,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("default nested", function (done) {
+  it('default nested', function (done) {
 
     var sequence = '';
 
@@ -226,7 +237,7 @@ describe("Routing -", function () {
     Router.navigate('/about/some');
   });
 
-  it("nested with sequence", function (done) {
+  it('nested with sequence', function (done) {
 
     var sequence = '';
 
@@ -257,7 +268,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("nested with parameters", function (done) {
+  it('nested with parameters', function (done) {
 
     var sequence = '';
 
@@ -275,7 +286,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/fixed');
   });
 
-  it("nested with parameters and query", function (done) {
+  it('nested with parameters and query', function (done) {
 
     var first = '';
 
@@ -299,7 +310,7 @@ describe("Routing -", function () {
     Router.navigate('/about/16/18/docs/17/19?first=3&second=7');
   });
 
-  it("groups", function (done) {
+  it('groups', function (done) {
 
     var sequence = '';
 
@@ -323,7 +334,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("groups with default route", function (done) {
+  it('groups with default route', function (done) {
 
     var sequence = '';
 
@@ -347,7 +358,7 @@ describe("Routing -", function () {
     done();
   });
 
-  it("groups with default route mounted in default", function (done) {
+  it('groups with default route mounted in default', function (done) {
 
     var sequence = '';
 
@@ -375,5 +386,19 @@ describe("Routing -", function () {
     done();
   });
 
+  it('listen - throws error if already listening', function (done) {
+    expect(function () {
+      Router.listen();
+    }).to.throw(Error);
+    done();
+  });
+
+  it('listen - throws error if navigating without listening', function (done) {
+    expect(function () {
+      Router.stop();
+      Router.navigate('something');
+    }).to.throw(Error);
+    done();
+  });
 
 });
