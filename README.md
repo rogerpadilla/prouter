@@ -76,6 +76,9 @@ Router.use('/about', function (req) {
 Router.listen({root: '/', usePushState: false, hashChange: true, silent: false});
 
 Router.navigate('/about');
+
+console.log(Router.getCurrent());
+// about
 ```
 
 #### leading slashes (/) does not affect paths
@@ -91,11 +94,25 @@ Router.use('docs', function () {
 
 Router.listen();
 
-// All the following four navigations triggers the same path.
 Router.navigate('docs');
+
+console.log(Router.getCurrent());
+// about
+
 Router.navigate('/docs');
+
+console.log(Router.getCurrent());
+// about
+
 Router.navigate('/docs/');
+
+console.log(Router.getCurrent());
+// about
+
 Router.navigate('docs/');
+
+console.log(Router.getCurrent());
+// about
 
 console.log(counter);
 // 4
