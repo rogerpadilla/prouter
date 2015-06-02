@@ -22,7 +22,7 @@ commonJs, AMD. And as global browser.
 * [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 * Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 * [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
-* [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle is by returning `true` from the callback.
+* [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle is by returning `true` from callbacks.
 
 ### Routing
 
