@@ -44,7 +44,7 @@ bower install prouter --save
 
 ### Examples
 
-#### basic
+#### basic with default options
 
 ``` js
 var Router = prouter.Router;
@@ -55,10 +55,26 @@ Router.use('/about', function (req) {
   // {params: {}, query: {}, path: 'about', oldPath: ''}
 });
 
-// Initializes the path-changes handling.
+// Initializes the path-changes handling using default options.
 Router.listen();
 
 // Navigates to the path 'about'.
+Router.navigate('/about');
+```
+
+#### basic with custom options
+
+``` js
+var Router = prouter.Router;
+
+Router.use('/about', function (req) {
+  console.log(req);
+  // {params: {}, query: {}, path: 'about', oldPath: ''}
+});
+
+// Initializes with given options (same as default in this case).
+Router.listen({root: '/', usePushState: false, hashChange: true, silent: false});
+
 Router.navigate('/about');
 ```
 
