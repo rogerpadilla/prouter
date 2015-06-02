@@ -22,7 +22,7 @@ commonJs, AMD. And as global browser.
 * [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 * Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 * [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
-* [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle is by returning `true` from callbacks.
+* [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle (processing next handlers) is by returning `true` from callbacks.
 
 ### Routing
 
@@ -68,20 +68,27 @@ Router.navigate('/about');
 var Router = prouter.Router;
 
 Router.use('/', function(req) {
-  
+
 }).use('/login', function(req) {
-  
+
 }).use('/signup', function(req) {
-  
+
+}).use('/users/:username', function(req) {
+
 }).use('/about', function (req) {
   console.log(req);
   // {params: {}, query: {}, path: 'about', oldPath: ''}
 }).use(function() {
-  
+
 });
 
-// Initialize the Router with custom options (same as default for the example).
-Router.listen({root: '/', usePushState: false, hashChange: true, silent: false});
+// Initialize the Router with custom options (same as default for this example).
+Router.listen({
+  root: '/', // base path for the handlers.
+  usePushState: false, // is pushState of history API desired?
+  hashChange: true, // is hashChange desired?
+  silent: false // should the router try to load handlers for the current path?
+});
 
 Router.navigate('/about');
 
@@ -89,7 +96,7 @@ console.log(Router.getCurrent());
 // 'about'
 ```
 
-#### leading slashes (/) does not affect paths
+#### leading slashes (/) does not differentiate paths
 
 ``` js
 var Router = prouter.Router;
