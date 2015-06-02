@@ -18,7 +18,7 @@ commonJs, AMD. And as global browser.
 * [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
 
 ### Special features
-* Express [routing-expressions's style](#parametersAndQuery) compatibility.
+* The powerfull express's [routing-expressions style](#parametersAndQuery) for the client-side.
 * [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 * Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 * [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
