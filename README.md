@@ -5,27 +5,41 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without needing to reload the whole pages. prouter provides methods for routing client-side pages and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), prouter handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
+In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app, without needing to reload the whole pages. prouter provides methods for routing client-side pages and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), prouter handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
 
 ### Why prouter?
 
-* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like [React](https://facebook.github.io/react/), [Polymer](https://www.polymer-project.org/), [Handlebars](http://handlebarsjs.com/) or just vanilla JS? Have an existing project and want to modernize it? Want a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
+* __Unobtrusive:__ it is designed from the beginning to play well with others libraries, frameworks and vanilla JS. Want to create a hibrid-mobile-app or a web-spa using something like  [Polymer](https://www.polymer-project.org/),
+[Handlebars](http://handlebarsjs.com/),
+[React](https://facebook.github.io/react/)  or just vanilla JS? Have an existing project and want to modernize it? Looking for a router component for integrating it on your own framework? Good news, prouter is created with all of those use cases in mind!
 * __No dependencies:__ no jQuery, no underscore... no dependencies at all.
-* __Lightweight:__ 7kb for the [minified](https://raw.githubusercontent.com/rogerpadilla/prouter/master/dist/prouter.min.js) version.
+* __Lightweight:__ 6kb.
 * __Forward-thinking:__ learns from other Router components like the ones from Backbone, Aurelia and Express. Written in [TypeScript](http://www.typescriptlang.org/) for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
 [commonJs](http://webpack.github.io/docs/commonjs.html), [AMD](http://requirejs.org/docs/commonjs.html), and global browser.
-* [KISS principle](http://en.wikipedia.org/wiki/KISS_principle): unnecessary complexity avoided.
-* Proper [JSDoc](http://en.wikipedia.org/wiki/JSDoc) comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
-* [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are included in the build process.
+* KISS principle: unnecessary complexity avoided.
+* Proper JSDoc comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
+* [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
 
 ### Features
-* Ability to pass **_flash_ messages** when triggering navigation.
-* Supports optionally declaring **_deactivate_ callbacks**.
-* Ability to **register listeners for navigation's events**: _route:before_ and _route:after_.
-* Supports **preventing navigation** by returning _false_ from the callback for the _route:before_ event or from the _deactivate_ callback.
-* Complete __navigation data__ is passed in two parameters (objects with properties) to the activate / deactivate / event callbacks, allowing to obtain full information about the navigation.
+* Supports **preventing navigation** by returning `false` from the `activate` callback of a handler.
+* Complete __request data__ is passed as a parameter (object with properties) to the `activate` callback.
+* Default routing - you may set a callback function for any routing; this function will be executed for any path.
+
+### Routing
+
+In client-side apps, routing refers to the definition of end points (Paths) to an application and how it responds to URL changes.
+
+A router in prouter is essentially a series of handlers. A handler is created in the following way `Router.use(path, callback)`,
+where `Router` is the singleton instance provided by prouter, `path` is a path on the app, and `activate` is the function (callback)
+to be executed when the path is matched. Handler's callback has access to the request object (req), therefore it can:
+
+* Execute any code.
+* Make changes to the request.
+* End the routing cycle (by returning `false`).
+* Groups of routes (modular routers).
 
 ### Installation
+
 ``` bash
 npm install prouter --save
 
@@ -36,97 +50,213 @@ bower install prouter --save
 
 ### Examples
 
-```js
+#### Basic
+
+``` js
 var Router = prouter.Router;
 
-// Instantiate router and declare some handlers.
-var appRouter = new Router({
-    map: [
-        {
-            route: '',
-            activate: function () {
-                console.log('Entering home page');
-            }
-        },
-        {
-            route: 'users/:id',
-            activate: function (newRouteData) {
-                var userId = newRouteData.params.id;
-                console.log('The given userId is: ', userId);
-            },
-            deactivate: function() {
-                // Optional 'deactivate' callbacks like this,
-                // can be declared for a handler.
-                console.log('Leaving user page.');
-            }
-        },
-        {
-            route: 'some-path/:paramA/sub-path/:paramB',
-            activate: function (newRouteData, oldRouteData) {
-                // The value for the parameter 'paramA'.
-                console.log(newRouteData.params.paramA);
-                // The value for the parameter 'paramB'.
-                console.log(newRouteData.params.paramB);
-                console.log(newRouteData.path);
-                // The query (parsed as object).
-                console.log(newRouteData.query);
-                // The flash message (if any).
-                console.log(newRouteData.message);
-                // Information about the previous handler (if any).
-                console.log(oldRouteData);
-            }
-        },
-        {
-            route: '*',
-            activate: function() {
-                console.log('Default route.');
-            }
-        }
-    ]
+// Adds a handler linked to the path 'about'.
+Router.use('/about', function (req) {
+  console.log(req);
+  // {params: {}, query: {}, path: 'about', oldPath: ''}
 });
 
-// Listen before navigation happens in this router.
-appRouter.on('route:before', function (newRouteData, oldRouteData) {
-    // Information about the new handler.
-    console.log(newRouteData);  
-    // Information about the previous handler (if any).
-    console.log(oldRouteData);
-    // Check if the current user can access the path; if not,
-    // cancel navigation and redirect to 'login'.
-    var isAuthenticationNeeded = checkIfRouteNeedsAuthenticatedUser(newRouteData.path);
-    var isAnonymousUser = isAnonymousUser();
-    if (isAuthenticationNeeded && isAnonymousUser) {
-        appRouter.navigate('login');
-        return false;
-    }
-});
+// Initializes the path-changes handling.
+Router.listen();
 
-// You can alternatively use the function "add" for adding handlers:
-appRouter.add({
-    route: 'item/:id',
-    activate: function (newRouteData, oldRouteData) {
-        console.log(newRouteData);
-        console.log(oldRouteData);
-    }
-});
-
-// Activate routers (default options used for this example).
-// During page load, after your application has finished creating all of
-// its routers, be sure to call Router.history.start() or
-// Router.history.start(options) to enable routers.
-Router.history.start({root: '/', hashChange: true, pushState: false, silent: false});
-
-// Client-side redirect to the 'items/:id' handler and send a flash message.
-Router.history.navigate('items/a12b', {msg: 'Item saved', type: 'success'});
+// Navigates to the path 'about'.
+Router.navigate('/about');
 ```
 
-### Supported Routing expressions (compatible with express / [path-to-regexp](https://github.com/pillarjs/path-to-regexp)):
+#### Leading slashes (/) does not affect paths
+
+``` js
+var Router = prouter.Router;
+
+var counter = 0;
+
+Router.use('docs', function () {
+  counter++;
+});
+
+Router.listen();
+
+// All the following four navigations triggers the same path.
+Router.navigate('docs');
+Router.navigate('/docs');
+Router.navigate('/docs/');
+Router.navigate('docs/');
+
+console.log(counter);
+// 4
+```
+
+#### Default handler
+
+``` js
+var Router = prouter.Router;
+
+Router.use('other', function (req) {
+  console.log(req);
+  // {params: {}, query: {}, path: 'other', oldPath: ''}
+  req.params.something = 'any';
+}).use(function (req) {
+  console.log(req);
+  // {params: {something: 'any'}, query: {}, path: 'other', oldPath: ''}
+});
+
+Router.listen();
+
+Router.navigate('other');
+```
+
+#### Parameters (path tokens)
+
+``` js
+var Router = prouter.Router;
+
+Router.use('about/:id/:num', function (req) {
+  console.log(req);
+  // {params: {id: '16', num: '18'}, query: {}, path: 'about/16/18', oldPath: ''}
+}).listen();
+
+Router.navigate('about/16/18');
+```
+
+#### Query (search string)
+
+``` js
+var Router = prouter.Router;
+
+Router.use('about', function (req) {
+  console.log(req);
+  // {params: {}, query: {first: '5', second: '6'}, path: 'about', oldPath: ''}}
+}).listen();
+
+Router.navigate('about?first=5&second=6');
+```
+
+#### Parameters and query
+
+``` js
+var Router = prouter.Router;
+
+Router.use('/about/:id/:num', function (req) {
+  console.log(req);
+  // {params: {id: '16', num: '18'}, query: {first: '5', second: '6'}, path: 'about', oldPath: ''}}
+}).listen();
+
+Router.navigate('/about/16/18?first=5&second=6');
+```
+
+#### Optional parameters
+
+``` js
+var Router = prouter.Router;
+
+var counter = 0;
+
+Router.use('docs/:section/:subsection?', function (req) {
+  counter += parseInt(req.params.section);
+  if (req.params.subsection) {
+    counter += parseInt(req.params.subsection);
+  }
+}).listen();
+
+Router.navigate('docs/1');
+Router.navigate('docs/2/3');
+
+console.log(counter);
+// 6
+```
+
+#### Cancel routing cycle
+
+``` js
+var Router = prouter.Router;
+
+Router.use(function (req) {
+  // This callback will be executed.
+  return false;
+}).use('/about', function () {
+  // Will not enter here.
+});
+
+Router.listen();
+
+Router.navigate('/about');
+```
+
+#### Nested paths
+
+``` js
+var Router = prouter.Router;
+
+var sequence = '';
+
+Router.use('/about/docs', function () {
+  sequence += '1';
+}).use('about/docs/about', function () {
+  sequence += '2';
+}).use('/about/docs/stub', function () {
+  sequence += '3';
+}).use('/about/*', function () {
+  sequence += '*';
+});
+
+Router.listen();
+
+Router.navigate('/about/docs');
+Router.navigate('/about/docs/about');
+Router.navigate('/about/docs/stub');
+
+console.log(sequence);
+// 1*2*3*
+```
+
+#### Route Groups
+
+``` js
+var Router = prouter.Router;
+var RouteGroup = prouter.RouteGroup;
+
+var sequence = '';
+
+var userGroup = new RouteGroup();
+userGroup.use('', function () {
+  sequence += '1';
+}).use(':id', function () {
+  sequence += '2';
+});
+
+var aboutGroup = new RouteGroup();
+aboutGroup.use('owner', function () {
+  sequence += '3';
+}).use('year/:num', function () {
+  sequence += '4';
+});
+
+Router.use('users', userGroup);
+Router.use('about', aboutGroup);
+
+Router.navigate('users');
+Router.navigate('users/9');
+Router.navigate('about/owner');
+Router.navigate('about/year/2015');
+
+console.log(sequence);
+// 1234
+```
+___
+
+
+### Supported Routing expressions (compatible with the express's routing-expressions style):
 
 #### Named Parameters
 
 Named parameters are defined by prefixing a colon to the parameter name (`:foo`). By default, this parameter will match up to the next path segment.
 
-```js
+``` js
 ':foo/:bar'
 // Given 'any/thing' => newRouteData.params = {foo: 'any', bar: 'thing'}
 ```
@@ -137,7 +267,7 @@ Named parameters are defined by prefixing a colon to the parameter name (`:foo`)
 
 Parameters can be suffixed with a question mark (`?`) to make the entire parameter optional.
 
-```js
+``` js
 ':foo/:bar?'
 // Given 'any' => newRouteData.params = {foo: 'any', bar: undefined}
 // Given 'any/thing' => newRouteData.params = {foo: 'any', bar: 'thing'}
@@ -147,7 +277,7 @@ Parameters can be suffixed with a question mark (`?`) to make the entire paramet
 
 Parameters can be suffixed with an asterisk (`*`) to denote a zero or more parameter match.
 
-```js
+``` js
 ':foo*'
 // Given '' => newRouteData.params = {foo: ''}
 // Given 'one/two/three' => newRouteData.params = {foo: 'one/two/three'}
@@ -157,7 +287,7 @@ Parameters can be suffixed with an asterisk (`*`) to denote a zero or more param
 
 Parameters can be suffixed with a plus sign (`+`) to denote a one or more parameters match.
 
-```js
+``` js
 ':foo+'
 // Given 'one/two/three' => newRouteData.params = {foo: 'one/two/three'}
 ```
@@ -166,7 +296,7 @@ Parameters can be suffixed with a plus sign (`+`) to denote a one or more parame
 
 All parameters can be provided a custom matching regexp and override the default. Please note: Backslashes need to be escaped in strings.
 
-```js
+``` js
 ':foo(\\d+)'
 // Given '123' => newRouteData.params = {foo: '123'}
 ```
@@ -175,7 +305,7 @@ All parameters can be provided a custom matching regexp and override the default
 
 It is possible to write an unnamed parameter that is only a matching group. It works the same as a named parameter, except it will be numerically indexed.
 
-```js
+``` js
 ':foo/(.*)'
 // Given 'test/route' => newRouteData.params = {foo: 'test', '0': 'route'}
 ```
@@ -184,7 +314,7 @@ It is possible to write an unnamed parameter that is only a matching group. It w
 
 An asterisk can be used for matching everything. It is equivalent to an unnamed matching group of `(.*)`.
 
-```js
+``` js
 'foo/*'
 // Given 'foo/bar/baz' => newRouteData.params = {'0': 'bar/baz'}
 

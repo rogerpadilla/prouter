@@ -75,7 +75,7 @@ describe('Routing -', function () {
     Router.navigate('/about/16/route/18');
   });
 
-  it('context', function (done) {
+  it('preserve context', function (done) {
     var context = {
       name: 'context'
     };
@@ -102,6 +102,7 @@ describe('Routing -', function () {
     Router.navigate('docs');
 
     expect(counter).eq(4);
+    
     done();
   });
 
@@ -160,15 +161,19 @@ describe('Routing -', function () {
 
     expect(counter).eq(6);
     expect(queryCounter).eq(3);
+    
     done();
   });
 
   it('get current URL', function () {
+    
     var originalPath = Router.getCurrent();
-    Router.use('/about', function () { });
-    Router.use('/about/docs', function () { });
-    Router.use('/about/docs/about', function () { });
-    Router.use('/about/docs/stub', function () { });
+    
+    Router.use('/about', function () { })
+      .use('/about/docs', function () { })
+      .use('/about/docs/about', function () { })
+      .use('/about/docs/stub', function () { });
+      
     expect(Router.getCurrent()).eq(originalPath);
     Router.navigate('/about/docs');
     expect(Router.getCurrent()).eq('about/docs');
@@ -185,9 +190,7 @@ describe('Routing -', function () {
     Router.use('some', function (req) {
       expect(req.path).eq('some');
       expect(req.oldPath).eq(originalPath);
-    });
-
-    Router.use('another', function (req) {
+    }).use('another', function (req) {
       expect(req.path).eq('another');
       expect(req.oldPath).eq('some');
     });
@@ -206,9 +209,7 @@ describe('Routing -', function () {
       expect(req.path).eq('about');
       expect(req.oldPath).eq(originalPath);
       return false;
-    });
-
-    Router.use('/about', function () {
+    }).use('/about', function () {
       expect(false);
     });
 
@@ -223,13 +224,9 @@ describe('Routing -', function () {
 
     Router.use('/about/:part', function () {
       sequence += '1';
-    });
-
-    Router.use('/about/docs', function () {
+    }).use('/about/docs', function () {
       expect(false);
-    });
-
-    Router.use(function () {
+    }).use(function () {
       expect(sequence).eq('1');
       done();
     });
@@ -243,17 +240,11 @@ describe('Routing -', function () {
 
     Router.use('/about/docs', function () {
       sequence += '1';
-    });
-
-    Router.use('about/docs/about', function () {
+    }).use('about/docs/about', function () {
       sequence += '2';
-    });
-
-    Router.use('/about/docs/stub', function () {
+    }).use('/about/docs/stub', function () {
       sequence += '3';
-    });
-
-    Router.use('/about/*', function () {
+    }).use('/about/*', function () {
       sequence += '*';
     });
 
@@ -265,6 +256,7 @@ describe('Routing -', function () {
     expect(Router.getCurrent()).eq('about/docs/stub');
 
     expect(sequence).eq('1*2*3*');
+    
     done();
   });
 
@@ -274,9 +266,7 @@ describe('Routing -', function () {
 
     Router.use('/about/:id/:dynamic', function (req) {
       sequence = req.params;
-    });
-
-    Router.use('/about/:id/fixed', function () {
+    }).use('/about/:id/fixed', function () {
       expect(sequence).a('object');
       expect(sequence.id).eq('16');
       expect(sequence.dynamic).eq('fixed');
@@ -292,9 +282,7 @@ describe('Routing -', function () {
 
     Router.use('/about/:id/:num/*', function (req) {
       first = req;
-    });
-
-    Router.use('/about/:id/:num/docs/:id/:num', function (req) {
+    }).use('/about/:id/:num/docs/:id/:num', function (req) {
       expect(first.params).a('object');
       expect(first.params.id).eq('16');
       expect(first.params.num).eq('18');
@@ -318,9 +306,7 @@ describe('Routing -', function () {
 
     userGroup.use('', function () {
       sequence += '1';
-    });
-
-    userGroup.use(':id', function () {
+    }).use(':id', function () {
       sequence += '2';
     });
 
@@ -330,6 +316,39 @@ describe('Routing -', function () {
     Router.navigate('users/9');
 
     expect(sequence).eq('12');
+
+    done();
+  });
+  
+  it('groups many', function (done) {
+
+    var sequence = '';
+
+    var userGroup = new RouteGroup();
+
+    userGroup.use('', function () {
+      sequence += '1';
+    }).use(':id', function () {
+      sequence += '2';
+    });
+    
+    var aboutGroup = new RouteGroup();
+
+    aboutGroup.use('owner', function () {
+      sequence += '3';
+    }).use('year/:num', function () {
+      sequence += '4';
+    });
+
+    Router.use('users', userGroup);
+    Router.use('about', aboutGroup);
+
+    Router.navigate('users');
+    Router.navigate('users/9');
+    Router.navigate('about/owner');
+    Router.navigate('about/year/2015');
+
+    expect(sequence).eq('1234');
 
     done();
   });
@@ -366,13 +385,9 @@ describe('Routing -', function () {
 
     userGroup.use('users', function () {
       sequence += '1';
-    });
-
-    userGroup.use('users/:id', function () {
+    }).use('users/:id', function () {
       sequence += '2';
-    });
-
-    userGroup.use(function () {
+    }).use(function () {
       sequence += '*';
     });
 
@@ -395,8 +410,7 @@ describe('Routing -', function () {
 
   it('listen - throws error if navigating without listening', function (done) {
     expect(function () {
-      Router.stop();
-      Router.navigate('something');
+      Router.stop().navigate('something');
     }).to.throw(Error);
     done();
   });
