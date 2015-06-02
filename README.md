@@ -95,22 +95,18 @@ Router.use('docs', function () {
 Router.listen();
 
 Router.navigate('docs');
-
 console.log(Router.getCurrent());
 // about
 
 Router.navigate('/docs');
-
 console.log(Router.getCurrent());
 // about
 
 Router.navigate('/docs/');
-
 console.log(Router.getCurrent());
 // about
 
 Router.navigate('docs/');
-
 console.log(Router.getCurrent());
 // about
 
