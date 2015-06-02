@@ -30,7 +30,7 @@ In client-side apps, routing refers to the declaration of end points (paths) to 
 
 The Router component of prouter is essentially a collection of helpers which operates on a series of handlers. A handler is created in the following way `Router.use(path, activate)`,
 where `Router` is the singleton instance provided by prouter, `path` is a path on the app, and `activate` is the function (callback)
-to be executed when the path is matched. Handler's callback has access to the request object (req), therefore it can make changes to the request.
+to be executed when the path is matched.
 
 ### Installation
 
