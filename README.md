@@ -5,7 +5,7 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app, without needing to reload the whole pages. prouter provides methods for routing client-side pages and connecting them to actions and events; for browsers which don't yet support the History API ([pushState](http://diveintohtml5.info/history.html) and real URLs), prouter handles graceful fallback and transparent translation to the fragment version of the URL ([onhashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange) and URL fragments).
+In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app, without needing to reload the whole pages. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
 
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
@@ -39,6 +39,7 @@ bower install prouter --save
 ```
 
 ## Examples
+
 ### basic with default options
 
 ```js
@@ -57,7 +58,7 @@ Router.listen();
 Router.navigate('/about');
 ```
 
-### with custom options and several handlers including default.
+### <a name="customOptions"></a>with custom options and several handlers including default.
 
 ```js
 var Router = prouter.Router;
@@ -299,7 +300,8 @@ console.log(sequence);
 // '1234'
 ```
 
---------------------------------------------------------------------------------
+___
+
 
 ## Supported Routing expressions (compatible with the express's routing-expressions style):
 ### Named Parameters
@@ -363,3 +365,8 @@ An asterisk can be used for matching everything. It is equivalent to an unnamed 
 ':foo/*'
 // Given 'foo/bar/baz' => newRouteData.params = {foo: 'foo', '0': 'bar/baz'}
 ```
+
+___
+
+
+See [unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for more detailed use cases.
