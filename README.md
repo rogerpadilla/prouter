@@ -202,6 +202,23 @@ console.log(counter);
 // 6
 ```
 
+### custom match parameters
+
+```js
+var Router = prouter.Router;
+
+Router.use(':foo(\\d+)', function(req) {
+  console.log(req);
+  // {params: {foo: '123'}, query: {}, path: '123', oldPath: ''}
+}).use('some/:other(\\d+)', function(req) {
+  console.log(req);
+  // {params: {other: '987'}, query: {}, path: 'some/987', oldPath: '123'}
+}).listen();
+
+Router.navigate('123');
+Router.navigate('some/987');
+```
+
 ### <a name="endRoutingCycle"></a>end routing cycle
 
 ```js

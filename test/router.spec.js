@@ -82,12 +82,10 @@ describe('Routing -', function() {
     var context = {
       name: 'context'
     };
-
     Router.use('/about', function() {
       expect(this).eq(context);
       done();
     }.bind(context));
-
     Router.navigate('/about');
   });
 
@@ -150,6 +148,7 @@ describe('Routing -', function() {
     Router.navigate('/docs/2/3');
 
     expect(counter).eq(6);
+    
     done();
   });
 
@@ -173,6 +172,41 @@ describe('Routing -', function() {
     expect(queryCounter).eq(3);
 
     done();
+  });
+
+  it('custom match parameters', function(done) {
+
+    var sequence = '';
+
+    Router.use(':foo(\\d+)', function(req) {
+      expect(req.path).eq('123');
+      expect(req.params.foo).eq('123');
+      sequence += '1';
+    }).use('some/:other(\\d+)', function(req) {
+      expect(req.oldPath).eq('123');
+      expect(req.path).eq('some/987');
+      expect(req.params.other).eq('987');
+      sequence += '2';
+    });
+
+    Router.navigate('123');
+    Router.navigate('some/987');
+
+    expect(sequence).eq('12');
+
+    done();
+  });
+
+  it('unnamed parameters', function(done) {
+
+    Router.use(':foo/(.*)', function(req) {
+      expect(req.path).eq('test/route');
+      expect(req.params.foo).eq('test');
+      expect(req.params['0']).eq('route');
+      done();
+    });
+
+    Router.navigate('test/route');    
   });
 
   it('get current URL', function() {
@@ -203,12 +237,11 @@ describe('Routing -', function() {
     }).use('another', function(req) {
       expect(req.path).eq('another');
       expect(req.oldPath).eq('some');
+      done();
     });
 
     Router.navigate('some');
-    Router.navigate('another');
-
-    done();
+    Router.navigate('another');    
   });
 
   it('end routing cycle', function(done) {
@@ -219,7 +252,7 @@ describe('Routing -', function() {
       expect(req.path).eq('about');
       expect(req.oldPath).eq(originalPath);
     }).use('/about', function() {
-      expect(false);
+      expect(false).true;
     });
 
     Router.navigate('/about');
@@ -235,7 +268,7 @@ describe('Routing -', function() {
       sequence += '1';
       return true;
     }).use('/about/docs', function() {
-      expect(false);
+      expect(false).true;
     }).use(function() {
       expect(sequence).eq('1');
       done();
@@ -417,14 +450,14 @@ describe('Routing -', function() {
   it('listen - throws error if already listening', function(done) {
     expect(function() {
       Router.listen();
-    }).to.throw(Error);
+    }).throw(Error);
     done();
   });
 
   it('listen - throws error if navigating without listening', function(done) {
     expect(function() {
       Router.stop().navigate('something');
-    }).to.throw(Error);
+    }).throw(Error);
     done();
   });
 
