@@ -70,12 +70,6 @@ module prouter {
     /** @type {RegExp} Cached regex for stripping out leading slashes. */
     const LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
 
-    /** @type {RegExp} Cached regex for default route. */
-    const DEF_ROUTE = /.*/;
-
-    /** @type {Options} Default options for initializing the router. */
-    const DEF_OPTIONS: Options = { hashChange: true, usePushState: false, root: '/', silent: false };
-
     /**
      * The main path matching regexp utility.
      * @type {RegExp} path regexp.
@@ -93,6 +87,12 @@ module prouter {
         '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
     ].join('|'), 'g');
 
+    /** @type {RegExp} Cached regex for default route. */
+    const DEF_ROUTE = /.*/;
+
+    /** @type {Options} Default options for initializing the router. */
+    const DEF_OPTIONS: Options = { hashChange: true, usePushState: false, root: '/', silent: false };
+        
 
     /**
      * Collection of helpers for processing routes.
@@ -370,12 +370,11 @@ module prouter {
         private static _usePushState: boolean;
 
         /**
-         * Start the routing system, returning `true` if the current URL was loaded for some handler,
-         * and `false` otherwise.
+         * Start the routing system.
          * @param {Object = {}} [options] The initialization options for the Router.
-         * @return {boolean} true if the current fragment matched some handler, false otherwise.
+         * @return {Router} The router.
          */
-        static listen(options: Options = {}): boolean {
+        static listen(options: Options = {}): Router {
 
             if (this._root !== undefined && this._root !== null) {
                 throw new Error('Router already listening.');
@@ -398,13 +397,11 @@ module prouter {
                 addEventListener('hashchange', this.heedCurrent, false);
             }
 
-            let loaded = false;
-
             if (!options.silent) {
-                loaded = this.heedCurrent();
+                this.heedCurrent();
             }
 
-            return loaded;
+            return this;
         }
 
         /**
@@ -480,9 +477,9 @@ module prouter {
         /**
          * Change the current path and load it.
          * @param {string} path The fragment to navigate to.
-         * @returns {boolean} true if the path matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
-        static navigate(path: string): boolean {
+        static navigate(path: string): Router {
 
             if (this._root === undefined || this._root === null) {
                 throw new Error("It is required to call the 'listen' function before navigating.");
@@ -506,41 +503,52 @@ module prouter {
 
         /**
          * Load the current path only if it has not been already heeded.
-         * @return {boolean} true if loaded, false otherwise.
+         * @return {Router} The router.
          */
-        static heedCurrent(): boolean {
+        static heedCurrent(): Router {
             const currentPath = this.getCurrent();
-            return currentPath === this._loadedPath ? false : this.load(currentPath);
+            return currentPath === this._loadedPath ? this : this.load(currentPath);
         }
 
         /**
          * Attempt to loads the handlers matching the given URL fragment.
          * @param {string} path The url fragment, e.g.: 'users/pinocho'
-         * @returns {boolean} true if the fragment matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
-        static load(path: string): boolean {
+        static load(path: string): Router {
 
-            const requestProcessors = this._obtainRequestProcessors(path);
+            const reqProcessors = this._obtainRequestProcessors(path);
 
-            let count = 0;
-
-            for (let i = 0; i < requestProcessors.length; i++) {
-                const requestProcessor = requestProcessors[i];
-                requestProcessor.request.oldPath = this._loadedPath;
-                const next = requestProcessor.activate.call(null, requestProcessor.request);
-                count++;
-                // the only way of continuing the routing cycle (processing next handler in the queue)
-                // is by returning `true` from callbacks.
-                if (next !== true) {
-                    break;
-                }
+            if (reqProcessors.length) {
+                
+                let count = 0;
+                          
+                /** Anonymous function used for processing nested callbacks. */      
+                function next() {
+                    
+                    if (count >= reqProcessors.length) {
+                        return;
+                    }
+                    
+                    const reqProc = reqProcessors[count];
+                    
+                    count++;
+                    
+                    reqProc.request.oldPath = Router._loadedPath;
+                    
+                    const resp = reqProc.activate.call(null, reqProc.request, next);
+                    
+                    if (resp === true) {
+                        next();
+                    }
+                }                             
+                
+                next();   
             }
-
-            const navigated = count > 0;
 
             this._loadedPath = path;
 
-            return navigated;
+            return this;
         }
 
         /**
@@ -605,12 +613,8 @@ module prouter {
                 const match = handler.pathExp.test(parsedPath.path);
 
                 if (match) {
-
                     const request = this._extractRequest(path, handler.pathExp);
-
-                    const requestProcessor: RequestProcessor = { activate: handler.activate, request };
-
-                    requestProcessors.push(requestProcessor);
+                    requestProcessors.push({ activate: handler.activate, request });
                 }
             }
 

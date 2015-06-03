@@ -61,12 +61,11 @@ declare module prouter {
         /** @type {boolean} Is pushState desired and supportted in the current browser? */
         private static _usePushState;
         /**
-         * Start the routing system, returning `true` if the current URL was loaded for some handler,
-         * and `false` otherwise.
+         * Start the routing system.
          * @param {Object = {}} [options] The initialization options for the Router.
-         * @return {boolean} true if the current fragment matched some handler, false otherwise.
+         * @return {Router} The router.
          */
-        static listen(options?: Options): boolean;
+        static listen(options?: Options): Router;
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
          * Not useful in a real app; but useful for unit testing.
@@ -88,20 +87,20 @@ declare module prouter {
         /**
          * Change the current path and load it.
          * @param {string} path The fragment to navigate to.
-         * @returns {boolean} true if the path matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
-        static navigate(path: string): boolean;
+        static navigate(path: string): Router;
         /**
          * Load the current path only if it has not been already heeded.
-         * @return {boolean} true if loaded, false otherwise.
+         * @return {Router} The router.
          */
-        static heedCurrent(): boolean;
+        static heedCurrent(): Router;
         /**
          * Attempt to loads the handlers matching the given URL fragment.
          * @param {string} path The url fragment, e.g.: 'users/pinocho'
-         * @returns {boolean} true if the fragment matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
-        static load(path: string): boolean;
+        static load(path: string): Router;
         /**
          * Extract the handlers from the given arguments.
          * @param  {string} parentPath The parent path of the group of routes.

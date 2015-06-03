@@ -21,7 +21,9 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 - [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 - Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 - [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
-- [End the routing cycle](#endRoutingCycle): the only way of continuing the routing cycle (processing next handler in the queue) is by returning `true` from callbacks.
+- [End the routing cycle](#endRoutingCycle): if the current callback does not end the routing-cycle (i.e. processing next handler in the queue), it must do one of the following things.  
+  1. Call the [`next`](#nestedPathsCallNext) function. Also useful for async-nested callbacks (express's style).
+  2. Return [`true`](#nestedPathsReturnTrue). Maintained for backwards compatibility.
 
 ## Routing
 In client-side apps, routing refers to the declaration of end points (paths) to an application and how it responds to URL changes.
@@ -130,11 +132,11 @@ console.log(counter);
 ```js
 var Router = prouter.Router;
 
-Router.use('other', function (req) {
+Router.use('other', function (req, next) {
   console.log(req);
   // {params: {}, query: {}, path: 'other', oldPath: ''}
   req.params.something = 'any';
-  return true;
+  next();
 }).use(function (req) {
   console.log(req);
   // {params: {something: 'any'}, query: {}, path: 'other', oldPath: ''}
@@ -228,7 +230,7 @@ var Router = prouter.Router;
 Router.use(function (req) {
   // This callback will be executed.
 }).use('/about', function () {
-  // Will not enter here since the previous callback did not returned `true`.
+  // Will not enter here since the previous callback ended routing-cycle.
 });
 
 Router.listen();
@@ -236,7 +238,35 @@ Router.listen();
 Router.navigate('/about');
 ```
 
-### nested paths
+### <a name="nestedPathsCallNext"></a>nested paths - call next
+
+```js
+var Router = prouter.Router;
+
+var sequence = '';
+
+Router.use('/about/docs', function (req, next) {
+  sequence += '1';
+  next();
+}).use('about/docs/about', function (req, next) {
+  sequence += '2';
+  next();
+}).use('/about/docs/stub', function (req, next) {
+  sequence += '3';
+  next();
+}).use('/about/*', function () {
+  sequence += '*';
+}).listen();
+
+Router.navigate('/about/docs');
+Router.navigate('/about/docs/about');
+Router.navigate('/about/docs/stub');
+
+console.log(sequence);
+// '1*2*3*
+```
+
+### <a name="nestedPathsReturnTrue"></a>nested paths - return true
 
 ```js
 var Router = prouter.Router;
@@ -261,7 +291,7 @@ Router.navigate('/about/docs/about');
 Router.navigate('/about/docs/stub');
 
 console.log(sequence);
-// '1*2*3*''
+// '1*2*3*
 ```
 
 ### <a name="routeGroup"></a>route group

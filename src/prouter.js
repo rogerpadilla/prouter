@@ -12,10 +12,6 @@ var prouter;
         (typeof global === 'object' && global.global === global && global);
     /** @type {RegExp} Cached regex for stripping out leading slashes. */
     var LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
-    /** @type {RegExp} Cached regex for default route. */
-    var DEF_ROUTE = /.*/;
-    /** @type {Options} Default options for initializing the router. */
-    var DEF_OPTIONS = { hashChange: true, usePushState: false, root: '/', silent: false };
     /**
      * The main path matching regexp utility.
      * @type {RegExp} path regexp.
@@ -32,6 +28,10 @@ var prouter;
         // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
         '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^()])+)\\))?|\\(((?:\\\\.|[^()])+)\\))([+*?])?|(\\*))'
     ].join('|'), 'g');
+    /** @type {RegExp} Cached regex for default route. */
+    var DEF_ROUTE = /.*/;
+    /** @type {Options} Default options for initializing the router. */
+    var DEF_OPTIONS = { hashChange: true, usePushState: false, root: '/', silent: false };
     /**
      * Collection of helpers for processing routes.
      */
@@ -264,10 +264,9 @@ var prouter;
         function Router() {
         }
         /**
-         * Start the routing system, returning `true` if the current URL was loaded for some handler,
-         * and `false` otherwise.
+         * Start the routing system.
          * @param {Object = {}} [options] The initialization options for the Router.
-         * @return {boolean} true if the current fragment matched some handler, false otherwise.
+         * @return {Router} The router.
          */
         Router.listen = function (options) {
             if (options === void 0) { options = {}; }
@@ -289,11 +288,10 @@ var prouter;
             else if (this._wantsHashChange) {
                 addEventListener('hashchange', this.heedCurrent, false);
             }
-            var loaded = false;
             if (!options.silent) {
-                loaded = this.heedCurrent();
+                this.heedCurrent();
             }
-            return loaded;
+            return this;
         };
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
@@ -363,7 +361,7 @@ var prouter;
         /**
          * Change the current path and load it.
          * @param {string} path The fragment to navigate to.
-         * @returns {boolean} true if the path matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
         Router.navigate = function (path) {
             if (this._root === undefined || this._root === null) {
@@ -386,34 +384,38 @@ var prouter;
         };
         /**
          * Load the current path only if it has not been already heeded.
-         * @return {boolean} true if loaded, false otherwise.
+         * @return {Router} The router.
          */
         Router.heedCurrent = function () {
             var currentPath = this.getCurrent();
-            return currentPath === this._loadedPath ? false : this.load(currentPath);
+            return currentPath === this._loadedPath ? this : this.load(currentPath);
         };
         /**
          * Attempt to loads the handlers matching the given URL fragment.
          * @param {string} path The url fragment, e.g.: 'users/pinocho'
-         * @returns {boolean} true if the fragment matched some handler, false otherwise.
+         * @returns {Router} The router.
          */
         Router.load = function (path) {
-            var requestProcessors = this._obtainRequestProcessors(path);
-            var count = 0;
-            for (var i = 0; i < requestProcessors.length; i++) {
-                var requestProcessor = requestProcessors[i];
-                requestProcessor.request.oldPath = this._loadedPath;
-                var next = requestProcessor.activate.call(null, requestProcessor.request);
-                count++;
-                // the only way of continuing the routing cycle (processing next handler in the queue)
-                // is by returning `true` from callbacks.
-                if (next !== true) {
-                    break;
+            var reqProcessors = this._obtainRequestProcessors(path);
+            if (reqProcessors.length) {
+                var count = 0;
+                /** Anonymous function used for processing nested callbacks. */
+                function next() {
+                    if (count >= reqProcessors.length) {
+                        return;
+                    }
+                    var reqProc = reqProcessors[count];
+                    count++;
+                    reqProc.request.oldPath = Router._loadedPath;
+                    var resp = reqProc.activate.call(null, reqProc.request, next);
+                    if (resp === true) {
+                        next();
+                    }
                 }
+                next();
             }
-            var navigated = count > 0;
             this._loadedPath = path;
-            return navigated;
+            return this;
         };
         /**
          * Extract the handlers from the given arguments.
@@ -469,8 +471,7 @@ var prouter;
                 var match = handler.pathExp.test(parsedPath.path);
                 if (match) {
                     var request = this._extractRequest(path, handler.pathExp);
-                    var requestProcessor = { activate: handler.activate, request: request };
-                    requestProcessors.push(requestProcessor);
+                    requestProcessors.push({ activate: handler.activate, request: request });
                 }
             }
             return requestProcessors;
