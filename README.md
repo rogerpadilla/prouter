@@ -58,7 +58,7 @@ Router.listen();
 Router.navigate('/about');
 ```
 
-### <a name="customOptions"></a>with custom options and several handlers including default.
+### <a name="customOptions"></a>custom options and several handlers including default
 
 ```js
 var Router = prouter.Router;
