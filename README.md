@@ -23,7 +23,7 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 - [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
 - [End the routing cycle](#endRoutingCycle): if the current callback does not end the routing-cycle (i.e. processing next handler in the queue), it must do one of the following things.  
   1. Call the [`next`](#nestedPathsCallNext) function. Also useful for async-nested callbacks (express's style).
-  2. Return [`true`](#nestedPathsReturnTrue). Maintained for backwards compatibility.
+  2. Or return [`true`](#nestedPathsReturnTrue). Maintained for backwards compatibility.
 
 ## Routing
 In client-side apps, routing refers to the declaration of end points (paths) to an application and how it responds to URL changes.
