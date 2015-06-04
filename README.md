@@ -10,18 +10,17 @@ In rich web applications, we still want to provide linkable, bookmarkable, and s
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
 - **Absence of dependencies** and still **really lightweight:** 6kb.
-- **Forward-thinking:** learns from other Router components like the ones from Express, Backbone and Aurelia. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there:
-- commonJs, AMD. And as global browser variable.
+- **Forward-thinking:** learns from other Router components like the ones from Express, Backbone and Aurelia. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: commonJs, AMD. And as global browser variable.
 - KISS principle: unnecessary complexity avoided.
 - Proper JSDoc comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
 - [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
 
 ## Special features
-- The powerful express's [routing-expressions style](#parametersAndQuery) now available in the client-side.
+- The powerful express's [routing-expressions style](#parametersAndQuery) now available on the client-side.
 - [Group of routes](#routeGroup). You can group your routes in a modular way, thus for example, you may organize your routes in external files, them import and mount them in the main file.
 - Complete [request data](#parametersAndQuery) is passed as a parameter (object with properties) to the `activate` callback.
 - [Default handler](#defaultHandler) - you may set a callback function for any routing without a path; thus this function will be executed for any path.
-- [End the routing cycle](#endRoutingCycle): if the current callback does not end the routing-cycle (i.e. processing next handler in the queue), it must do one of the following things.  
+- [End the routing cycle](#endRoutingCycle): if the current callback want to continue the routing-cycle (i.e. processing next handler in the queue), it must do one of the following things.  
   1. Call the [`next`](#nestedPathsCallNext) function. Also useful for async-nested callbacks (express's style).
   2. Or return [`true`](#nestedPathsReturnTrue). Maintained for backwards compatibility.
 
