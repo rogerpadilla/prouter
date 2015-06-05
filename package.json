@@ -1,6 +1,6 @@
 {
   "name": "prouter",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Unobtrusive, forward-thinking and lightweight JavaScript Router library.",
   "main": "dist/prouter.js",
   "keywords": [

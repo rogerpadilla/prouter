@@ -290,7 +290,7 @@ var prouter;
             if (!options.silent) {
                 Router.heedCurrent();
             }
-            return this;
+            return Router;
         };
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
@@ -300,13 +300,13 @@ var prouter;
         Router.stop = function () {
             removeEventListener('popstate', Router.heedCurrent, false);
             removeEventListener('hashchange', Router.heedCurrent, false);
-            for (var propName in this) {
-                if (Router.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
-                    this[propName] = null;
+            for (var propName in Router) {
+                if (Router.hasOwnProperty(propName) && typeof Router[propName] !== 'function') {
+                    Router[propName] = null;
                 }
             }
             Router._handlers = [];
-            return this;
+            return Router;
         };
         /**
          * Retrieve the current path without the root prefix.
@@ -356,7 +356,7 @@ var prouter;
                 }
                 Router._handlers.push({ pathExp: pathExp, activate: activate });
             }
-            return this;
+            return Router;
         };
         /**
          * Change the current path and load it.
@@ -388,7 +388,7 @@ var prouter;
          */
         Router.heedCurrent = function () {
             var currentPath = Router.getCurrent();
-            return currentPath === Router._loadedPath ? this : Router.load(currentPath);
+            return currentPath === Router._loadedPath ? Router : Router.load(currentPath);
         };
         /**
          * Attempt to loads the handlers matching the given URL fragment.
@@ -415,7 +415,7 @@ var prouter;
                 next();
             }
             Router._loadedPath = path;
-            return this;
+            return Router;
         };
         /**
          * Extract the handlers from the given arguments.

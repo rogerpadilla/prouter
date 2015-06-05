@@ -88,7 +88,7 @@ module prouter {
 
     /** @type {Options} Default options for initializing the router. */
     const DEF_OPTIONS: Options = { hashChange: true, usePushState: false, root: '/', silent: false };
-        
+
 
     /**
      * Collection of helpers for processing routes.
@@ -384,7 +384,7 @@ module prouter {
 
             Router._wantsHashChange = options.hashChange;
             Router._usePushState    = options.usePushState && !!(_global.history && _global.history.pushState);
-            Router._root = RouteHelper.ensureSlashes(options.root);            
+            Router._root = RouteHelper.ensureSlashes(options.root);
 
             if (Router._usePushState) {
                 addEventListener('popstate', Router.heedCurrent, false);
@@ -396,7 +396,7 @@ module prouter {
                 Router.heedCurrent();
             }
 
-            return this;
+            return Router;
         }
 
         /**
@@ -407,13 +407,13 @@ module prouter {
         static stop(): Router {
             removeEventListener('popstate', Router.heedCurrent, false);
             removeEventListener('hashchange', Router.heedCurrent, false);
-            for (let propName in this) {
-                if (Router.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
-                    this[propName] = null;
+            for (let propName in Router) {
+                if (Router.hasOwnProperty(propName) && typeof Router[propName] !== 'function') {
+                  Router[propName] = null;
                 }
             }
             Router._handlers = [];
-            return this;
+            return Router;
         }
 
         /**
@@ -467,7 +467,7 @@ module prouter {
                 Router._handlers.push({ pathExp, activate });
             }
 
-            return this;
+            return Router;
         }
 
         /**
@@ -503,7 +503,7 @@ module prouter {
          */
         static heedCurrent(): Router {
             const currentPath = Router.getCurrent();
-            return currentPath === Router._loadedPath ? this : Router.load(currentPath);
+            return currentPath === Router._loadedPath ? Router : Router.load(currentPath);
         }
 
         /**
@@ -516,35 +516,35 @@ module prouter {
             const reqProcessors = Router._obtainRequestProcessors(path);
 
             if (reqProcessors.length) {
-                
+
                 let count = 0;
-                          
-                /** Anonymous function used for processing nested callbacks. */      
+
+                /** Anonymous function used for processing nested callbacks. */
                 function next() {
-                    
+
                     if (count >= reqProcessors.length) {
                         return;
                     }
-                    
+
                     const reqProc = reqProcessors[count];
-                    
+
                     count++;
-                    
+
                     reqProc.request.oldPath = Router._loadedPath;
-                    
+
                     const resp = reqProc.activate.call(null, reqProc.request, next);
-                    
+
                     if (resp === true) {
                         next();
                     }
-                }                             
-                
-                next();   
+                }
+
+                next();
             }
 
             Router._loadedPath = path;
 
-            return this;
+            return Router;
         }
 
         /**
