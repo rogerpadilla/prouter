@@ -49,7 +49,7 @@ var Router = prouter.Router;
 // Adds a handler linked to the path 'about'.
 Router.use('/about', function (req) {
   console.log(req);
-  // {params: {}, query: {}, path: 'about', oldPath: ''}
+  // {params: {}, query: {}, path: 'about', oldPath: undefined}
 });
 
 // Initialize the path-changes handling using default options.
@@ -74,7 +74,7 @@ Router.use('/', function(req) {
 
 }).use('/about', function (req) {
   console.log(req);
-  // {params: {}, query: {}, path: 'about', oldPath: ''}
+  // {params: {}, query: {}, path: 'about', oldPath: undefined}
 }).use(function() {
 
 });
@@ -133,12 +133,12 @@ var Router = prouter.Router;
 
 Router.use('other', function (req, next) {
   console.log(req);
-  // {params: {}, query: {}, path: 'other', oldPath: ''}
+  // {params: {}, query: {}, path: 'other', oldPath: undefined}
   req.params.something = 'any';
   next();
 }).use(function (req) {
   console.log(req);
-  // {params: {something: 'any'}, query: {}, path: 'other', oldPath: ''}
+  // {params: {something: 'any'}, query: {}, path: 'other', oldPath: undefined}
 }).listen();
 
 Router.navigate('other');
@@ -151,7 +151,7 @@ var Router = prouter.Router;
 
 Router.use('about/:id/:num', function (req) {
   console.log(req);
-  // {params: {id: '16', num: '18'}, query: {}, path: 'about/16/18', oldPath: ''}
+  // {params: {id: '16', num: '18'}, query: {}, path: 'about/16/18', oldPath: undefined}
 }).listen();
 
 Router.navigate('about/16/18');
@@ -164,7 +164,7 @@ var Router = prouter.Router;
 
 Router.use('about', function (req) {
   console.log(req);
-  // {params: {}, query: {first: '5', second: '6'}, path: 'about', oldPath: ''}}
+  // {params: {}, query: {first: '5', second: '6'}, path: 'about', oldPath: undefined}}
 }).listen();
 
 Router.navigate('about?first=5&second=6');
@@ -177,7 +177,7 @@ var Router = prouter.Router;
 
 Router.use('/about/:id/:num', function (req) {
   console.log(req);
-  // {params: {id: '16', num: '18'}, query: {first: '5', second: '6'}, path: 'about/16/18', oldPath: ''}}
+  // {params: {id: '16', num: '18'}, query: {first: '5', second: '6'}, path: 'about/16/18', oldPath: undefined}}
 }).listen();
 
 Router.navigate('/about/16/18?first=5&second=6');
@@ -211,7 +211,7 @@ var Router = prouter.Router;
 
 Router.use(':foo(\\d+)', function(req) {
   console.log(req);
-  // {params: {foo: '123'}, query: {}, path: '123', oldPath: ''}
+  // {params: {foo: '123'}, query: {}, path: '123', oldPath: undefined}
 }).use('some/:other(\\d+)', function(req) {
   console.log(req);
   // {params: {other: '987'}, query: {}, path: 'some/987', oldPath: '123'}
