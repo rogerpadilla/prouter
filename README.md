@@ -219,15 +219,20 @@ Router.navigate('123');
 Router.navigate('some/987');
 ```
 
-### <a name="endRoutingCycle"></a>end routing cycle
+### <a name="endRoutingCycle"></a>conditionally end routing cycle (can acts like a filter)
 
 ```js
 var Router = prouter.Router;
 
-Router.use(function (req) {
-  // This callback will be executed.
+Router.use(function (req, next) {
+  // Will enter here first since this is a default handler (any url)
+  // and it is at first position in the queue (can acts like a filter).
+  if (ifSomeCustomConditionIsMet) {
+    // Continue routing-cycle.
+    next();
+  }
 }).use('/about', function () {
-  // Will not enter here since the previous callback ended routing-cycle.
+  // Will enter here only if the previous callback call 'next' or return true.
 });
 
 Router.listen();
