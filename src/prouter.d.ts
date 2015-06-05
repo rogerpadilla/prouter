@@ -35,11 +35,8 @@ declare module prouter {
         path: any;
         activate: Function;
     }
-    interface RequestParams {
-        [index: string]: string;
-    }
     interface Request extends Path {
-        params?: RequestParams;
+        params?: any;
         oldPath?: string;
     }
     interface RequestProcessor {

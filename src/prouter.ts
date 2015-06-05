@@ -42,12 +42,8 @@ module prouter {
         activate: Function;
     }
 
-    export interface RequestParams {
-        [index: string]: string;
-    }
-
     export interface Request extends Path {
-        params?: RequestParams;
+        params?: any;
         oldPath?: string;
     }
 
@@ -361,7 +357,7 @@ module prouter {
         /** @type {string} Root path. */
         private static _root: string;
         /** @type {Handler[]} Handlers for the routing system. */
-        private static _handlers: Handler[];
+        private static _handlers: Handler[] = [];
         /** @type {string} Last loaded path. */
         private static _loadedPath: string;
         /** @type {boolean} Is hashChange desired? */
@@ -376,7 +372,7 @@ module prouter {
          */
         static listen(options: Options = {}): Router {
 
-            if (this._root !== undefined && this._root !== null) {
+            if (Router._root !== undefined && Router._root !== null) {
                 throw new Error('Router already listening.');
             }
 
@@ -386,19 +382,18 @@ module prouter {
                 }
             }
 
-            this._wantsHashChange = options.hashChange;
-            this._usePushState    = options.usePushState && !!(_global.history && _global.history.pushState);
-            this._root = RouteHelper.ensureSlashes(options.root);
-            this._handlers = [];
+            Router._wantsHashChange = options.hashChange;
+            Router._usePushState    = options.usePushState && !!(_global.history && _global.history.pushState);
+            Router._root = RouteHelper.ensureSlashes(options.root);            
 
-            if (this._usePushState) {
-                addEventListener('popstate', this.heedCurrent, false);
-            } else if (this._wantsHashChange) {
-                addEventListener('hashchange', this.heedCurrent, false);
+            if (Router._usePushState) {
+                addEventListener('popstate', Router.heedCurrent, false);
+            } else if (Router._wantsHashChange) {
+                addEventListener('hashchange', Router.heedCurrent, false);
             }
 
             if (!options.silent) {
-                this.heedCurrent();
+                Router.heedCurrent();
             }
 
             return this;
@@ -410,13 +405,14 @@ module prouter {
          * @return {Router} The router.
          */
         static stop(): Router {
-            removeEventListener('popstate', this.heedCurrent, false);
-            removeEventListener('hashchange', this.heedCurrent, false);
+            removeEventListener('popstate', Router.heedCurrent, false);
+            removeEventListener('hashchange', Router.heedCurrent, false);
             for (let propName in this) {
-                if (this.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
+                if (Router.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
                     this[propName] = null;
                 }
             }
+            Router._handlers = [];
             return this;
         }
 
@@ -428,10 +424,10 @@ module prouter {
 
             let path: string;
 
-            if (this._usePushState || !this._wantsHashChange) {
+            if (Router._usePushState || !Router._wantsHashChange) {
                 path = decodeURI(location.pathname + location.search);
                 // removes the root prefix from the path.
-                path = path.slice(this._root.length);
+                path = path.slice(Router._root.length);
             } else {
                 const match = location.href.match(/#(.*)$/);
                 path = match ? match[1] : '';
@@ -457,7 +453,7 @@ module prouter {
                 } else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                this._handlers = this._extractHandlers(parentPath, activate, this._handlers);
+                Router._handlers = Router._extractHandlers(parentPath, activate, Router._handlers);
             } else {
                 let pathExp: PathExp;
                 // If default route.
@@ -468,7 +464,7 @@ module prouter {
                     path = RouteHelper.clearSlashes(path);
                     pathExp = RouteHelper.stringToPathExp(path);
                 }
-                this._handlers.push({ pathExp, activate });
+                Router._handlers.push({ pathExp, activate });
             }
 
             return this;
@@ -481,24 +477,24 @@ module prouter {
          */
         static navigate(path: string): Router {
 
-            if (this._root === undefined || this._root === null) {
+            if (Router._root === undefined || Router._root === null) {
                 throw new Error("It is required to call the 'listen' function before navigating.");
             }
 
             path = RouteHelper.clearSlashes(path);
 
-            if (this._usePushState) {
-                history.pushState(null, null, this._root + path);
-            } else if (this._wantsHashChange) {
+            if (Router._usePushState) {
+                history.pushState(null, null, Router._root + path);
+            } else if (Router._wantsHashChange) {
                 location.hash = '#' + path;
             } else {
                 // If you've told us that you explicitly don't want fallback hashchange-
                 // based history, then `navigate` becomes a page refresh.
-                location.assign(this._root + path);
+                location.assign(Router._root + path);
                 return true;
             }
 
-            return this.load(path);
+            return Router.load(path);
         }
 
         /**
@@ -506,8 +502,8 @@ module prouter {
          * @return {Router} The router.
          */
         static heedCurrent(): Router {
-            const currentPath = this.getCurrent();
-            return currentPath === this._loadedPath ? this : this.load(currentPath);
+            const currentPath = Router.getCurrent();
+            return currentPath === Router._loadedPath ? this : Router.load(currentPath);
         }
 
         /**
@@ -517,7 +513,7 @@ module prouter {
          */
         static load(path: string): Router {
 
-            const reqProcessors = this._obtainRequestProcessors(path);
+            const reqProcessors = Router._obtainRequestProcessors(path);
 
             if (reqProcessors.length) {
                 
@@ -546,7 +542,7 @@ module prouter {
                 next();   
             }
 
-            this._loadedPath = path;
+            Router._loadedPath = path;
 
             return this;
         }
@@ -607,13 +603,13 @@ module prouter {
 
             const requestProcessors: RequestProcessor[] = [];
 
-            for (let i = 0; i < this._handlers.length; i++) {
+            for (let i = 0; i < Router._handlers.length; i++) {
 
-                const handler = this._handlers[i];
+                const handler = Router._handlers[i];
                 const match = handler.pathExp.test(parsedPath.path);
 
                 if (match) {
-                    const request = this._extractRequest(path, handler.pathExp);
+                    const request = Router._extractRequest(path, handler.pathExp);
                     requestProcessors.push({ activate: handler.activate, request });
                 }
             }
@@ -645,10 +641,6 @@ module prouter {
             return request;
         }
     }
-
-    // This function is used as callback for event listeners of different objects,
-    // and we want to maintain its context linked to the Router instance.
-    Router.heedCurrent = Router.heedCurrent.bind(Router);
 
     /**
      * Allows to use a group of routes as middleware.

@@ -270,7 +270,7 @@ var prouter;
          */
         Router.listen = function (options) {
             if (options === void 0) { options = {}; }
-            if (this._root !== undefined && this._root !== null) {
+            if (Router._root !== undefined && Router._root !== null) {
                 throw new Error('Router already listening.');
             }
             for (var prop in DEF_OPTIONS) {
@@ -278,18 +278,17 @@ var prouter;
                     options[prop] = DEF_OPTIONS[prop];
                 }
             }
-            this._wantsHashChange = options.hashChange;
-            this._usePushState = options.usePushState && !!(_global.history && _global.history.pushState);
-            this._root = RouteHelper.ensureSlashes(options.root);
-            this._handlers = [];
-            if (this._usePushState) {
-                addEventListener('popstate', this.heedCurrent, false);
+            Router._wantsHashChange = options.hashChange;
+            Router._usePushState = options.usePushState && !!(_global.history && _global.history.pushState);
+            Router._root = RouteHelper.ensureSlashes(options.root);
+            if (Router._usePushState) {
+                addEventListener('popstate', Router.heedCurrent, false);
             }
-            else if (this._wantsHashChange) {
-                addEventListener('hashchange', this.heedCurrent, false);
+            else if (Router._wantsHashChange) {
+                addEventListener('hashchange', Router.heedCurrent, false);
             }
             if (!options.silent) {
-                this.heedCurrent();
+                Router.heedCurrent();
             }
             return this;
         };
@@ -299,13 +298,14 @@ var prouter;
          * @return {Router} The router.
          */
         Router.stop = function () {
-            removeEventListener('popstate', this.heedCurrent, false);
-            removeEventListener('hashchange', this.heedCurrent, false);
+            removeEventListener('popstate', Router.heedCurrent, false);
+            removeEventListener('hashchange', Router.heedCurrent, false);
             for (var propName in this) {
-                if (this.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
+                if (Router.hasOwnProperty(propName) && typeof this[propName] !== 'function') {
                     this[propName] = null;
                 }
             }
+            Router._handlers = [];
             return this;
         };
         /**
@@ -314,10 +314,10 @@ var prouter;
          */
         Router.getCurrent = function () {
             var path;
-            if (this._usePushState || !this._wantsHashChange) {
+            if (Router._usePushState || !Router._wantsHashChange) {
                 path = decodeURI(location.pathname + location.search);
                 // removes the root prefix from the path.
-                path = path.slice(this._root.length);
+                path = path.slice(Router._root.length);
             }
             else {
                 var match = location.href.match(/#(.*)$/);
@@ -341,7 +341,7 @@ var prouter;
                 else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                this._handlers = this._extractHandlers(parentPath, activate, this._handlers);
+                Router._handlers = Router._extractHandlers(parentPath, activate, Router._handlers);
             }
             else {
                 var pathExp;
@@ -354,7 +354,7 @@ var prouter;
                     path = RouteHelper.clearSlashes(path);
                     pathExp = RouteHelper.stringToPathExp(path);
                 }
-                this._handlers.push({ pathExp: pathExp, activate: activate });
+                Router._handlers.push({ pathExp: pathExp, activate: activate });
             }
             return this;
         };
@@ -364,31 +364,31 @@ var prouter;
          * @returns {Router} The router.
          */
         Router.navigate = function (path) {
-            if (this._root === undefined || this._root === null) {
+            if (Router._root === undefined || Router._root === null) {
                 throw new Error("It is required to call the 'listen' function before navigating.");
             }
             path = RouteHelper.clearSlashes(path);
-            if (this._usePushState) {
-                history.pushState(null, null, this._root + path);
+            if (Router._usePushState) {
+                history.pushState(null, null, Router._root + path);
             }
-            else if (this._wantsHashChange) {
+            else if (Router._wantsHashChange) {
                 location.hash = '#' + path;
             }
             else {
                 // If you've told us that you explicitly don't want fallback hashchange-
                 // based history, then `navigate` becomes a page refresh.
-                location.assign(this._root + path);
+                location.assign(Router._root + path);
                 return true;
             }
-            return this.load(path);
+            return Router.load(path);
         };
         /**
          * Load the current path only if it has not been already heeded.
          * @return {Router} The router.
          */
         Router.heedCurrent = function () {
-            var currentPath = this.getCurrent();
-            return currentPath === this._loadedPath ? this : this.load(currentPath);
+            var currentPath = Router.getCurrent();
+            return currentPath === Router._loadedPath ? this : Router.load(currentPath);
         };
         /**
          * Attempt to loads the handlers matching the given URL fragment.
@@ -396,7 +396,7 @@ var prouter;
          * @returns {Router} The router.
          */
         Router.load = function (path) {
-            var reqProcessors = this._obtainRequestProcessors(path);
+            var reqProcessors = Router._obtainRequestProcessors(path);
             if (reqProcessors.length) {
                 var count = 0;
                 /** Anonymous function used for processing nested callbacks. */
@@ -414,7 +414,7 @@ var prouter;
                 }
                 next();
             }
-            this._loadedPath = path;
+            Router._loadedPath = path;
             return this;
         };
         /**
@@ -466,11 +466,11 @@ var prouter;
         Router._obtainRequestProcessors = function (path) {
             var parsedPath = RouteHelper.parsePath(path);
             var requestProcessors = [];
-            for (var i = 0; i < this._handlers.length; i++) {
-                var handler = this._handlers[i];
+            for (var i = 0; i < Router._handlers.length; i++) {
+                var handler = Router._handlers[i];
                 var match = handler.pathExp.test(parsedPath.path);
                 if (match) {
-                    var request = this._extractRequest(path, handler.pathExp);
+                    var request = Router._extractRequest(path, handler.pathExp);
                     requestProcessors.push({ activate: handler.activate, request: request });
                 }
             }
@@ -495,12 +495,11 @@ var prouter;
             }
             return request;
         };
+        /** @type {Handler[]} Handlers for the routing system. */
+        Router._handlers = [];
         return Router;
     })();
     prouter.Router = Router;
-    // This function is used as callback for event listeners of different objects,
-    // and we want to maintain its context linked to the Router instance.
-    Router.heedCurrent = Router.heedCurrent.bind(Router);
     /**
      * Allows to use a group of routes as middleware.
      */
