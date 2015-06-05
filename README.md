@@ -304,6 +304,7 @@ var RouteGroup = prouter.RouteGroup;
 
 var sequence = '';
 
+// Note that each route-group may be placed in a separate file.
 var userGroup = new RouteGroup();
 userGroup.use('', function () {
   sequence += '1';
@@ -311,6 +312,7 @@ userGroup.use('', function () {
   sequence += '2';
 });
 
+// Note that each route-group may be placed in a separate file.
 var aboutGroup = new RouteGroup();
 aboutGroup.use('owner', function () {
   sequence += '3';
