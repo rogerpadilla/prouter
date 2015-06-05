@@ -148,4 +148,4 @@ gulp.task('dev', ['release'], function () {
     });
 });
 
-gulp.task('default', ['release']);
+gulp.task('default', ['dev']);
