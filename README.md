@@ -106,21 +106,21 @@ Router.use('docs', function (req) {
   // 'docs'
 }).listen();
 
-var navigated = Router.navigate('docs');
-console.log(Router.getCurrent(), navigated);
-// 'docs', true
+Router.navigate('docs');
+console.log(Router.getCurrent());
+// 'docs'
 
-navigated = Router.navigate('/docs');
-console.log(Router.getCurrent(), navigated);
-// 'docs', true
+Router.navigate('/docs');
+console.log(Router.getCurrent());
+// 'docs'
 
-navigated = Router.navigate('/docs/');
-console.log(Router.getCurrent(), navigated);
-// 'docs', true
+Router.navigate('/docs/');
+console.log(Router.getCurrent());
+// 'docs'
 
-navigated = Router.navigate('docs/');
-console.log(Router.getCurrent(), navigated);
-// 'docs', true
+Router.navigate('docs/');
+console.log(Router.getCurrent());
+// 'docs'
 
 console.log(counter);
 // 4
