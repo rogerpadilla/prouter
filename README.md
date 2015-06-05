@@ -102,8 +102,6 @@ var counter = 0;
 
 Router.use('docs', function (req) {
   counter++;
-  console.log(req.path);
-  // 'docs'
 }).listen();
 
 Router.navigate('docs');
