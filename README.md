@@ -10,7 +10,7 @@ In rich web applications, without needing to reload the whole pages, we still wa
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
 - **Absence of dependencies** and still **really lightweight:** 6kb.
-- **Forward-thinking:** learns from other Router components like the ones from Express, Backbone and Aurelia. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: commonJs, AMD. And as global browser variable.
+- **Forward-thinking:** learns from others Router components like the ones of Express, Backbone and Aurelia. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: commonJs, AMD. And as global browser variable.
 - KISS principle: unnecessary complexity avoided.
 - Proper JSDoc comments are used in all the [source code](https://github.com/rogerpadilla/prouter/blob/master/src/prouter.ts).
 - [Unit tests](https://github.com/rogerpadilla/prouter/blob/master/test/router.spec.js) for every feature are automatically executed in major browsers: Chrome, Firefox and IE9+.
