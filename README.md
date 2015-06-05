@@ -5,7 +5,7 @@
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
-In rich web applications, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app, without needing to reload the whole pages. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
+In rich web applications, without needing to reload the whole pages, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
 
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with others libraries, frameworks and vanilla JS.
