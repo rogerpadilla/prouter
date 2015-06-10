@@ -339,8 +339,8 @@ var prouter;
         };
         /**
          * Add the given middleware as a handler for the given path (defaulting to any path).
-         * @param {string|Function|RouteGroup} path The fragment or the callback.
-         * @param {Function|RouteGroup} [activate] The activate callback or the group of routes.
+         * @param {string|Callback|RouteGroup} path The fragment or the callback.
+         * @param {Callback|RouteGroup} [activate] The activate callback or the group of routes.
          * @return {Router} The router.
          */
         Router.use = function (path, activate) {
@@ -521,8 +521,8 @@ var prouter;
         }
         /**
          * Add the given middleware function as handler for the given path (defaulting to any path).
-         * @param {string|Function} path The fragment or the callback.
-         * @param {Function} [activate] The activate callback or the group of routes.
+         * @param {string|Callback} path The fragment or the callback.
+         * @param {Callback} [activate] The activate callback.
          * @return {RouteGroup} The router group.
          */
         RouteGroup.prototype.use = function (path, activate) {

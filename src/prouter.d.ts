@@ -1,7 +1,7 @@
 /**
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
-declare module prouter {
+declare module 'prouter' {
     /**
      * Contracts for static type checking.
      */
@@ -29,11 +29,11 @@ declare module prouter {
     }
     interface Handler {
         pathExp: PathExp;
-        activate: Function;
+        activate: Callback;
     }
     interface GroupHandler {
         path: any;
-        activate: Function;
+        activate: Callback;
     }
     interface Request extends Path {
         params?: any;
@@ -41,7 +41,10 @@ declare module prouter {
     }
     interface RequestProcessor {
         request: Request;
-        activate: Function;
+        activate: Callback;
+    }
+    interface Callback {
+        (req?: Request): any;
     }
     /**
      * Core component for the routing system.
@@ -76,8 +79,8 @@ declare module prouter {
         static getCurrent(): string;
         /**
          * Add the given middleware as a handler for the given path (defaulting to any path).
-         * @param {string|Function|RouteGroup} path The fragment or the callback.
-         * @param {Function|RouteGroup} [activate] The activate callback or the group of routes.
+         * @param {string|Callback|RouteGroup} path The fragment or the callback.
+         * @param {Callback|RouteGroup} [activate] The activate callback or the group of routes.
          * @return {Router} The router.
          */
         static use(path: any, activate?: any): Router;
@@ -128,10 +131,10 @@ declare module prouter {
         _handlers: GroupHandler[];
         /**
          * Add the given middleware function as handler for the given path (defaulting to any path).
-         * @param {string|Function} path The fragment or the callback.
-         * @param {Function} [activate] The activate callback or the group of routes.
+         * @param {string|Callback} path The fragment or the callback.
+         * @param {Callback} [activate] The activate callback.
          * @return {RouteGroup} The router group.
          */
-        use(path: any, activate?: Function): RouteGroup;
+        use(path: any, activate?: Callback): RouteGroup;
     }
 }

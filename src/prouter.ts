@@ -34,12 +34,12 @@ module prouter {
 
     export interface Handler {
         pathExp: PathExp;
-        activate: Function;
+        activate: Callback;
     }
 
     export interface GroupHandler {
         path: any;
-        activate: Function;
+        activate: Callback;
     }
 
     export interface Request extends Path {
@@ -49,7 +49,11 @@ module prouter {
 
     export interface RequestProcessor {
         request: Request;
-        activate: Function;
+        activate: Callback;
+    }
+
+    export interface Callback {
+      (req?: Request): any;
     }
 
     /** @type {global} Allow accessing the global var in the IDE, only required for compilation. */
@@ -440,8 +444,8 @@ module prouter {
 
         /**
          * Add the given middleware as a handler for the given path (defaulting to any path).
-         * @param {string|Function|RouteGroup} path The fragment or the callback.
-         * @param {Function|RouteGroup} [activate] The activate callback or the group of routes.
+         * @param {string|Callback|RouteGroup} path The fragment or the callback.
+         * @param {Callback|RouteGroup} [activate] The activate callback or the group of routes.
          * @return {Router} The router.
          */
         static use(path: any, activate?: any): Router {
@@ -562,7 +566,7 @@ module prouter {
 
                 const itHandler = groupHandlers[i];
                 let subPath: string;
-                let activate: Function;
+                let activate: Callback;
 
                 if (typeof itHandler.path === 'function') {
                     activate = itHandler.path;
@@ -652,11 +656,11 @@ module prouter {
 
         /**
          * Add the given middleware function as handler for the given path (defaulting to any path).
-         * @param {string|Function} path The fragment or the callback.
-         * @param {Function} [activate] The activate callback or the group of routes.
+         * @param {string|Callback} path The fragment or the callback.
+         * @param {Callback} [activate] The activate callback.
          * @return {RouteGroup} The router group.
          */
-        use(path: any, activate?: Function): RouteGroup {
+        use(path: any, activate?: Callback): RouteGroup {
             this._handlers.push({ path, activate });
             return this;
         }
