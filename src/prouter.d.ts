@@ -1,7 +1,7 @@
 /**
  * Unobtrusive, forward-thinking and lightweight JavaScript router library.
  */
-declare module 'prouter' {
+declare module prouter {
     /**
      * Contracts for static type checking.
      */

@@ -467,5 +467,27 @@ describe('Routing -', function () {
     }).throw(Error);
     done();
   });
+  
+  it('respect escaped characters', function (done) {
+    Router.use('\\(testing\\)', function () {
+      done();
+    });
+    Router.navigate('/(testing)');
+  });
+  
+  it('respect unicode characters', function (done) {
+    Router.use('café/:it', function (req) {
+      expect(req.params.it).eq('costeño');
+      done();
+    });
+    Router.navigate('café/costeño');
+  });
+  
+  it('unnamed custom param', function (done) {
+    Router.use('(\\d+)?', function (req) {
+      done();
+    });
+    Router.navigate('123');
+  });
 
 });

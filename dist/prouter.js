@@ -45,6 +45,7 @@ var prouter;
     var DEF_OPTIONS = { hashChange: true, usePushState: false, root: '/', silent: false };
     /**
      * Collection of helpers for processing routes.
+     * Most helpers of this class are sourced from https://github.com/pillarjs/path-to-regexp (used by Express also).
      */
     var RouteHelper = (function () {
         function RouteHelper() {
@@ -389,7 +390,7 @@ var prouter;
                 // If you've told us that you explicitly don't want fallback hashchange-
                 // based history, then `navigate` becomes a page refresh.
                 location.assign(Router._root + path);
-                return true;
+                return Router;
             }
             return Router.load(path);
         };
@@ -410,7 +411,7 @@ var prouter;
             var reqProcessors = Router._obtainRequestProcessors(path);
             if (reqProcessors.length) {
                 var count = 0;
-                /** Anonymous function used for processing nested callbacks. */
+                /** Anonymous function used for processing routing cycle. */
                 function next() {
                     if (count >= reqProcessors.length) {
                         return;
