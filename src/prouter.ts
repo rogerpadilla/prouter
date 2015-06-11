@@ -56,7 +56,7 @@ module prouter {
       (req?: Request): any;
     }
 
-    /** @type {global} Allow accessing the global var in the IDE, only required for compilation. */
+    /** @type {global} Allow accessing the global var in the IDE, only required for TS compilation. */
     declare const global: any;
 
     /**
@@ -96,6 +96,7 @@ module prouter {
 
     /**
      * Collection of helpers for processing routes.
+     * Most helpers of this class are sourced from https://github.com/pillarjs/path-to-regexp (used by Express also).
      */
     class RouteHelper {
 
@@ -495,7 +496,7 @@ module prouter {
                 // If you've told us that you explicitly don't want fallback hashchange-
                 // based history, then `navigate` becomes a page refresh.
                 location.assign(Router._root + path);
-                return true;
+                return Router;
             }
 
             return Router.load(path);
@@ -523,7 +524,7 @@ module prouter {
 
                 let count = 0;
 
-                /** Anonymous function used for processing nested callbacks. */
+                /** Anonymous function used for processing routing cycle. */
                 function next() {
 
                     if (count >= reqProcessors.length) {
