@@ -540,6 +540,9 @@ module prouter {
                     const resp = reqProc.activate.call(null, reqProc.request, next);
 
                     if (resp === true) {
+                        if (console && console.log) {
+                          console.log('"return true" is deprecated, use "next()" instead.');
+                        }
                         next();
                     }
                 }

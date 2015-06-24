@@ -1,14 +1,13 @@
 # prouter
 <p>
     <a href="https://travis-ci.org/rogerpadilla/prouter"><img src="https://travis-ci.org/rogerpadilla/prouter.svg" alt="build status" /></a>
-    <a href="https://gemnasium.com/rogerpadilla/prouter"><img src="https://gemnasium.com/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
     <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
 </p>
 
 In rich web applications, without needing to reload the whole pages, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
 
 ## Why prouter?
-- **Unobtrusive:** it is designed from the beginning to play well with others frameworks (e.g.: Polymer, React, etc.) and vanilla JS.
+- **Unobtrusive:** it is designed from the beginning to play well with UI libraries like [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
 - **No dependencies** and still **really lightweight:** 6kb.
 - **Forward-thinking:** learns from others Router components like the ones of Express, Backbone and Aurelia. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: commonJs, AMD. And as global browser variable.
 - KISS principle: unnecessary complexity avoided.
