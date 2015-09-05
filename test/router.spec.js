@@ -14,7 +14,8 @@ describe('Routing -', function () {
     var randomRoot = Math.random() > 0.5 ? '/' : 'some-root';
     var options = {
       usePushState: usePushState,
-      root: randomRoot
+      root: randomRoot,
+      usePost: true
     };
     Router.listen(options);
   })
@@ -39,6 +40,15 @@ describe('Routing -', function () {
 
   it('parameters', function (done) {
     Router.use('/about/:id/:num', function (req) {
+      expect(req.params.id).eq('16');
+      expect(req.params.num).eq('18');
+      done();
+    });
+    Router.navigate('/about/16/18');
+  });
+
+  it('get parameters', function (done) {
+    Router.get('/about/:id/:num', function (req) {
       expect(req.params.id).eq('16');
       expect(req.params.num).eq('18');
       done();
@@ -76,6 +86,45 @@ describe('Routing -', function () {
       done();
     });
     Router.navigate('/about/16/route/18');
+  });
+
+  it('post from form submit intercept', function (done) {
+    Router.post('/about/:id/:num', function (req) {
+      expect(req.params.id).eq('16');
+      expect(req.params.num).eq('18');
+      expect(req.body.test3).eq('1234');
+      done();
+    });
+    var form = document.createElement("form");
+    form.action = '/about/16/18';
+    var input = document.createElement("input");
+    input.type = "text";
+    input.value = "1234";
+    input.name = "test3";
+    form.appendChild(input);
+    document.body.appendChild(form);
+    var event = document.createEvent('Event');
+    event.initEvent('submit', true, true);
+    form.dispatchEvent(event);
+  });
+
+  it('post from submit', function (done) {
+    Router.post('/about/:id/:num', function (req) {
+      expect(req.params.id).eq('16');
+      expect(req.params.num).eq('18');
+      done();
+    });
+    Router.submit('/about/16/18');
+  });
+
+  it('post from submit with body', function (done) {
+    Router.post('/about/:id/:num', function (req) {
+      expect(req.params.id).eq('16');
+      expect(req.params.num).eq('18');
+      expect(req.body.test3).eq('123');
+      done();
+    });
+    Router.submit('/about/16/18', { test3: "123"});
   });
 
   it('preserve context', function (done) {
