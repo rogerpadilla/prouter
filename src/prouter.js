@@ -4,6 +4,73 @@
 var prouter;
 (function (prouter) {
     /**
+    * Serializes an HTML Form Element to an object.
+    * @param {FormElement} The form element to parse.
+    * @returns {Object} The serialized form element.
+    */
+    function serialize(form) {
+        if (!form || form.nodeName !== "FORM") {
+            return;
+        }
+        var i, j, o = {};
+        for (i = form.elements.length - 1; i >= 0; i = i - 1) {
+            if (form.elements[i].name === "") {
+                continue;
+            }
+            switch (form.elements[i].nodeName) {
+            case 'INPUT':
+                switch (form.elements[i].type) {
+                case 'text':
+                case 'hidden':
+                case 'password':
+                case 'button':
+                case 'reset':
+                case 'submit':
+                    o[form.elements[i].name] = form.elements[i].value;
+                    break;
+                case 'checkbox':
+                case 'radio':
+                    if (form.elements[i].checked) {
+                        o[form.elements[i].name] = form.elements[i].value;
+                    }
+                    break;
+                case 'file':
+                    break;
+                }
+                break;
+            case 'TEXTAREA':
+                o[form.elements[i].name] = form.elements[i].value;
+                break;
+            case 'SELECT':
+                switch (form.elements[i].type) {
+                case 'select-one':
+                    o[form.elements[i].name] = form.elements[i].value;
+                    break;
+                case 'select-multiple':
+                    o[form.elements[i].name] = [];
+                    for (j = form.elements[i].options.length - 1; j >= 0; j = j - 1) {
+                        if (form.elements[i].options[j].selected) {
+                            o[form.elements[i].name].push(form.elements[i].options[j].value);
+                        }
+                    }
+                    break;
+                }
+                break;
+            case 'BUTTON':
+                switch (form.elements[i].type) {
+                case 'reset':
+                case 'submit':
+                case 'button':
+                    o[form.elements[i].name] = form.elements[i].value;
+                    break;
+                }
+                break;
+            }
+        }
+        return o;
+    }
+
+    /**
      * Stablish the root object, `window` (`self`) in the browser, or `global` on the server.
      * We use `self` instead of `window` for `WebWorker` support.
      * @type {window} the root object
@@ -258,6 +325,9 @@ var prouter;
         };
         return RouteHelper;
     })();
+
+
+
     /**
      * Core component for the routing system.
      */
@@ -283,15 +353,29 @@ var prouter;
             Router._usePushState = options.usePushState && !!(_global.history && _global.history.pushState);
             Router._root = RouteHelper.ensureSlashes(options.root);
             if (Router._usePushState) {
-                addEventListener('popstate', Router.heedCurrent, false);
+                window.addEventListener('popstate', Router.heedCurrent, false);
             }
             else if (Router._wantsHashChange) {
-                addEventListener('hashchange', Router.heedCurrent, false);
+                window.addEventListener('hashchange', Router.heedCurrent, false);
             }
             if (!options.silent) {
                 Router.heedCurrent();
             }
+            if (options.usePost) {
+                document.body.addEventListener("submit", Router.postListener, true);
+            }
             return Router;
+        };
+        /**
+         * Load the post action handler on a form submit.
+         * @param {Event} The form submit event.
+         * @returns {Router} The router.
+         */
+        Router.postListener = function(event) {
+            event.preventDefault();
+            var body = serialize(event.target, true);
+            var action = event.target.action.replace(window.location.origin, ""); 
+            return Router.load(action, Router._postHandlers, body);
         };
         /**
          * Disable the route-change-handling and resets the Router's state, perhaps temporarily.
@@ -299,14 +383,16 @@ var prouter;
          * @return {Router} The router.
          */
         Router.stop = function () {
-            removeEventListener('popstate', Router.heedCurrent, false);
-            removeEventListener('hashchange', Router.heedCurrent, false);
+            window.removeEventListener('popstate', Router.heedCurrent, false);
+            window.removeEventListener('hashchange', Router.heedCurrent, false);
+            document.body.removeEventListener("submit", Router.postListener, true);
             for (var propName in Router) {
                 if (Router.hasOwnProperty(propName) && typeof Router[propName] !== 'function') {
                     Router[propName] = null;
                 }
             }
-            Router._handlers = [];
+            Router._getHandlers = [];
+            Router._postHandlers = [];
             return Router;
         };
         /**
@@ -316,12 +402,12 @@ var prouter;
         Router.getCurrent = function () {
             var path;
             if (Router._usePushState || !Router._wantsHashChange) {
-                path = decodeURI(location.pathname + location.search);
+                path = decodeURI(window.location.pathname + window.location.search);
                 // removes the root prefix from the path.
                 path = path.slice(Router._root.length);
             }
             else {
-                var match = location.href.match(/#(.*)$/);
+                var match = window.location.href.match(/#(.*)$/);
                 path = match ? match[1] : '';
             }
             path = RouteHelper.clearSlashes(path);
@@ -331,9 +417,13 @@ var prouter;
          * Add the given middleware as a handler for the given path (defaulting to any path).
          * @param {string|Callback|RouteGroup} path The fragment or the callback.
          * @param {Callback|RouteGroup} [activate] The activate callback or the group of routes.
+         * @param {Handler[]=[]} [handlersStore] The handlers to process.
          * @return {Router} The router.
          */
         Router.use = function (path, activate) {
+          return Router._use(path, activate, Router._getHandlers);
+        };
+        Router._use = function (path, activate, handlersStore) {
             if (activate instanceof RouteGroup || path instanceof RouteGroup) {
                 var parentPath;
                 if (path instanceof RouteGroup) {
@@ -342,7 +432,7 @@ var prouter;
                 else {
                     parentPath = RouteHelper.clearSlashes(path);
                 }
-                Router._handlers = Router._extractHandlers(parentPath, activate, Router._handlers);
+                handlersStore = Router._extractHandlers(parentPath, activate, handlersStore);
             }
             else {
                 var pathExp;
@@ -355,10 +445,29 @@ var prouter;
                     path = RouteHelper.clearSlashes(path);
                     pathExp = RouteHelper.stringToPathExp(path);
                 }
-                Router._handlers.push({ pathExp: pathExp, activate: activate });
+                handlersStore.push({ pathExp: pathExp, activate: activate });
             }
             return Router;
         };
+        Router.get = Router.use;
+        /**
+         * Add the given middleware as a handler for the given for post path (defaulting to any path).
+         * @param {string|Callback|RouteGroup} action The fragment or the callback.
+         * @param {Callback|RouteGroup} [activate] The activate callback or the group of routes.
+         * @return {Router} The router.
+         */
+        Router.post = function (action, activate) {
+          return Router._use(action, activate, Router._postHandlers);
+        }
+        /**
+         * Submit action for form post.
+         * @param {string} action The post action to submit.
+         * @param {string} body The body of the form.
+         * @returns {Router} The router.
+         */
+        Router.submit = function (action, body) {
+            return Router.load(action, Router._postHandlers, body);
+        }
         /**
          * Change the current path and load it.
          * @param {string} path The fragment to navigate to.
@@ -370,18 +479,18 @@ var prouter;
             }
             path = RouteHelper.clearSlashes(path);
             if (Router._usePushState) {
-                history.pushState(null, null, Router._root + path);
+                window.history.pushState(null, null, Router._root + path);
             }
             else if (Router._wantsHashChange) {
-                location.hash = '#' + path;
+                window.location.hash = '#' + path;
             }
             else {
                 // If you've told us that you explicitly don't want fallback hashchange-
                 // based history, then `navigate` becomes a page refresh.
-                location.assign(Router._root + path);
+                window.location.assign(Router._root + path);
                 return Router;
             }
-            return Router.load(path);
+            return Router.load(path, Router._getHandlers);
         };
         /**
          * Load the current path only if it has not been already heeded.
@@ -389,15 +498,17 @@ var prouter;
          */
         Router.heedCurrent = function () {
             var currentPath = Router.getCurrent();
-            return currentPath === Router._loadedPath ? Router : Router.load(currentPath);
+            return currentPath === Router._loadedPath ? Router : Router.load(currentPath, Router._getHandlers);
         };
         /**
          * Attempt to loads the handlers matching the given URL fragment.
          * @param {string} path The url fragment, e.g.: 'users/pinocho'
+         * @param {Handler[]=[]} [handlersStore] The handlers to process.
+         * @param  {Object} body The body of a form.
          * @returns {Router} The router.
          */
-        Router.load = function (path) {
-            var reqProcessors = Router._obtainRequestProcessors(path);
+        Router.load = function (path, handlersStore, body) {
+            var reqProcessors = Router._obtainRequestProcessors(path, handlersStore);
             if (reqProcessors.length) {
                 var count = 0;
                 /** Anonymous function used for processing routing cycle. */
@@ -408,6 +519,9 @@ var prouter;
                     var reqProc = reqProcessors[count];
                     count++;
                     reqProc.request.oldPath = Router._loadedPath;
+                    if (body) {
+                        reqProc.request.body = body;
+                    }
                     var resp = reqProc.activate.call(null, reqProc.request, next);
                     if (resp === true) {
                         if (console && console.log) {
@@ -430,7 +544,7 @@ var prouter;
          */
         Router._extractHandlers = function (parentPath, routeGroup, handlers) {
             if (handlers === void 0) { handlers = []; }
-            var groupHandlers = routeGroup._handlers;
+            var groupHandlers = routeGroup._getHandlers;
             for (var i = 0; i < groupHandlers.length; i++) {
                 var itHandler = groupHandlers[i];
                 var subPath = void 0;
@@ -465,13 +579,14 @@ var prouter;
         /**
          * Obtain the request processors for the given path according to the current handlers in the router.
          * @param  {string} path The url fragment to check.
+         * @param  {Handler[]=[]} [handlersStore] The handlers to process.
          * @return {RequestProcessor[]} The obtained request processors.
          */
-        Router._obtainRequestProcessors = function (path) {
+        Router._obtainRequestProcessors = function (path, handlersStore) {
             var parsedPath = RouteHelper.parsePath(path);
             var requestProcessors = [];
-            for (var i = 0; i < Router._handlers.length; i++) {
-                var handler = Router._handlers[i];
+            for (var i = 0; i < handlersStore.length; i++) {
+                var handler = handlersStore[i];
                 var match = handler.pathExp.test(parsedPath.path);
                 if (match) {
                     var request = Router._extractRequest(path, handler.pathExp);
@@ -500,7 +615,8 @@ var prouter;
             return request;
         };
         /** @type {Handler[]} Handlers for the routing system. */
-        Router._handlers = [];
+        Router._getHandlers = [];
+        Router._postHandlers = [];
         return Router;
     })();
     prouter.Router = Router;
@@ -510,7 +626,8 @@ var prouter;
     var RouteGroup = (function () {
         function RouteGroup() {
             /** @type {GroupHandler[]} The list of handlers for this group. */
-            this._handlers = [];
+            this._getHandlers = [];
+            this._postHandlers = [];
         }
         /**
          * Add the given middleware function as handler for the given path (defaulting to any path).
@@ -519,7 +636,7 @@ var prouter;
          * @return {RouteGroup} The router group.
          */
         RouteGroup.prototype.use = function (path, activate) {
-            this._handlers.push({ path: path, activate: activate });
+            this._getHandlers.push({ path: path, activate: activate });
             return this;
         };
         return RouteGroup;

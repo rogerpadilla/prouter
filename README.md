@@ -83,7 +83,8 @@ Router.listen({
   root: '/', // base path for the handlers.
   usePushState: false, // is pushState of history API desired?
   hashChange: true, // is hashChange desired?
-  silent: false // don't try to load handlers for the current path?
+  silent: false, // don't try to load handlers for the current path?
+  usePost: false // should support Router.post and intercept all form submits?
 });
 
 Router.navigate('/about');
@@ -165,6 +166,19 @@ Router.use('about', function (req) {
 }).listen();
 
 Router.navigate('about?first=5&second=6');
+```
+
+### post
+
+```js
+var Router = prouter.Router;
+
+Router.post('/test/:id', function (req) {
+  console.log(req);
+  // {params: {id: '16'}, query: {}, body: {test: '13'}, path: '/test/16', oldPath: undefined}
+}).listen({usePost: true}); // usePost option will intercept form submission actions
+
+Router.submit('/test/16', {test: '13'});
 ```
 
 ### <a name="parametersAndQuery"></a>parameters and query
