@@ -1,23 +1,87 @@
 {
+  "extends": ["tslint:latest"],
   "rules": {
-    "class-name": true,
+    "eofline": false,
+    "no-consecutive-blank-lines": false,
+    "no-trailing-whitespace": false,
+    "object-literal-sort-keys": false,
+    "member-access": false,
+    "member-ordering": [true, { "order": "fields-first" }],
+    "no-inferrable-types": true,
+    "no-internal-module": true,
     "curly": true,
-    "indent": true,
-    "jsdoc-format": true,
+    "forin": false,
+    "label-position": true,
     "no-arg": true,
     "no-bitwise": true,
+    "no-conditional-assignment": true,
+    "no-console": [
+      true,
+      "debug",
+      "info",
+      "time",
+      "timeEnd",
+      "trace"
+    ],
     "no-construct": true,
     "no-debugger": true,
-    "no-duplicate-key": true,
+    "no-duplicate-variable": true,
     "no-empty": true,
     "no-eval": true,
-    "no-trailing-comma": true,
-    "no-unreachable": true,
+    "no-string-literal": false,
+    "no-shadowed-variable": true,
+    "no-switch-case-fall-through": true,
     "no-unused-expression": true,
     "no-use-before-declare": true,
-    "quotemark": true,
-    "semicolon": true,
-    "triple-equals": true,
-    "variable-name": "allow-leading-underscore"
+    "no-var-keyword": true,
+    "ordered-imports": false,
+    "radix": true,
+    "switch-default": true,
+    "triple-equals": [
+      true,
+      "allow-null-check"
+    ],
+
+    "object-literal-key-quotes": [true, "as-needed"],
+    "indent": [
+      true,
+      "spaces"
+    ],
+    "max-line-length": [
+      true,
+      130
+    ],
+    "no-require-imports": true,
+    "trailing-comma": [
+      true,
+      {
+        "multiline": false,
+        "singleline": "never"
+      }
+    ],
+
+    "arrow-parens": [false],
+    "align": [true],
+    "class-name": true,
+    "comment-format": [
+      true,
+      "check-space"
+    ],
+    "max-classes-per-file": [false],
+    "interface-name": [true, "never-prefix"],
+    "jsdoc-format": true,
+    "one-line": [
+      true,
+      "check-open-brace",
+      "check-catch",
+      "check-else",
+      "check-finally",
+      "check-whitespace"
+    ],
+    "quotemark": [
+      false,
+      "single",
+      "avoid-escape"
+    ]
   }
 }

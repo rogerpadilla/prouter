@@ -1,52 +1,60 @@
 {
   "name": "prouter",
-  "version": "2.1.6",
-  "description": "Unobtrusive, forward-thinking and lightweight JavaScript Router library.",
-  "main": "dist/prouter.js",
-  "keywords": [
-    "route",
-    "router",
-    "routing",
-    "library",
-    "app",
-    "web",
-    "spa"
-  ],
-  "author": "Roger Padilla <rogerjose81@gmail.com>",
-  "homepage": "https://github.com/rogerpadilla/prouter",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rogerpadilla/prouter.git"
-  },
-  "bugs": "https://github.com/rogerpadilla/prouter/issues",
+  "version": "3.0.0",
+  "main": "src/index.ts",
   "scripts": {
-    "test": "gulp test"
+    "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
+    "test": "rimraf reports/coverage && karma start"
+  },
+  "keywords": [
+    "router"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "Roger Padilla <rogerpadilla>"
+  ],
+  "dependencies": {
+    "path-to-regexp": "1.7.0"
   },
   "devDependencies": {
-    "chai": "^3.0.0",
-    "del": "^1.2.0",
-    "gulp": "^3.9.0",
-    "gulp-coveralls": "^0.1.4",
-    "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^1.5.2",
-    "gulp-tslint": "^3.0.2-beta",
-    "gulp-uglify": "^1.2.0",
-    "gulp-util": "^3.0.6",
-    "gulp-wrap-umd": "^0.2.1",
-    "karma": "^0.12.37",
-    "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^0.2",
-    "karma-coverage": "^0.4.2",
-    "karma-firefox-launcher": "^0.1.6",
-    "karma-ie-launcher": "^0.2.0",
-    "karma-mocha": "^0.2.0",
-    "karma-phantomjs-launcher": "^0.2.0",
-    "karma-qunit": "^0.1.4",
-    "mocha": "^2.2.5",
-    "node-notifier": "^4.2.3",
-    "qunitjs": "^1.18.0",
-    "run-sequence": "^1.1.1",
-    "typescript": "^1.5.0-beta"
+    "@types/jasmine": "2.5.46",
+    "@types/node": "7.0.11",
+    "awesome-typescript-loader": "3.1.2",
+    "istanbul-instrumenter-loader": "2.0.0",
+    "jasmine-core": "2.5.2",
+    "karma": "1.5.0",
+    "karma-coverage": "1.1.1",
+    "karma-jasmine": "1.1.0",
+    "karma-mocha-reporter": "2.2.2",
+    "karma-phantomjs-launcher": "1.0.4",
+    "karma-remap-coverage": "0.1.4",
+    "karma-sourcemap-loader": "0.3.7",
+    "karma-webpack": "2.0.3",
+    "phantomjs-prebuilt": "2.1.14",
+    "rimraf": "2.6.1",
+    "source-map-loader": "0.2.0",
+    "tslint": "4.5.1",
+    "tslint-loader": "3.4.3",
+    "typescript": "2.2.1",
+    "webpack": "2.3.2",
+    "webpack-dev-server": "2.4.2",
+    "webpack-merge": "4.1.0"
+  },
+  "engines": {
+    "node": ">= 4.0.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "transform": {
+      ".+\\.tsx?$": "<rootDir>/preprocessor.js"
+    },
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "testRegex": "\\.spec\\.ts$",
+    "testURL": "http://example.com"
   }
 }

@@ -1,18 +1,31 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "sourceMap": true,
-        "declaration": true,
-        "noImplicitAny": true,
-        "suppressImplicitAnyIndexErrors": true,
-        "module": "commonjs"
-    },
-    "filesGlob": [
-        "./src/prouter.ts",
-        "./typings/tsd.d.ts"
-    ],
-    "files": [
-        "./src/prouter.ts",
-        "./typings/tsd.d.ts"
+  "compilerOptions": {
+    "target": "es5",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "lib": [
+      "dom",
+      "es6"
     ]
+  },
+  "include": [
+    "src"
+  ],
+  "awesomeTypescriptLoaderOptions": {
+    "forkChecker": true,
+    "useWebpackText": true
+  },
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "atom": {
+    "rewriteTsconfig": false
+  }
 }
