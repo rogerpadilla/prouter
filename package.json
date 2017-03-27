@@ -1,7 +1,7 @@
 {
   "name": "prouter",
-  "version": "3.0.0",
-  "main": "src/index.ts",
+  "version": "3.0.1",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
     "test": "rimraf reports/coverage && karma start"

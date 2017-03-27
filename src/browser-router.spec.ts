@@ -1,4 +1,4 @@
-import { BrowserRouter } from './browser-router';
+import { BrowserRouter } from './';
 
 describe('Router', () => {
 

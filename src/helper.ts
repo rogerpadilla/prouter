@@ -1,6 +1,6 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-import { Path, PathExp, RequestProcessor, Request, Handler } from './interfaces';
+import { Path, PathExp, RequestProcessor, Request, Handler } from './';
 
 
 export class RouterHelper {

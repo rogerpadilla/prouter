@@ -1,6 +1,4 @@
-import { Options } from './interfaces';
-import { RouterHelper } from './helper';
-import { Router } from './router';
+import { Options, RouterHelper, Router } from './';
 
 export class BrowserRouter extends Router {
 

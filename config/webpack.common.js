@@ -11,7 +11,7 @@ module.exports = {
   },
 
   entry: {
-    'main': './src/index.ts'
+    'index': './src/index.ts'
   },
 
   output: {
@@ -61,7 +61,7 @@ module.exports = {
     }),
     new CheckerPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
-      name: ['main']
+      name: ['index']
     })
   ]
 

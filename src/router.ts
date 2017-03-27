@@ -1,5 +1,4 @@
-import { Handler, RequestCallback, Response, Options } from './interfaces';
-import { RouterHelper } from './helper';
+import { Handler, RequestCallback, Response, Options, RouterHelper } from './';
 
 export abstract class Router {
 
