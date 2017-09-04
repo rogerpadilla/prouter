@@ -7,6 +7,8 @@
     "strict": true,
     "noUnusedLocals": true,
     "suppressImplicitAnyIndexErrors": true,
+    "declaration": true,
+    "declarationDir": "dist",
     "lib": [
       "es2017",
       "dom"
