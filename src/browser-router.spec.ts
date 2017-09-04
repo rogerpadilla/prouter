@@ -1,4 +1,4 @@
-import { BrowserRouter } from './';
+import { BrowserRouter } from './browser-router';
 
 describe('Router', () => {
 
@@ -6,21 +6,24 @@ describe('Router', () => {
 
   beforeAll(() => {
 
-    const HTMLElementsCache = {};
+    const htmlElementsCache = {};
 
     document.querySelector = jasmine.createSpy('document - querySelector').and.callFake((selector: string) => {
-      if (!HTMLElementsCache[selector]) {
+      if (!htmlElementsCache[selector]) {
         const newElement = document.createElement('div');
-        HTMLElementsCache[selector] = newElement;
+        htmlElementsCache[selector] = newElement;
       }
-      return HTMLElementsCache[selector];
+      return htmlElementsCache[selector];
     });
-
-    spyOn(BrowserRouter, 'defaultSend').and.callThrough();
   });
 
   beforeEach(() => {
-    router = new BrowserRouter();
+
+    router = new BrowserRouter({
+      defaultTarget: 'body'
+    });
+
+    router.listen();
   });
 
   afterEach(() => {
@@ -32,9 +35,9 @@ describe('Router', () => {
     router.use(
       'about',
       (req, res, next) => {
-        expect(req.pathname).toBe('about');
-        expect(req.search).toBe('');
-        expect(req.searchObj).toEqual({});
+        expect(req.path).toBe('about');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
         expect(router.getPath()).toBe('about');
         done();
       }
@@ -62,8 +65,8 @@ describe('Router', () => {
     router.use(
       'something',
       (req, res, next) => {
-        expect(req.searchObj.first).toBe('5');
-        expect(req.searchObj.second).toBe('6');
+        expect(req.query.first).toBe('5');
+        expect(req.query.second).toBe('6');
         done();
       }
     );
@@ -78,8 +81,8 @@ describe('Router', () => {
       (req, res, next) => {
         expect(req.params.param1).toBe('16');
         expect(req.params.param2).toBe('18');
-        expect(req.searchObj.first).toBe('5');
-        expect(req.searchObj.second).toBe('6');
+        expect(req.query.first).toBe('5');
+        expect(req.query.second).toBe('6');
         done();
       }
     );
@@ -94,8 +97,8 @@ describe('Router', () => {
       (req, res, next) => {
         expect(req.params.param1).toBe('16');
         expect(req.params.param2).toBe('18');
-        expect(req.searchObj.first).toBe('5');
-        expect(req.searchObj.second).toBe('6');
+        expect(req.query.first).toBe('5');
+        expect(req.query.second).toBe('6');
         done();
       }
     );
@@ -126,7 +129,7 @@ describe('Router', () => {
     );
 
     router.use(
-      '*',
+      '(.*)',
       (req, res, next) => done()
     );
 
@@ -144,7 +147,7 @@ describe('Router', () => {
     );
 
     router.use(
-      '*',
+      '(.*)',
       (req, res, next) => {
         expect(req.params.paramA).toEqual(123);
         done();
@@ -162,31 +165,8 @@ describe('Router', () => {
     );
 
     router.use(
-      '*',
+      '(.*)',
       (req, res, next) => done()
-    );
-
-    router.push('something/16/other/18?q1=5&q2=6');
-  });
-
-  it('custom send', (done) => {
-
-    router.use(
-      'something/:p1/other/:p2',
-      (req, res, next) => {
-        res.send('#someElement', 'the content');
-        expect(BrowserRouter.defaultSend).toHaveBeenCalledWith('#someElement', 'the content');
-        next();
-      }
-    );
-
-    router.use(
-      '*',
-      (req, res, next) => {
-        res.send('#anotherElement', '<span>the another content</span>');
-        expect(BrowserRouter.defaultSend).toHaveBeenCalledWith('#anotherElement', '<span>the another content</span>');
-        done();
-      }
     );
 
     router.push('something/16/other/18?q1=5&q2=6');

@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
-const helpers = require('./helpers');
 const commonConfig = require('./webpack.common');
 
 const ENV = process.env.ENV = process.env.NODE_ENV = 'prod';
@@ -8,7 +7,7 @@ const ENV = process.env.ENV = process.env.NODE_ENV = 'prod';
 
 module.exports = webpackMerge(commonConfig, {
 
-  devtool: 'source-map',  
+  devtool: 'source-map',
 
   plugins: [
     new webpack.DefinePlugin({

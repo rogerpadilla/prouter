@@ -1,8 +1,7 @@
 {
   "name": "prouter",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
     "test": "rimraf reports/coverage && karma start"
@@ -15,47 +14,31 @@
     "Roger Padilla <rogerpadilla>"
   ],
   "dependencies": {
-    "path-to-regexp": "1.7.0"
+    "path-to-regexp": "^2.0.0"
   },
   "devDependencies": {
-    "@types/jasmine": "2.5.46",
-    "@types/node": "7.0.11",
-    "awesome-typescript-loader": "3.1.2",
-    "istanbul-instrumenter-loader": "2.0.0",
-    "jasmine-core": "2.5.2",
-    "karma": "1.5.0",
+    "@types/jasmine": "2.5.54",
+    "@types/node": "8.0.26",
+    "awesome-typescript-loader": "3.2.3",
+    "istanbul-instrumenter-loader": "3.0.0",
+    "jasmine-core": "2.8.0",
+    "karma": "1.7.1",
     "karma-coverage": "1.1.1",
     "karma-jasmine": "1.1.0",
-    "karma-mocha-reporter": "2.2.2",
+    "karma-mocha-reporter": "2.2.4",
     "karma-phantomjs-launcher": "1.0.4",
     "karma-remap-coverage": "0.1.4",
     "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.3",
-    "phantomjs-prebuilt": "2.1.14",
+    "karma-webpack": "2.0.4",
+    "phantomjs-prebuilt": "2.1.15",
     "rimraf": "2.6.1",
-    "source-map-loader": "0.2.0",
-    "tslint": "4.5.1",
-    "tslint-loader": "3.4.3",
-    "typescript": "2.2.1",
-    "webpack": "2.3.2",
-    "webpack-dev-server": "2.4.2",
+    "source-map-loader": "0.2.1",
+    "tslint": "5.7.0",
+    "typescript": "2.5.2",
+    "webpack": "3.5.5",
     "webpack-merge": "4.1.0"
   },
   "engines": {
     "node": ">= 4.0.0"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "transform": {
-      ".+\\.tsx?$": "<rootDir>/preprocessor.js"
-    },
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "testRegex": "\\.spec\\.ts$",
-    "testURL": "http://example.com"
   }
 }

@@ -8,10 +8,16 @@ export class RouterHelper {
   private static LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
 
   static stringToRegexp(str: string) {
-    return pathToRegexp(str);
+
+    const keys: pathToRegexp.Key[] = [];
+
+    const resp = pathToRegexp(str, keys) as PathExp;
+    resp.keys = keys;
+
+    return resp;
   }
 
-  static parseSearch(str: string) {
+  static parseQuery(str: string) {
 
     const searchObj = {};
 
@@ -45,9 +51,9 @@ export class RouterHelper {
     }
 
     const parsedPath: Path = {
-      pathname: RouterHelper.trimSlashes(url.pathname),
-      search: url.search,
-      searchObj: RouterHelper.parseSearch(url.search)
+      path: RouterHelper.trimSlashes(url.pathname),
+      queryString: url.search,
+      query: RouterHelper.parseQuery(url.search)
     };
 
     return parsedPath;
@@ -64,14 +70,14 @@ export class RouterHelper {
 
     const parsedPath = RouterHelper.parsePath(path);
 
-    const request: Request = RouterHelper.parsePath(path);
+    const request = parsedPath as Request;
     request.params = {};
 
     const requestProcessors: RequestProcessor[] = [];
 
     for (const handler of handlers) {
 
-      const hasProcessor = handler.pathExp.test(parsedPath.pathname);
+      const hasProcessor = handler.pathExp.test(request.path);
 
       if (hasProcessor) {
         RouterHelper.populateRequest(request, handler.pathExp);
@@ -84,7 +90,7 @@ export class RouterHelper {
 
   private static populateRequest(request: Request, pathExp: PathExp) {
 
-    const result = pathExp.exec(request.pathname);
+    const result = pathExp.exec(request.path);
     const args = result ? result.slice(1) : [];
     const keys = pathExp.keys;
 

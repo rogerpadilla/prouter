@@ -1,40 +1,45 @@
-import { Options, RouterHelper, Router } from './';
+import { Options } from './';
+import { Router } from './router';
+import { RouterHelper } from './helper';
 
 export class BrowserRouter extends Router {
 
-  private static sent: {};
+  private sent = {};
 
-  constructor(opts: Options = { send: BrowserRouter.defaultSend }) {
+  constructor(private opts: Options) {
 
-    if (!opts.send) {
-      opts.send = BrowserRouter.defaultSend;
-    }
+    super();
 
-    super(opts);
-
-    addEventListener('popstate', this.processCurrentPath);
+    this.send = this.send.bind(this);
+    this.processCurrentPath = this.processCurrentPath.bind(this);
   }
 
-  static defaultSend(target: string, content: string) {
+  send(content: string, target = this.opts.defaultTarget) {
 
-    if (BrowserRouter.sent[target]) {
+    if (this.sent[target]) {
       throw new Error(`Already sent data to the target '${target}'.`);
     }
 
-    BrowserRouter.sent[target] = true;
+    this.sent[target] = true;
 
     const el = document.querySelector(target);
 
     if (!el) {
-      throw new Error(`No match for the selector ${target}`);
+      throw new Error(`No match for the target '${target}'`);
     }
 
     el.innerHTML = content;
   }
 
-  /**
-   * Not useful in a real app; but useful for unit testing.
-   */
+  listen() {
+
+    this.processCurrentPath();
+
+    addEventListener('popstate', this.processCurrentPath);
+
+    super.listen();
+  }
+
   stop() {
     removeEventListener('popstate', this.processCurrentPath);
   }
@@ -45,18 +50,18 @@ export class BrowserRouter extends Router {
   }
 
   push(path: string) {
-    history.pushState(null, '', path);
+    history.pushState(undefined, '', path);
+    this.processPath(path);
+  }
+
+  processCurrentPath() {
+    const path = this.getPath();
     this.processPath(path);
   }
 
   protected processPath(path: string) {
-    BrowserRouter.sent = {};
+    this.sent = {};
     super.processPath(path);
-  }
-
-  private processCurrentPath() {
-    const path = this.getPath();
-    this.processPath(path);
   }
 
 }

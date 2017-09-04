@@ -1,8 +1,8 @@
-var testWebpackConfig = require('./config/webpack.test.js');
+const testWebpackConfig = require('./config/webpack.test');
 
 module.exports = function (config) {
 
-  var configuration = {
+  const configuration = {
 
     // base path that will be used to resolve all patterns (e.g. files, exclude)
     basePath: '',

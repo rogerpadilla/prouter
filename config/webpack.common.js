@@ -2,12 +2,10 @@ const webpack = require('webpack');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const helpers = require('./helpers');
 
-
 module.exports = {
 
   resolve: {
-    extensions: ['.ts', '.js'],
-    modules: ['node_modules']
+    extensions: ['.ts', '.js']
   },
 
   entry: {
@@ -23,11 +21,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.ts$/,
-        use: 'tslint-loader',
-        enforce: 'pre'
-      },
       /*
       * Source map loader support for *.js files
       * Extracts SourceMaps for source files that as added as sourceMappingURL comment.
@@ -42,27 +35,18 @@ module.exports = {
 
       {
         test: /\.ts$/,
-        loader: 'awesome-typescript-loader',
-        exclude: /\.(spec|e2e)\.ts$/
+        loader: 'awesome-typescript-loader'
       }
     ]
   },
 
   plugins: [
-    new webpack.LoaderOptionsPlugin({
-      debug: true,
-      options: {
-        tslint: {
-          emitErrors: false,
-          failOnHint: false,
-          resourcePath: 'src'
-        }
-      }
-    }),
     new CheckerPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
-      name: ['index']
-    })
+      name: ['index'],
+      minChunks: Infinity
+    }),
+    new webpack.optimize.ModuleConcatenationPlugin()
   ]
 
 };

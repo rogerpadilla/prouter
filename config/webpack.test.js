@@ -1,20 +1,14 @@
 const webpack = require('webpack');
 const helpers = require('./helpers');
-const ENV = process.env.ENV = process.env.NODE_ENV = 'test';
 
+const ENV = process.env.ENV = process.env.NODE_ENV = 'test';
 
 module.exports = {
 
   devtool: 'inline-source-map',
 
   resolve: {
-
-    extensions: ['.ts', '.js'],
-
-    /**
-     * Make sure root is src
-     */
-    modules: [helpers.root('src'), 'node_modules']
+    extensions: ['.ts', '.js']
   },
 
   module: {
@@ -35,12 +29,8 @@ module.exports = {
         test: /\.ts$/,
         loader: 'awesome-typescript-loader',
         query: {
-          // use inline sourcemaps for "karma-remap-coverage" reporter
-          sourceMap: false,
-          inlineSourceMap: true,
-          module: 'commonjs'
-        },
-        exclude: [/\.e2e\.ts$/]
+          configFileName: 'tsconfig-test.json'
+        }
       },
 
       /**
@@ -53,11 +43,7 @@ module.exports = {
         enforce: 'post',
         test: /\.(js|ts)$/,
         loader: 'istanbul-instrumenter-loader',
-        include: helpers.root('src'),
-        exclude: [
-          /\.(e2e|spec)\.ts$/,
-          /node_modules/
-        ]
+        include: helpers.root('src')
       }
 
     ]
