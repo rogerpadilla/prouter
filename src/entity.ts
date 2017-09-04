@@ -6,7 +6,7 @@ export interface Path {
   query: StringMap;
 }
 
-interface StringMap {
+export interface StringMap {
   [prop: string]: any;
 }
 
@@ -43,4 +43,8 @@ export type RequestCallback = (req: Request, res: Response, next: () => void) =>
 
 export interface Options {
   defaultTarget: string;
+}
+
+export class Person {
+  
 }

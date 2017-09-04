@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const webpackMerge = require('webpack-merge');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const commonConfig = require('./webpack.common');
 
 const ENV = process.env.ENV = process.env.NODE_ENV = 'prod';
@@ -31,7 +32,10 @@ module.exports = webpackMerge(commonConfig, {
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true
-    })
+    }),
+    new CopyWebpackPlugin([
+      { from: 'package.json' }
+    ])
   ]
 });
 

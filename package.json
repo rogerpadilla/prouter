@@ -1,8 +1,6 @@
 {
   "name": "prouter",
-  "version": "3.1.4",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "3.1.6",
   "scripts": {
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
@@ -22,6 +20,7 @@
     "@types/jasmine": "2.5.54",
     "@types/node": "8.0.26",
     "awesome-typescript-loader": "3.2.3",
+    "copy-webpack-plugin": "4.0.1",
     "istanbul-instrumenter-loader": "3.0.0",
     "jasmine-core": "2.8.0",
     "karma": "1.7.1",
