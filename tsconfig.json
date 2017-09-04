@@ -4,7 +4,6 @@
     "module": "umd",
     "moduleResolution": "node",
     "sourceMap": true,
-    "experimentalDecorators": false,
     "strict": true,
     "noUnusedLocals": true,
     "suppressImplicitAnyIndexErrors": true,
