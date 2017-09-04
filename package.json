@@ -1,6 +1,6 @@
 {
   "name": "prouter",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "scripts": {
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
