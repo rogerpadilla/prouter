@@ -30,7 +30,7 @@ npm install prouter --save
 bower install prouter --save
 
 # Or just inject it using a 'script' tag in your HTML file
-<script src="prouter.js"></script>
+<script src="prouter.min.js"></script>
 ```
 
 ## Examples

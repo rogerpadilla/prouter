@@ -2,6 +2,9 @@ const webpack = require('webpack');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const helpers = require('./helpers');
 
+const libraryName = 'prouter';
+
+
 module.exports = {
 
   resolve: {
@@ -9,7 +12,7 @@ module.exports = {
   },
 
   entry: {
-    'index': './src/index.ts'
+    'prouter.min': './src/index.ts'
   },
 
   output: {
@@ -17,6 +20,11 @@ module.exports = {
     publicPath: '/',
     filename: '[name].js',
     chunkFilename: '[id].chunk.js',
+    library: {
+      root: libraryName,
+      amd: libraryName,
+      commonjs: libraryName
+    },
     libraryTarget: 'umd'
   },
 
