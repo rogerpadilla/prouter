@@ -40,12 +40,14 @@ bower install prouter --save
 ```js
 import { BrowserRouter } from 'prouter';
 
+// Instantiate the router
 const router = new BrowserRouter({
   // default CSS selector used to obtaing the target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: 'body'
 });
 
+// Declare the paths and its respective handlers
 router
   .use('', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
