@@ -10,6 +10,9 @@ In web/hybrid applications, we want to provide linkable, bookmarkable, and share
 
 Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); so now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
 
+## Routing
+In frontend side, routing refers to the declaration of end-points (paths) to an application and how it responds (handlers) to URL changes.
+
 ## Why prouter?
 - **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser?
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
@@ -17,9 +20,6 @@ Under the hood, prouter uses the same library than express for parsing URLs: [Pa
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
 - KISS principle: unnecessary complexity avoided.
 - Unit tests for every feature are created.
-
-## Routing
-In client-side apps, routing refers to the declaration of end-points (paths) to an application and how it responds (handlers) to URL changes.
 
 ## Installation
 
