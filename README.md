@@ -6,9 +6,10 @@
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
 </p>
 
-In web/hybrid applications, we want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. prouter provides methods for routing pages and connecting them to actions and events in the browser. Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp). So now you can use the powerful express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
+In web/hybrid applications, we want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. prouter provides features to listen the URL changes in the browser and to trigger the configured callbacks (handlers) accordingly. Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp). So now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
 
 ## Why prouter?
+- **Learn once and reuse it** Express.js is very well known and used in the world, why not bringing the same API (wherever possible) to the browser?
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
 - **Really lightweight:** 8kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
