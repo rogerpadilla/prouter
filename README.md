@@ -1,9 +1,9 @@
 # prouter
 <p>
-    <a href="https://travis-ci.org/rogerpadilla/prouter?branch=master"><img src="https://travis-ci.org/rogerpadilla/prouter.svg?branch=master" alt="build status" /></a>
-    <a href="https://coveralls.io/r/rogerpadilla/prouter?branch=master"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master" alt="Coverage Status" /></a>
-    <a href="https://david-dm.org/rogerpadilla/prouter"><img src="https://david-dm.org/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
-    <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="Dev Dependency Status" /></a>
+    <a href="https://travis-ci.org/rogerpadilla/prouter?branch=master" title="build status"><img src="https://travis-ci.org/rogerpadilla/prouter.svg?branch=master" alt="build status" /></a>
+    <a href="https://coveralls.io/r/rogerpadilla/prouter?branch=master" title="coverage status"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master" alt="coverage status" /></a>
+    <a href="https://david-dm.org/rogerpadilla/prouter" title="dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/status.svg" alt="dependencies status" /></a>
+    <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
 </p>
 
 In rich web applications, without needing to reload the whole pages, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
