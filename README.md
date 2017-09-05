@@ -1,9 +1,9 @@
 # prouter
 <p>
     <a href="https://travis-ci.org/rogerpadilla/prouter"><img src="https://travis-ci.org/rogerpadilla/prouter.svg" alt="build status" /></a>
-    <a href='https://coveralls.io/r/rogerpadilla/prouter'><img src='https://coveralls.io/repos/rogerpadilla/prouter/badge.svg' alt='Coverage Status' /></a>
-    [![Dependency Status](https://david-dm.org/rogerpadilla/prouter.svg)](https://david-dm.org/rogerpadilla/prouter)
-    [![devDependency Status](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)](https://david-dm.org/rogerpadilla/prouter#info=devDependencies)
+    <a href="https://coveralls.io/r/rogerpadilla/prouter"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg" alt="Coverage Status" /></a>
+    <a href="https://david-dm.org/rogerpadilla/prouter"><img src="https://david-dm.org/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
+    <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="devDependency Status" /></a>
 </p>
 
 In rich web applications, without needing to reload the whole pages, we still want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app. prouter provides methods for routing client-side pages and connecting them to actions and events. prouter is [configurable](#customOptions), you can opt by using [pushState](http://diveintohtml5.info/history.html) and/or [hashchange](https://developer.mozilla.org/en-US/docs/DOM/window.onhashchange); and if you choose _pushState_, prouter can handle graceful fallback and transparent translation to the fragment version (#hash) of the URL if you wish.
