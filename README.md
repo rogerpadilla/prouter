@@ -6,12 +6,11 @@
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
 </p>
 
+In frontend side, routing refers to the declaration of end-points (paths) to an application and how it responds (handlers) to URL changes.
+
 In web/hybrid applications, we want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. prouter provides features to listen the URL changes in the browser and trigger callbacks (handlers) accordingly.
 
 Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); so now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
-
-## Routing
-In frontend side, routing refers to the declaration of end-points (paths) to an application and how it responds (handlers) to URL changes.
 
 ## Why prouter?
 - **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser?
