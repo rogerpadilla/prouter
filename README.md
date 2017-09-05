@@ -1,6 +1,6 @@
 # prouter
 <p>
-    <a href="https://travis-ci.org/rogerpadilla/prouter"><img src="https://travis-ci.org/rogerpadilla/prouter.svg" alt="build status" /></a>
+    <a href="https://travis-ci.org/rogerpadilla/prouter?branch=master"><img src="https://travis-ci.org/rogerpadilla/prouter.svg?branch=master" alt="build status" /></a>
     <a href="https://coveralls.io/r/rogerpadilla/prouter?branch=master"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master" alt="Coverage Status" /></a>
     <a href="https://david-dm.org/rogerpadilla/prouter"><img src="https://david-dm.org/rogerpadilla/prouter.svg" alt="Dependency Status" /></a>
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="Dev Dependency Status" /></a>
