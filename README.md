@@ -8,7 +8,7 @@
 
 In web/hybrid applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page.
 
-In frontend side, routing refers to the declaration that the application wants to react to URL (path) changes in the browser, and to trigger some callbacks (handlers) accordingly.
+In frontend/browser side, routing refers to the declaration that the application wants to react to URL (path) changes, and to trigger some callbacks (handlers) accordingly.
 
 Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); so now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
 
