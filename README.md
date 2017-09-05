@@ -118,15 +118,15 @@ router
   .use('', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
   })
-  .use('top', (req, res, next) => {
-    res.send('<h1>About page.</h1>');
+  .use('contact', (req, res, next) => {
+    res.send('<h1>Contact page.</h1>');
   });
 
 // start listening events for the routing
 router.listen();
 
 // programmatically navigate to any route in your router
-router.push('top');
+router.push('contact');
 ```
 
 
