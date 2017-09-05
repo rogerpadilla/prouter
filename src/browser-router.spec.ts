@@ -46,6 +46,19 @@ describe('Router', () => {
     router.push('about');
   });
 
+  it('basic with send - default', (done) => {
+
+    router.use(
+      'about',
+      (req, res, next) => {
+        res.send('hello');
+        done();
+      }
+    );
+
+    router.push('about');
+  });
+
   it('parameters', (done) => {
 
     router.use(
