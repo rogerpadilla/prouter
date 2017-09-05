@@ -6,7 +6,9 @@
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
 </p>
 
-In web/hybrid applications, we want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. prouter provides features to listen the URL changes in the browser and to trigger the configured callbacks (handlers) accordingly. Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp). So now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
+In web/hybrid applications, we want to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. prouter provides features to listen the URL changes in the browser and trigger callbacks (handlers) accordingly.
+
+Under the hood, prouter uses the same library than express for parsing URLs: [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp). So now you can also use the power of the express's [routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
 
 ## Why prouter?
 - **Learn once and reuse it** Express.js is very well known and used in the world, why not bringing the same API (wherever possible) to the browser?
