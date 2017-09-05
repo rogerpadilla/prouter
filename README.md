@@ -69,12 +69,14 @@ router.push('about');
 ```js
 const BrowserRouter = proute.BrowserRouter;
 
+// Instantiate the router
 const router = new BrowserRouter({
   // default CSS selector used to obtaing the target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: 'body'
 });
 
+// Declare the paths and its respective handlers
 router
   .use('', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
@@ -95,12 +97,14 @@ router.push('about');
 ```js
 import { BrowserRouter } from 'prouter';
 
+// Instantiate the router
 const router = new BrowserRouter({
   // default CSS selector used to obtaing the target DOM-element
-  // when sending/printing content (res.send) from the handler
-  defaultTarget: '.my-router-outlet'
+  // when sending content (res.send) from the handler
+  defaultTarget: 'body'
 });
 
+// Declare the paths and its respective handlers
 router
   .use('(.*)', (req, res, next) => {
     // this handler will be for any routing event, before other handlers
@@ -155,12 +159,14 @@ productRouterGroup
     });
   });
 
+// Instantiate the router
 const router = new BrowserRouter({
   // default CSS selector used to obtaing the target DOM-element
-  // when sending/printing content (res.send) from the handler
+  // when sending content (res.send) from the handler
   defaultTarget: '.my-router-outlet'
 });
 
+// Declare the paths and its respective handlers
 router
   .use('(.*)', (req, res, next) => {
     // this handler will be for any routing event, before other handlers
