@@ -16,7 +16,8 @@ module.exports = {
     path: helpers.root('dist'),
     publicPath: '/',
     filename: '[name].js',
-    chunkFilename: '[id].chunk.js'
+    chunkFilename: '[id].chunk.js',
+    libraryTarget: 'umd'
   },
 
   module: {
@@ -42,10 +43,6 @@ module.exports = {
 
   plugins: [
     new CheckerPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ['index'],
-      minChunks: Infinity
-    }),
     new webpack.optimize.ModuleConcatenationPlugin()
   ]
 

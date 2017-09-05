@@ -43,13 +43,6 @@ module.exports = function (config) {
       html: './reports/coverage/html'
     },
 
-    bambooReporter: {
-      filename: 'reports/mocha.json'
-    },
-
-    // Webpack please don't spam the console when running in karma!
-    webpackMiddleware: { stats: 'errors-only' },
-
     /*
      * test results reporter to use
      *
