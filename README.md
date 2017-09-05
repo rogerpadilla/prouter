@@ -44,7 +44,7 @@ import { BrowserRouter } from 'prouter';
 const router = new BrowserRouter({
   // default CSS selector used to obtaing the target DOM-element
   // when sending content (res.send) from the handler
-  defaultTarget: 'body'
+  defaultTarget: '.some-css-class'
 });
 
 // Declare the paths and its respective handlers
