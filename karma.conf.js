@@ -34,13 +34,15 @@ module.exports = function (config) {
     webpack: testWebpackConfig,
 
     coverageReporter: {
-      type: 'in-memory'
+      reporters: [
+        { type: 'in-memory' }
+      ]
     },
 
     remapCoverageReporter: {
       'text-summary': null,
-      json: './reports/coverage/coverage.json',
-      html: './reports/coverage/html'
+      json: './coverage/coverage.json',
+      html: './coverage/html'
     },
 
     /*
@@ -84,6 +86,11 @@ module.exports = function (config) {
      */
     singleRun: true
   };
+
+  if (process.env.TRAVIS) {
+    configuration.coverageReporter.reporters.push({ type: 'lcov', dir: 'coverage' });
+    configuration.reporters.push('coveralls');
+  }
 
   config.set(configuration);
 };
