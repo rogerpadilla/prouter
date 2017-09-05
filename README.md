@@ -6,7 +6,7 @@
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
 </p>
 
-In frontend side, routing refers to the declaration of end-points (paths) to an application and how it responds (handlers) to URL changes.
+In frontend side, routing refers to the declaration that the application wants to react to URL (path) changes in the browser, and to trigger some callbacks (handlers) accordingly.
 
 In web/hybrid applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. _prouter_ provides features to listen the URL changes in the browser and trigger callbacks (handlers) accordingly.
 
