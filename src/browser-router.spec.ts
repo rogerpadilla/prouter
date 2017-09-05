@@ -1,4 +1,5 @@
 import { BrowserRouter } from './browser-router';
+import { RouterGroup } from './router-group';
 
 describe('Router', () => {
 
@@ -9,6 +10,9 @@ describe('Router', () => {
     const htmlElementsCache = {};
 
     document.querySelector = jasmine.createSpy('document - querySelector').and.callFake((selector: string) => {
+      if (!selector) {
+        return undefined;
+      }
       if (!htmlElementsCache[selector]) {
         const newElement = document.createElement('div');
         htmlElementsCache[selector] = newElement;
@@ -46,12 +50,43 @@ describe('Router', () => {
     router.push('about');
   });
 
-  it('basic with send - default', (done) => {
+  it('basic with send', (done) => {
 
     router.use(
       'about',
       (req, res, next) => {
         res.send('hello');
+        done();
+      }
+    );
+
+    router.push('about');
+  });
+
+  it('basic with send twice', (done) => {
+
+    router.use(
+      'about',
+      (req, res, next) => {
+        res.send('hello');
+        expect(() => {
+          res.send('hello');
+        }).toThrowError();
+        done();
+      }
+    );
+
+    router.push('about');
+  });
+
+  it('basic with send no-target', (done) => {
+
+    router.use(
+      'about',
+      (req, res, next) => {
+        expect(() => {
+          res.send('hello', '');
+        }).toThrowError();
         done();
       }
     );
@@ -181,6 +216,21 @@ describe('Router', () => {
       '(.*)',
       (req, res, next) => done()
     );
+
+    router.push('something/16/other/18?q1=5&q2=6');
+  });
+
+  it('RouterGroup', (done) => {
+
+    const groupRouter = new RouterGroup();
+
+    groupRouter
+      .use(':p1/other/:p2', (req, res, next) => {
+        next();
+      })
+      .use('(.*)', () => done());
+
+    router.use('something', groupRouter);
 
     router.push('something/16/other/18?q1=5&q2=6');
   });
