@@ -1,7 +1,6 @@
 language: node_js
 node_js:
   - "stable"
-  - "lts"
   - "current"
 notifications:
   email: false
