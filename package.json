@@ -1,6 +1,6 @@
 {
   "name": "prouter",
-  "version": "3.1.11",
+  "version": "3.1.12",
   "main": "prouter.min.js",
   "scripts": {
     "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
