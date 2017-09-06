@@ -4,6 +4,7 @@
     <a href="https://coveralls.io/r/rogerpadilla/prouter?branch=master" title="coverage status"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master" alt="coverage status" /></a>
     <a href="https://david-dm.org/rogerpadilla/prouter" title="dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/status.svg" alt="dependencies status" /></a>
     <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
+    <a href="https://www.npmjs.com/prouter" title="npm version"><img src="https://badge.fury.io/js/prouter.svg" alt="npm version" /></a>
 </p>
 
 In web/hybrid applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page.
