@@ -43,7 +43,7 @@ import { BrowserRouter } from 'prouter';
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // default CSS selector used to obtaing the target DOM-element
+  // CSS selector used to obtaing the default target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: '.some-css-class'
 });
@@ -72,7 +72,7 @@ const BrowserRouter = proute.BrowserRouter;
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // default CSS selector used to obtaing the target DOM-element
+  // CSS selector used to obtaing the default target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: 'body'
 });
@@ -100,7 +100,7 @@ import { BrowserRouter } from 'prouter';
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // default CSS selector used to obtaing the target DOM-element
+  // CSS selector used to obtaing the default target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: 'body'
 });
@@ -162,7 +162,7 @@ productRouterGroup
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // default CSS selector used to obtaing the target DOM-element
+  // CSS selector used to obtaing the default target DOM-element
   // when sending content (res.send) from the handler
   defaultTarget: '.my-router-outlet'
 });
