@@ -1,7 +1,16 @@
 {
   "name": "prouter",
-  "version": "3.1.14",
+  "description": "The power of the express's routing-expressions style in the frontend",
+  "version": "3.1.15",
   "main": "prouter.min.js",
+  "homepage": "https://github.com/rogerpadilla/prouter",
+  "bugs": {
+    "url": "https://github.com/rogerpadilla/prouter/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rogerpadilla/prouter.git"
+  },
   "scripts": {
     "prepublishOnly": "npm run test && npm run build && node prepublishOnly.js",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
