@@ -1,13 +1,12 @@
 # prouter
-<p>
-    <a href="https://travis-ci.org/rogerpadilla/prouter?branch=master" title="build status"><img src="https://travis-ci.org/rogerpadilla/prouter.svg?branch=master" alt="build status" /></a>
-    <a href="https://coveralls.io/r/rogerpadilla/prouter?branch=master" title="coverage status"><img src="https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master" alt="coverage status" /></a>
-    <a href="https://david-dm.org/rogerpadilla/prouter" title="dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/status.svg" alt="dependencies status" /></a>
-    <a href="https://david-dm.org/rogerpadilla/prouter#info=devDependencies" title="dev dependencies status"><img src="https://david-dm.org/rogerpadilla/prouter/dev-status.svg" alt="dev dependencies status" /></a>
-    <a href="https://www.npmjs.com/prouter" title="npm version"><img src="https://badge.fury.io/js/prouter.svg" alt="npm version" /></a>
-</p>
 
-In web/hybrid applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page.
+[![build status](https://travis-ci.org/rogerpadilla/prouter.svg?branch=master)](https://travis-ci.org/rogerpadilla/prouter?branch=master)
+[![coverage status](https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master)](https://coveralls.io/r/rogerpadilla/prouter?branch=master)
+[![dependencies status](https://david-dm.org/rogerpadilla/prouter/status.svg)](https://david-dm.org/rogerpadilla/prouter/status.svg)
+[![dev dependencies status](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)
+[![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
+
+In applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page.
 
 In frontend/browser side, routing refers to the declaration that the application wants to react to URL (path) changes, and to trigger some callbacks (handlers) accordingly.
 

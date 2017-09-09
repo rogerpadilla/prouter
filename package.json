@@ -1,6 +1,6 @@
 {
   "name": "prouter",
-  "version": "3.1.13",
+  "version": "3.1.14",
   "main": "prouter.min.js",
   "scripts": {
     "prepublishOnly": "npm run test && npm run build && node prepublishOnly.js",
