@@ -12,8 +12,7 @@
     "url": "https://github.com/rogerpadilla/prouter.git"
   },
   "scripts": {
-    "prepublishOnly": "npm run test && npm run build && node prepublishOnly.js",
-    "rimraf": "rimraf",
+    "prepublishOnly": "node prepublishOnly.js",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "test": "rimraf reports/coverage && npm run lint && karma start",
     "start": "rimraf dist && webpack --progress --profile --bail --watch",
