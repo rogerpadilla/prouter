@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
-
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = function (ENV) {
 
@@ -71,7 +71,12 @@ module.exports = function (ENV) {
         }
       }),
       new CheckerPlugin(),
-      new webpack.optimize.ModuleConcatenationPlugin()
+      new webpack.optimize.ModuleConcatenationPlugin(),
+      new CopyWebpackPlugin([
+        { from: 'package.json' },
+        { from: 'README.md' },
+        { from: 'LICENSE' },
+      ])
     ]
   }
 
