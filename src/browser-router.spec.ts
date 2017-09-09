@@ -220,6 +220,12 @@ describe('Router', () => {
     router.push('something/16/other/18?q1=5&q2=6');
   });
 
+  it('Throws error if try to listen again', () => {
+    expect(() => {
+      router.listen();
+    }).toThrowError();
+  });
+
   it('RouterGroup', (done) => {
 
     const groupRouter = new RouterGroup();

@@ -1,7 +1,10 @@
+const path = require('path');
 const webpack = require('webpack');
-const helpers = require('./helpers');
+
+const ROOT = path.resolve(__dirname, '..');
 
 const ENV = process.env.ENV = process.env.NODE_ENV = 'test';
+
 
 module.exports = {
 
@@ -14,12 +17,6 @@ module.exports = {
   module: {
 
     rules: [
-      /**
-       * Source map loader support for *.js files
-       * Extracts SourceMaps for source files that as added as sourceMappingURL comment.
-       *
-       * See: https://github.com/webpack/source-map-loader
-       */
       {
         enforce: 'pre',
         test: /\.js$/,
@@ -43,12 +40,11 @@ module.exports = {
         enforce: 'post',
         test: /\.(js|ts)$/,
         loader: 'istanbul-instrumenter-loader',
-        include: helpers.root('src'),
+        include: path.join(ROOT, 'src'),
         exclude: [
           /\.(e2e|spec)\.ts$/
         ]
       }
-
     ]
   },
 

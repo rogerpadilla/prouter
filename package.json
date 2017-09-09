@@ -1,13 +1,16 @@
 {
   "name": "prouter",
-  "version": "3.1.12",
+  "version": "3.1.13",
   "main": "prouter.min.js",
   "scripts": {
-    "build": "rimraf dist && webpack --config config/webpack.prod.js --progress --profile --bail",
+    "prepublishOnly": "npm run test && npm run build && node prepublishOnly.js",
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
-    "test": "rimraf reports/coverage && npm run lint && karma start"
+    "test": "rimraf reports/coverage && npm run lint && karma start",
+    "start": "rimraf dist && webpack --progress --profile --bail --watch",
+    "build": "rimraf dist && webpack --progress --profile --bail --env=prod"
   },
   "keywords": [
+    "browser",
     "router"
   ],
   "license": "MIT",
@@ -19,7 +22,7 @@
   },
   "devDependencies": {
     "@types/jasmine": "2.5.54",
-    "@types/node": "8.0.26",
+    "@types/node": "8.0.28",
     "awesome-typescript-loader": "3.2.3",
     "copy-webpack-plugin": "4.0.1",
     "istanbul-instrumenter-loader": "3.0.0",
@@ -38,7 +41,7 @@
     "source-map-loader": "0.2.1",
     "tslint": "5.7.0",
     "typescript": "2.5.2",
-    "webpack": "3.5.5",
+    "webpack": "3.5.6",
     "webpack-merge": "4.1.0"
   },
   "engines": {
