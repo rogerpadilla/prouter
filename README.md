@@ -6,14 +6,14 @@
 [![dev dependencies status](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
+The power of the [express's routing-expressions style](https://expressjs.com/en/guide/routing.html) available in the frontend.
+
 In web applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. In that context, routing refers to the declaration that does the app that it wants to react to changes in the URL (path), and to trigger some callbacks (handlers) accordingly.
 
-So basically, you give prouter a set of path expressions and a callback function for each of them, so prouter will call each callback (passing contextual parameters) according to the activated path (in the URL).
-
-So now you can also use the power of the [express's routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend. Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); 
+So basically, you give prouter a set of path expressions and a callback function for each of them, so prouter will call the callback(s) (passing contextual parameters) according to the activated path (in the URL). 
 
 ## Why prouter?
-- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser?
+- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser? With prouter. Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
 - **Really lightweight:** 8kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
