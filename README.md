@@ -6,11 +6,11 @@
 [![dev dependencies status](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-In applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page.
+In web applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. In that context, routing refers to the declaration that does the app that it wants to react to changes in the URL (path), and to trigger some callbacks (handlers) accordingly.
 
-In frontend/browser side, routing refers to the declaration that the application wants to react to URL (path) changes, and to trigger some callbacks (handlers) accordingly.
+So basically, you give prouter a set of path expressions and a callback function for each of them, so prouter will call each callback (passing contextual parameters) according to the activated path (in the URL).
 
-Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); so now you can also use the power of the [express's routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend.
+So now you can also use the power of the [express's routing-expressions style](https://expressjs.com/en/guide/routing.html) in the frontend. Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp); 
 
 ## Why prouter?
 - **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser?
