@@ -241,4 +241,30 @@ describe('Router', () => {
     router.push('something/16/other/18?q1=5&q2=6');
   });
 
+  it('Emulate browsers with URL support', (done) => {
+
+    class URL {
+      constructor(url: string) {        
+        const parser = document.createElement('a');
+        parser.href = 'http://example.com/' + url;
+        const propsToCopy = ['pathname', 'hash', 'hostname', 'host', 'search'];
+        for (const prop of propsToCopy) {
+          this[prop] = parser[prop];
+        }
+      }
+    }
+
+    window.URL = URL as any;
+
+    router.use(
+      'about',
+      (req, res, next) => {
+        res.send('hello');
+        done();
+      }
+    );
+
+    router.push('about');
+  });
+
 });

@@ -7,7 +7,7 @@ export class RouterHelper {
 
   private static LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
 
-  static stringToRegexp(str: string) {
+  stringToRegexp(str: string) {
 
     const keys: pathToRegexp.Key[] = [];
 
@@ -17,7 +17,7 @@ export class RouterHelper {
     return resp;
   }
 
-  static parseQuery(str: string) {
+  parseQuery(str: string) {
 
     const searchObj = {};
 
@@ -25,9 +25,7 @@ export class RouterHelper {
       return searchObj;
     }
 
-    if (str.charAt(0) === '?') {
-      str = str.slice(1);
-    }
+    str = str.slice(1);
 
     const params = str.split('&');
 
@@ -39,7 +37,7 @@ export class RouterHelper {
     return searchObj;
   }
 
-  static parsePath(path: string) {
+  parsePath(path: string) {
 
     let url: URL | HTMLAnchorElement;
 
@@ -51,24 +49,24 @@ export class RouterHelper {
     }
 
     const parsedPath: Path = {
-      path: RouterHelper.trimSlashes(url.pathname),
+      path: this.trimSlashes(url.pathname),
       queryString: url.search,
-      query: RouterHelper.parseQuery(url.search)
+      query: this.parseQuery(url.search)
     };
 
     return parsedPath;
   }
 
-  static trimSlashes(str: string) {
+  trimSlashes(str: string) {
     return str.replace(RouterHelper.LEADING_SLASHES_STRIPPER, '');
   }
 
   /**
    * Obtain the request processors for the given path according to the handlers in the router.
    */
-  static obtainRequestProcessors(path: string, handlers: Handler[]) {
+  obtainRequestProcessors(path: string, handlers: Handler[]) {
 
-    const parsedPath = RouterHelper.parsePath(path);
+    const parsedPath = this.parsePath(path);
 
     const request = parsedPath as Request;
     request.params = {};
@@ -77,10 +75,17 @@ export class RouterHelper {
 
     for (const handler of handlers) {
 
-      const hasProcessor = handler.pathExp.test(request.path);
+      const result = handler.pathExp.exec(request.path);
 
-      if (hasProcessor) {
-        RouterHelper.populateRequest(request, handler.pathExp);
+      if (result) {
+
+        const args = result.slice(1);
+        const keys = handler.pathExp.keys;
+
+        for (let i = 0; i < args.length; i++) {
+          request.params[keys[i].name] = decodeURIComponent(args[i]);
+        }
+
         requestProcessors.push({ callback: handler.callback, request });
       }
     }
@@ -88,19 +93,7 @@ export class RouterHelper {
     return requestProcessors;
   }
 
-  private static populateRequest(request: Request, pathExp: PathExp) {
-
-    const result = pathExp.exec(request.path);
-    const args = result ? result.slice(1) : [];
-    const keys = pathExp.keys;
-
-    for (let i = 0; i < args.length; i++) {
-      if (args[i] !== undefined) {
-        request.params[keys[i].name] = decodeURIComponent(args[i]);
-      }
-    }
-
-    return request;
-  }
-
 }
+
+
+export const routerHelper = new RouterHelper();

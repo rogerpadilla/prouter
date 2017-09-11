@@ -1,6 +1,6 @@
 import { Response, RequestCallback } from './';
 import { Handler } from './entity';
-import { RouterHelper } from './helper';
+import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 
 export abstract class Router {
@@ -15,11 +15,11 @@ export abstract class Router {
     if (callback instanceof RouterGroup) {
       for (const handler of callback.handlers) {
         const itPath = path + '/' + handler.path;
-        const pathExp = RouterHelper.stringToRegexp(itPath);
+        const pathExp = routerHelper.stringToRegexp(itPath);
         this.handlers.push({ path: itPath, pathExp, callback: handler.callback });
       }
     } else {
-      const pathExp = RouterHelper.stringToRegexp(path);
+      const pathExp = routerHelper.stringToRegexp(path);
       this.handlers.push({ path, pathExp, callback });
     }
 
@@ -39,7 +39,7 @@ export abstract class Router {
 
     const response: Response = { send: this.send };
 
-    const requestProcessors = RouterHelper.obtainRequestProcessors(path, this.handlers);
+    const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
     let count = 0;
 
@@ -59,6 +59,8 @@ export abstract class Router {
     };
 
     next();
+
+    return requestProcessors.length;
   }
 
 }

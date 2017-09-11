@@ -1,6 +1,6 @@
 import { Options } from './';
 import { Router } from './router';
-import { RouterHelper } from './helper';
+import { routerHelper } from './helper';
 
 export class BrowserRouter extends Router {
 
@@ -46,12 +46,12 @@ export class BrowserRouter extends Router {
 
   getPath() {
     const path = decodeURI(location.pathname + location.search);
-    return RouterHelper.trimSlashes(path);
+    return routerHelper.trimSlashes(path);
   }
 
   push(path: string) {
     history.pushState(undefined, '', path);
-    this.processPath(path);
+    return this.processPath(path);
   }
 
   processCurrentPath() {
@@ -61,7 +61,7 @@ export class BrowserRouter extends Router {
 
   protected processPath(path: string) {
     this.sent = {};
-    super.processPath(path);
+    return super.processPath(path);
   }
 
 }
