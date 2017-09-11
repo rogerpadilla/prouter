@@ -49,8 +49,7 @@
     "source-map-loader": "0.2.1",
     "tslint": "5.7.0",
     "typescript": "2.5.2",
-    "webpack": "3.5.6",
-    "webpack-merge": "4.1.0"
+    "webpack": "3.5.6"
   },
   "engines": {
     "node": ">= 4.2.1",
