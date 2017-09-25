@@ -14,7 +14,7 @@ In web applications, it's useful to provide linkable, bookmarkable, and shareabl
 So basically, you give prouter a set of path expressions and a callback function for each of them, so prouter will call the callback(s) (passing contextual parameters) according to the activated path (in the URL). 
 
 ## Why prouter?
-- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser? With prouter. Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
+- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
 - **Really lightweight:** 8kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
