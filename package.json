@@ -29,8 +29,8 @@
     "path-to-regexp": "^2.0.0"
   },
   "devDependencies": {
-    "@types/jasmine": "2.5.54",
-    "@types/node": "8.0.28",
+    "@types/jasmine": "2.6.0",
+    "@types/node": "8.0.31",
     "awesome-typescript-loader": "3.2.3",
     "copy-webpack-plugin": "4.0.1",
     "istanbul-instrumenter-loader": "3.0.0",
@@ -45,11 +45,11 @@
     "karma-sourcemap-loader": "0.3.7",
     "karma-webpack": "2.0.4",
     "phantomjs-prebuilt": "2.1.15",
-    "rimraf": "2.6.1",
+    "rimraf": "2.6.2",
     "source-map-loader": "0.2.1",
     "tslint": "5.7.0",
-    "typescript": "2.5.2",
-    "webpack": "3.5.6"
+    "typescript": "2.5.3",
+    "webpack": "3.6.0"
   },
   "engines": {
     "node": ">= 4.2.1",
