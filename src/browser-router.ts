@@ -1,4 +1,4 @@
-import { Options } from './';
+import { Options } from './entity';
 import { Router } from './router';
 import { routerHelper } from './helper';
 

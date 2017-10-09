@@ -1,5 +1,8 @@
 import * as pathToRegexp from 'path-to-regexp';
 
+export type Send = (content: string, target?: string) => void;
+export type RequestCallback = (req: Request, res: Response, next: () => void) => void;
+
 export interface Path {
   path: string;
   queryString: string;
@@ -33,13 +36,9 @@ export interface RequestProcessor {
   callback: RequestCallback;
 }
 
-export type Send = (content: string, target?: string) => void;
-
 export interface Response {
   send: Send;
 }
-
-export type RequestCallback = (req: Request, res: Response, next: () => void) => void;
 
 export interface Options {
   defaultTarget: string;

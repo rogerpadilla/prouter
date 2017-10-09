@@ -1,5 +1,3 @@
-/* tslint:disable:no-any */
-
 export * from './helper';
 export * from './router-group';
 export * from './router';

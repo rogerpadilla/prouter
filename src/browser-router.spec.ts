@@ -1,5 +1,4 @@
-import { BrowserRouter } from './browser-router';
-import { RouterGroup } from './router-group';
+import { BrowserRouter, RouterGroup } from './';
 
 describe('Router', () => {
 
@@ -113,8 +112,8 @@ describe('Router', () => {
     router.use(
       'something',
       (req, res, next) => {
-        expect(req.query.first).toBe('5');
-        expect(req.query.second).toBe('6');
+        expect(req.queryString).toBe('?first=5&second=6');
+        expect(req.query).toEqual({first: '5', second: '6'});
         done();
       }
     );
@@ -127,10 +126,9 @@ describe('Router', () => {
     router.use(
       'something/:param1/:param2',
       (req, res, next) => {
-        expect(req.params.param1).toBe('16');
-        expect(req.params.param2).toBe('18');
-        expect(req.query.first).toBe('5');
-        expect(req.query.second).toBe('6');
+        expect(req.params).toEqual({param1: '16', param2: '18'});
+        expect(req.queryString).toBe('?first=5&second=6');
+        expect(req.query).toEqual({first: '5', second: '6'});        
         done();
       }
     );
@@ -143,10 +141,8 @@ describe('Router', () => {
     router.use(
       'something/:param1/other/:param2',
       (req, res, next) => {
-        expect(req.params.param1).toBe('16');
-        expect(req.params.param2).toBe('18');
-        expect(req.query.first).toBe('5');
-        expect(req.query.second).toBe('6');
+        expect(req.params).toEqual({param1: '16', param2: '18'});
+        expect(req.query).toEqual({first: '5', second: '6'});                
         done();
       }
     );

@@ -13,9 +13,34 @@
   },
   "scripts": {
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
-    "test": "rimraf reports/coverage && npm run lint && karma start",
+    "test": "rimraf coverage && npm run lint && jest",
+    "jest": "jest",
     "start": "rimraf dist && webpack --progress --profile --bail --watch",
     "build": "rimraf dist && webpack --progress --profile --bail --env=prod"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "transform": {
+      "^.+\\.ts$": "<rootDir>/preprocessor.js"
+    },
+    "testMatch": [
+      "**/*.spec.ts"
+    ],
+    "mapCoverage": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.ts"
+    ],
+    "coverageReporters": [
+      "html",
+      "lcov"
+    ],
+    "coverageDirectory": "coverage",
+    "testURL": "http://example.com"
   },
   "keywords": [
     "browser",
@@ -29,24 +54,14 @@
     "path-to-regexp": "^2.0.0"
   },
   "devDependencies": {
-    "@types/jasmine": "2.6.0",
-    "@types/node": "8.0.31",
+    "@types/jest": "21.1.2",
+    "@types/node": "8.0.33",
     "awesome-typescript-loader": "3.2.3",
-    "copy-webpack-plugin": "4.0.1",
-    "istanbul-instrumenter-loader": "3.0.0",
-    "jasmine-core": "2.8.0",
-    "karma": "1.7.1",
-    "karma-coverage": "1.1.1",
-    "karma-coveralls": "1.1.2",
-    "karma-jasmine": "1.1.0",
-    "karma-mocha-reporter": "2.2.4",
-    "karma-phantomjs-launcher": "1.0.4",
-    "karma-remap-coverage": "0.1.4",
-    "karma-sourcemap-loader": "0.3.7",
-    "karma-webpack": "2.0.4",
+    "copy-webpack-plugin": "4.1.1",
+    "jest": "21.2.1",
     "phantomjs-prebuilt": "2.1.15",
     "rimraf": "2.6.2",
-    "source-map-loader": "0.2.1",
+    "source-map-loader": "0.2.2",
     "tslint": "5.7.0",
     "typescript": "2.5.3",
     "webpack": "3.6.0"

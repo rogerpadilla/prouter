@@ -1,5 +1,4 @@
-import { Response, RequestCallback } from './';
-import { Handler } from './entity';
+import { Response, RequestCallback, Handler } from './entity';
 import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 

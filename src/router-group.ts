@@ -1,4 +1,4 @@
-import { RequestCallback } from './';
+import { RequestCallback } from './entity';
 
 export class RouterGroup {
 
