@@ -65,10 +65,10 @@ router.push('about');
 ```
 
 
-### basic using global variable (including it via a 'script' tag in the HTML file)
+### basic, including it via a 'script' tag in the HTML file
 
 ```js
-const BrowserRouter = proute.BrowserRouter;
+const BrowserRouter = prouter.BrowserRouter;
 
 // Instantiate the router
 const router = new BrowserRouter({
