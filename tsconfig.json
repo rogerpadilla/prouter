@@ -6,6 +6,7 @@
     "sourceMap": true,
     "strict": true,
     "noUnusedLocals": true,
+    "forceConsistentCasingInFileNames": true,
     "suppressImplicitAnyIndexErrors": true,
     "declaration": true,
     "declarationDir": "dist",

@@ -49,6 +49,37 @@ describe('Router', () => {
     router.push('about');
   });
 
+  it('basic - old browser', (done) => {
+
+    const _window: any = window;
+    const _URL = window.URL;
+    _window.URL = undefined;
+    const _createElement = document.createElement;
+
+    document.createElement = (tag: string) => {
+      if (tag === 'a') {
+        return new _URL('', 'http://example.com') as any;
+      }
+      return _createElement(tag);
+    };
+
+    router.use(
+      'about',
+      (req, res, next) => {
+        expect(req.path).toBe('about');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('about');
+        done();
+      }
+    );
+
+    router.push('about');
+
+    _window.URL = _URL;
+    document.createElement = _createElement;
+  });
+
   it('basic with send', (done) => {
 
     router.use(
@@ -113,7 +144,7 @@ describe('Router', () => {
       'something',
       (req, res, next) => {
         expect(req.queryString).toBe('?first=5&second=6');
-        expect(req.query).toEqual({first: '5', second: '6'});
+        expect(req.query).toEqual({ first: '5', second: '6' });
         done();
       }
     );
@@ -126,9 +157,9 @@ describe('Router', () => {
     router.use(
       'something/:param1/:param2',
       (req, res, next) => {
-        expect(req.params).toEqual({param1: '16', param2: '18'});
+        expect(req.params).toEqual({ param1: '16', param2: '18' });
         expect(req.queryString).toBe('?first=5&second=6');
-        expect(req.query).toEqual({first: '5', second: '6'});        
+        expect(req.query).toEqual({ first: '5', second: '6' });
         done();
       }
     );
@@ -141,8 +172,8 @@ describe('Router', () => {
     router.use(
       'something/:param1/other/:param2',
       (req, res, next) => {
-        expect(req.params).toEqual({param1: '16', param2: '18'});
-        expect(req.query).toEqual({first: '5', second: '6'});                
+        expect(req.params).toEqual({ param1: '16', param2: '18' });
+        expect(req.query).toEqual({ first: '5', second: '6' });
         done();
       }
     );
@@ -240,7 +271,7 @@ describe('Router', () => {
   it('Emulate browsers with URL support', (done) => {
 
     class URL {
-      constructor(url: string) {        
+      constructor(url: string) {
         const parser = document.createElement('a');
         parser.href = 'http://example.com/' + url;
         const propsToCopy = ['pathname', 'hash', 'hostname', 'host', 'search'];
