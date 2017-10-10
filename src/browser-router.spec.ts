@@ -1,6 +1,6 @@
 import { BrowserRouter, RouterGroup } from './';
 
-describe('Router', () => {
+describe('BrowserRouter', () => {
 
   let router: BrowserRouter;
 
