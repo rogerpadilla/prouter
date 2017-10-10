@@ -5,9 +5,7 @@ describe('Router', () => {
   let router: BrowserRouter;
 
   beforeAll(() => {
-
     const htmlElementsCache = {};
-
     document.querySelector = jasmine.createSpy('document - querySelector').and.callFake((selector: string) => {
       if (!selector) {
         return undefined;
@@ -21,11 +19,9 @@ describe('Router', () => {
   });
 
   beforeEach(() => {
-
     router = new BrowserRouter({
       defaultTarget: 'body'
     });
-
     router.listen();
   });
 
@@ -53,9 +49,12 @@ describe('Router', () => {
 
     const _window: any = window;
     const _URL = window.URL;
+    // Emulates old browsers which doesn't supports URL constructor
     _window.URL = undefined;
     const _createElement = document.createElement;
 
+    // Router will use 'createElement("a")' as fallback for parsing paths
+    // when the URL's constructor is not present (old browsers).
     document.createElement = (tag: string) => {
       if (tag === 'a') {
         return new _URL('', 'http://example.com') as any;
@@ -76,6 +75,7 @@ describe('Router', () => {
 
     router.push('about');
 
+    // Restore original objects
     _window.URL = _URL;
     document.createElement = _createElement;
   });
