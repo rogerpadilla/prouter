@@ -47,10 +47,9 @@ describe('BrowserRouter', () => {
 
   it('basic - old browser', (done) => {
 
-    const _window: any = window;
     const _URL = window.URL;
     // Emulates old browsers which doesn't supports URL constructor
-    _window.URL = undefined;
+    window.URL = undefined as any;
     const _createElement = document.createElement;
 
     // Router will use 'createElement("a")' as fallback for parsing paths
@@ -76,7 +75,7 @@ describe('BrowserRouter', () => {
     router.push('about');
 
     // Restore original objects
-    _window.URL = _URL;
+    window.URL = _URL;
     document.createElement = _createElement;
   });
 
