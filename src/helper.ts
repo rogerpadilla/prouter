@@ -5,8 +5,6 @@ import { Path, PathExp, RequestProcessor, Request, Handler } from './entity';
 
 export class RouterHelper {
 
-  private static LEADING_SLASHES_STRIPPER = /^\/+|\/+$/;
-
   stringToRegexp(str: string) {
 
     const keys: pathToRegexp.Key[] = [];
@@ -45,20 +43,16 @@ export class RouterHelper {
       url = new URL(path, 'http://example.com');
     } else {
       url = document.createElement('a');
-      url.href = 'http://example.com/' + path;
+      url.href = 'http://example.com' + path;
     }
 
     const parsedPath: Path = {
-      path: this.trimSlashes(url.pathname),
+      path: url.pathname,
       queryString: url.search,
       query: this.parseQuery(url.search)
     };
 
     return parsedPath;
-  }
-
-  trimSlashes(str: string) {
-    return str.replace(RouterHelper.LEADING_SLASHES_STRIPPER, '');
   }
 
   /**

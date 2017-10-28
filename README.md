@@ -16,7 +16,7 @@ So basically, you give prouter a set of path expressions and a callback function
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
 - **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
-- **Really lightweight:** 8kb (before gzipping).
+- **Really lightweight:** 7kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
 - KISS principle: unnecessary complexity avoided.
 - Unit tests for every feature are created.
@@ -43,17 +43,18 @@ import { BrowserRouter } from 'prouter';
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // CSS selector used to obtaing the default target DOM-element
-  // when sending content (res.send) from the handler
-  defaultTarget: '.some-css-class'
+  // (optional) function used to send content (res.send) from the handler
+  send(content) {
+    document.body.innerHTML = content;
+  }
 });
 
 // Declare the paths and its respective handlers
 router
-  .use('', (req, res, next) => {
+  .use('/', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
   })
-  .use('about', (req, res, next) => {
+  .use('/about', (req, res, next) => {
     res.send('<h1>About page.</h1>');
   });
 
@@ -61,7 +62,7 @@ router
 router.listen();
 
 // programmatically navigate to any route in your router
-router.push('about');
+router.push('/about');
 ```
 
 
@@ -72,17 +73,18 @@ const BrowserRouter = prouter.BrowserRouter;
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // CSS selector used to obtaing the default target DOM-element
-  // when sending content (res.send) from the handler
-  defaultTarget: 'body'
+  // (optional) function used to send content (res.send) from the handler
+  send(content) {
+    document.body.innerHTML = content;
+  }
 });
 
 // Declare the paths and its respective handlers
 router
-  .use('', (req, res, next) => {
+  .use('/', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
   })
-  .use('about', (req, res, next) => {
+  .use('/about', (req, res, next) => {
     res.send('<h1>About page.</h1>');
   });
 
@@ -90,7 +92,7 @@ router
 router.listen();
 
 // programmatically navigate to any route in your router
-router.push('about');
+router.push('/about');
 ```
 
 ### using an interceptor/validator handler
@@ -100,9 +102,10 @@ import { BrowserRouter } from 'prouter';
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // CSS selector used to obtaing the default target DOM-element
-  // when sending content (res.send) from the handler
-  defaultTarget: 'body'
+  // (optional) function used to send content (res.send) from the handler
+  send(content) {
+    document.body.innerHTML = content;
+  }
 });
 
 // Declare the paths and its respective handlers
@@ -122,10 +125,10 @@ router
     // let's continue with the flow in the other handlers below
     next();
   })
-  .use('', (req, res, next) => {
+  .use('/', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
   })
-  .use('contact', (req, res, next) => {
+  .use('/contact', (req, res, next) => {
     res.send('<h1>Contact page.</h1>');
   });
 
@@ -133,7 +136,7 @@ router
 router.listen();
 
 // programmatically navigate to any route in your router
-router.push('contact');
+router.push('/contact');
 ```
 
 
@@ -147,13 +150,13 @@ import { BrowserRouter, RouterGroup } from 'prouter';
 const productRouterGroup = new RouterGroup();
 
 productRouterGroup
-  .use('', (req, res, next) => {
+  .use('/', (req, res, next) => {
     res.send('<h1>Landing page of Products.</h1>');
   })
-  .use('create', (req, res, next) => {
+  .use('/create', (req, res, next) => {
     res.send('<form>Create a product.</form>');    
   })
-  .use(':id', (req, res, next) => {
+  .use('/:id', (req, res, next) => {
     const id = req.params.id;
     productService.findOneById(id).then(product => {
       res.send(`<h1>${product.name}<h1>`);    
@@ -162,9 +165,10 @@ productRouterGroup
 
 // Instantiate the router
 const router = new BrowserRouter({
-  // CSS selector used to obtaing the default target DOM-element
-  // when sending content (res.send) from the handler
-  defaultTarget: '.my-router-outlet'
+  // (optional) function used to send content (res.send) from the handler
+  send(content) {
+    document.body.innerHTML = content;
+  }
 });
 
 // Declare the paths and its respective handlers
@@ -175,15 +179,15 @@ router
     // let's continue with the flow in the other handlers below
     next();
   })
-  .use('', (req, res, next) => {
+  .use('/', (req, res, next) => {
     res.send('<h1>Home page.</h1>');
   })
   // mount the product's group of handlers using this base path
-  .use('product', productRouterGroup);
+  .use('/product', productRouterGroup);
 
 // start listening events for the routing
 router.listen();
 
 // programmatically navigate to the detail of the product with this ID
-router.push('product/123');
+router.push('/product/123');
 ```

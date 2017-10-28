@@ -1,34 +1,19 @@
 import { Options } from './entity';
 import { Router } from './router';
-import { routerHelper } from './helper';
 
 export class BrowserRouter extends Router {
 
   private sent = {};
 
-  constructor(private opts: Options) {
+  constructor(opts: Options = {
+    send: () => {
+      throw new Error(`Provide a custom 'send' function if you want to use it from the handler in the browser.`);
+    }
+  }) {
 
-    super();
+    super(opts);
 
-    this.send = this.send.bind(this);
     this.processCurrentPath = this.processCurrentPath.bind(this);
-  }
-
-  send(content: string, target = this.opts.defaultTarget) {
-
-    if (this.sent[target]) {
-      throw new Error(`Already sent data to the target '${target}'.`);
-    }
-
-    this.sent[target] = true;
-
-    const el = document.querySelector(target);
-
-    if (!el) {
-      throw new Error(`No match for the target '${target}'`);
-    }
-
-    el.innerHTML = content;
   }
 
   listen() {
@@ -46,7 +31,7 @@ export class BrowserRouter extends Router {
 
   getPath() {
     const path = decodeURI(location.pathname + location.search);
-    return routerHelper.trimSlashes(path);
+    return path;
   }
 
   push(path: string) {

@@ -1,4 +1,4 @@
-import { Response, RequestCallback, Handler } from './entity';
+import { Response, RequestCallback, Handler, Options } from './entity';
 import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 
@@ -7,7 +7,7 @@ export abstract class Router {
   private listening: boolean;
   private handlers: Handler[] = [];
 
-  abstract send(content: string, target?: string): void;
+  constructor(private opts: Options) {  }
 
   use(path: string, callback: RequestCallback | RouterGroup) {
 
@@ -36,7 +36,7 @@ export abstract class Router {
 
   protected processPath(path: string) {
 
-    const response: Response = { send: this.send };
+    const response: Response = { send: this.opts.send };
 
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
