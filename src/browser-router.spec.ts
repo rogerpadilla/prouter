@@ -238,10 +238,23 @@ describe('BrowserRouter', () => {
     const groupRouter = new RouterGroup();
 
     groupRouter
+      .use('/ask', (req, res, next) => {
+        done();
+      });
+
+    router.use('/question', groupRouter);
+
+    router.push('/question/ask');
+  });
+
+  it('RouterGroup with params', (done) => {
+
+    const groupRouter = new RouterGroup();
+
+    groupRouter
       .use('/:p1/other/:p2', (req, res, next) => {
-        next();
-      })
-      .use('(.*)', () => done());
+        done();
+      });
 
     router.use('/something', groupRouter);
 

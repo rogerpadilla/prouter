@@ -13,7 +13,7 @@ export abstract class Router {
 
     if (callback instanceof RouterGroup) {
       for (const handler of callback.handlers) {
-        const itPath = path + '/' + handler.path;
+        const itPath = path + handler.path;
         const pathExp = routerHelper.stringToRegexp(itPath);
         this.handlers.push({ path: itPath, pathExp, callback: handler.callback });
       }
