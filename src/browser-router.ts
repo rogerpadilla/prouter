@@ -3,8 +3,6 @@ import { Router } from './router';
 
 export class BrowserRouter extends Router {
 
-  private sent = {};
-
   constructor(opts: Options = {
     send: () => {
       throw new Error(`Provide a custom 'send' function if you want to use it from the handler in the browser.`);
@@ -45,7 +43,6 @@ export class BrowserRouter extends Router {
   }
 
   protected processPath(path: string) {
-    this.sent = {};
     return super.processPath(path);
   }
 

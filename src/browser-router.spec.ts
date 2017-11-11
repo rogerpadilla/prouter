@@ -65,7 +65,7 @@ describe('BrowserRouter', () => {
     const _createElement = document.createElement;
 
     // Router will use 'createElement("a")' as fallback for parsing paths
-    // when the URL's constructor is not present (old browsers).
+    // when the URL's constructor is not available (old browsers).
     document.createElement = (tag: string) => {
       if (tag === 'a') {
         return new _URL('', 'http://example.com') as any;
