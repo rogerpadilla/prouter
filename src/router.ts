@@ -41,6 +41,7 @@ export abstract class Router {
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
     let count = 0;
+    const listening = this.listening;
 
     /** Anonymous function used for processing routing cycle. */
     const next = () => {
@@ -50,7 +51,7 @@ export abstract class Router {
       }
 
       const reqProc = requestProcessors[count];
-      reqProc.request.listening = this.listening;
+      reqProc.request.listening = listening;
 
       count++;
 

@@ -1,4 +1,7 @@
+// tslint:disable:max-file-line-count
+
 import { BrowserRouter, RouterGroup } from './';
+import { setTimeout } from 'timers';
 
 describe('BrowserRouter', () => {
 
@@ -19,26 +22,37 @@ describe('BrowserRouter', () => {
   });
 
   beforeEach(() => {
+    history.pushState(undefined, '', '/');
     router = new BrowserRouter();
-    router.listen();
   });
 
   afterEach(() => {
     router.stop();
   });
 
-  it('basic', (done) => {
+  it('basic - default', (done) => {
+    router
+      .use('/', (req, res, next) => {
+        expect(req.path).toBe('/');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        done();
+      })
+      .listen();
+  });
 
-    router.use(
-      '/about',
-      (req, res, next) => {
+  it('basic - push', (done) => {
+
+    router
+      .use('/about', (req, res, next) => {
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/about');
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/about');
   });
@@ -59,16 +73,15 @@ describe('BrowserRouter', () => {
       return _createElement(tag);
     };
 
-    router.use(
-      '/about',
-      (req, res, next) => {
+    router
+      .use('/about', (req, res, next) => {
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/about');
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/about');
 
@@ -77,157 +90,153 @@ describe('BrowserRouter', () => {
     document.createElement = _createElement;
   });
 
-  it('basic with send', (done) => {
+  it('proper listening - default path', (done) => {
 
-    router.use(
-      '/about',
-      (req, res, next) => {
+    router
+      .use('/', (req, res, next) => {
+        setTimeout(() => next(), 10);
+      })
+      .use('(.*)', (req, res, next) => {
+        expect(req.listening).toBeFalsy();
         done();
-      }
-    );
+      })
+      .listen();
+  });
+
+  it('proper listening - push', (done) => {
+
+    router
+      .use('/something', (req, res, next) => {
+        throw new Error('Should not call unmatched path');
+      })
+      .use('/about', (req, res, next) => {
+        expect(req.listening).toBeTruthy();
+        done();
+      })
+      .listen();
 
     router.push('/about');
   });
 
   it('basic trying to use send function without providing it', (done) => {
 
-    router.use(
-      '/about',
-      (req, res, next) => {
+    router
+      .use('/about', (req, res, next) => {
         expect(() => {
           res.send('hello');
         }).toThrowError();
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/about');
   });
 
   it('parameters', (done) => {
 
-    router.use(
-      '/about/:id/:num',
-      (req, res, next) => {
+    router
+      .use('/about/:id/:num', (req, res, next) => {
         expect(req.params.id).toBe('16');
         expect(req.params.num).toBe('18');
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/about/16/18');
   });
 
   it('query', (done) => {
 
-    router.use(
-      '/something',
-      (req, res, next) => {
+    router
+      .use('/something', (req, res, next) => {
         expect(req.queryString).toBe('?first=5&second=6');
         expect(req.query).toEqual({ first: '5', second: '6' });
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/something?first=5&second=6');
   });
 
   it('parameters & query', (done) => {
 
-    router.use(
-      '/something/:param1/:param2',
-      (req, res, next) => {
+    router
+      .use('/something/:param1/:param2', (req, res, next) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
         expect(req.queryString).toBe('?first=5&second=6');
         expect(req.query).toEqual({ first: '5', second: '6' });
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/something/16/18?first=5&second=6');
   });
 
   it('divided parameters', (done) => {
 
-    router.use(
-      '/something/:param1/other/:param2',
-      (req, res, next) => {
+    router
+      .use('/something/:param1/other/:param2', (req, res, next) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
         expect(req.query).toEqual({ first: '5', second: '6' });
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/something/16/other/18?first=5&second=6');
   });
 
   it('path', (done) => {
 
-    router.use(
-      '/file/:path*',
-      (req, res, next) => {
+    router
+      .use('/file/:path*', (req, res, next) => {
         expect(req.params.path).toBe('dir/file.jpg');
         done();
-      }
-    );
+      })
+      .listen();
 
     router.push('/file/dir/file.jpg');
   });
 
   it('default only', (done) => {
 
-    router.use(
-      '/abc/:p1/other/:p2',
-      (req, res, next) => {
+    router
+      .use('/abc/:p1/other/:p2', (req, res, next) => {
         expect(true).toBeFalsy();
-      }
-    );
-
-    router.use(
-      '(.*)',
-      (req, res, next) => done()
-    );
+      })
+      .use('(.*)', (req, res, next) => done())
+      .listen();
 
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('transfer request', (done) => {
+  it('RouterGroup', (done) => {
 
-    router.use(
-      '/something/:p1/other/:p2',
-      (req, res, next) => {
-        req.params.paramA = 123;
-        next();
-      }
-    );
+    const groupRouter = new RouterGroup();
 
-    router.use(
-      '(.*)',
-      (req, res, next) => {
-        expect(req.params.paramA).toEqual(123);
+    groupRouter
+      .use('/ask', (req, res, next) => {
         done();
-      }
-    );
+      });
+
+    router
+      .use('/question', groupRouter);
+
+    router.push('/question/ask');
+  });
+
+  it('next also', (done) => {
+
+    router
+      .use('/something/:p1/other/:p2', (req, res, next) => next())
+      .use('(.*)', (req, res, next) => done());
 
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('default also', (done) => {
+  it('Throws error if try to listen more than once', () => {
 
-    router.use(
-      '/something/:p1/other/:p2',
-      (req, res, next) => next()
-    );
+    router.listen();
 
-    router.use(
-      '(.*)',
-      (req, res, next) => done()
-    );
-
-    router.push('/something/16/other/18?q1=5&q2=6');
-  });
-
-  it('Throws error if try to listen again', () => {
     expect(() => {
       router.listen();
     }).toThrowError();
@@ -242,7 +251,8 @@ describe('BrowserRouter', () => {
         done();
       });
 
-    router.use('/question', groupRouter);
+    router
+      .use('/question', groupRouter);
 
     router.push('/question/ask');
   });
@@ -276,12 +286,10 @@ describe('BrowserRouter', () => {
 
     window.URL = URL as any;
 
-    router.use(
-      '/about',
-      (req, res, next) => {
+    router
+      .use('/about', (req, res, next) => {
         done();
-      }
-    );
+      });
 
     router.push('/about');
   });
