@@ -46,8 +46,8 @@ export class RouterHelper {
       url.href = 'http://example.com' + path;
     }
 
-    const parsedPath: Path = {
-      path: url.pathname,
+    const parsedPath: Partial<Path> = {
+      originalUrl: url.pathname,
       queryString: url.search,
       query: this.parseQuery(url.search)
     };
@@ -61,26 +61,27 @@ export class RouterHelper {
   obtainRequestProcessors(path: string, handlers: Handler[]) {
 
     const parsedPath = this.parsePath(path);
-
+    const requestProcessors: RequestProcessor[] = [];
     const request = parsedPath as Request;
     request.params = {};
 
-    const requestProcessors: RequestProcessor[] = [];
-
     for (const handler of handlers) {
 
-      const result = handler.pathExp.exec(request.path);
+      const result = handler.pathExp.exec(request.originalUrl);
 
       if (result) {
+
+        const req = { ...request };
+        req.path = request.originalUrl;
 
         const args = result.slice(1);
         const keys = handler.pathExp.keys;
 
         for (let i = 0; i < args.length; i++) {
-          request.params[keys[i].name] = decodeURIComponent(args[i]);
+          req.params[keys[i].name] = decodeURIComponent(args[i]);
         }
 
-        requestProcessors.push({ callback: handler.callback, request });
+        requestProcessors.push({ callback: handler.callback, request: req });
       }
     }
 

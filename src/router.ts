@@ -7,7 +7,7 @@ export abstract class Router {
   private listening: boolean;
   private handlers: Handler[] = [];
 
-  constructor(private opts: Options) {  }
+  constructor(private opts: Options) { }
 
   use(path: string, callback: RequestCallback | RouterGroup) {
 
@@ -40,20 +40,20 @@ export abstract class Router {
 
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
-    let count = 0;
     const listening = this.listening;
+    let index = 0;
 
     /** Anonymous function used for processing routing cycle. */
     const next = () => {
 
-      if (count >= requestProcessors.length) {
+      if (index >= requestProcessors.length) {
         return;
       }
 
-      const reqProc = requestProcessors[count];
+      const reqProc = requestProcessors[index];
       reqProc.request.listening = listening;
 
-      count++;
+      index++;
 
       reqProc.callback(reqProc.request, response, next);
     };

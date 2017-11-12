@@ -1,7 +1,6 @@
 // tslint:disable:max-file-line-count
 
 import { BrowserRouter, RouterGroup } from './';
-import { setTimeout } from 'timers';
 
 describe('BrowserRouter', () => {
 
@@ -30,9 +29,10 @@ describe('BrowserRouter', () => {
     router.stop();
   });
 
-  it('basic - default', (done) => {
+  it('basic', (done) => {
     router
       .use('/', (req, res, next) => {
+        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -46,6 +46,7 @@ describe('BrowserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
+        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -75,6 +76,7 @@ describe('BrowserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
+        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -209,21 +211,6 @@ describe('BrowserRouter', () => {
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('RouterGroup', (done) => {
-
-    const groupRouter = new RouterGroup();
-
-    groupRouter
-      .use('/ask', (req, res, next) => {
-        done();
-      });
-
-    router
-      .use('/question', groupRouter);
-
-    router.push('/question/ask');
-  });
-
   it('next also', (done) => {
 
     router
@@ -263,6 +250,8 @@ describe('BrowserRouter', () => {
 
     groupRouter
       .use('/:p1/other/:p2', (req, res, next) => {
+        expect(req.originalUrl).toBe('/something/16/other/18');
+        expect(req.path).toBe('/something/16/other/18');
         done();
       });
 

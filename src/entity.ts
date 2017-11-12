@@ -4,6 +4,7 @@ export type Send = (content: string) => void;
 export type RequestCallback = (req: Request, res: Response, next: () => void) => void;
 
 export interface Path {
+  originalUrl: string;
   path: string;
   queryString: string;
   query: StringMap;
@@ -26,9 +27,6 @@ export interface Handler {
 export interface Request extends Path {
   listening?: boolean;
   params: StringMap;
-  session: {
-    userId: number
-  };
 }
 
 export interface RequestProcessor {
@@ -42,8 +40,4 @@ export interface Response {
 
 export interface Options {
   send: Send;
-}
-
-export class Person {
-
 }
