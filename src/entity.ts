@@ -41,3 +41,8 @@ export interface Response {
 export interface Options {
   send: Send;
 }
+
+// Dont delete this dummy class, TS do not create the definition of the file if only interface
+export class DummyClassToMakeTsExportThisFile {
+
+}
