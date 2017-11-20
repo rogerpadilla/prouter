@@ -113,10 +113,10 @@ router
   .use('(.*)', (req, res, next) => {
     // this handler will be for any routing event, before other handlers
     const srcPath = router.getPath();
-    const destPath = req.path;
+    const destPath = req.originalUrl;
     console.log('coming from', srcPath);
     console.log('going to', destPath);
-    const isAuthorized = validateUserAuthorization(req.path);
+    const isAuthorized = validateUserAuthorization(req.originalUrl);
     if (!isAuthorized) {
       showAlert("You haven't rights to access the page: " + destPath);
       // stop the flow since 'next' wasn't called
