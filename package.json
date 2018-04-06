@@ -57,7 +57,7 @@
     "Roger Padilla <rogerpadilla>"
   ],
   "dependencies": {
-    "path-to-regexp": "^2.1.0"
+    "path-to-regexp": "^2.2.0"
   },
   "devDependencies": {
     "@types/jest": "21.1.6",

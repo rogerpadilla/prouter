@@ -17,7 +17,7 @@ export class RouterHelper {
 
   parseQuery(str: string) {
 
-    const searchObj = {};
+    const searchObj: {[key: string]: string} = {};
 
     if (str === '') {
       return searchObj;

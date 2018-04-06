@@ -4,7 +4,7 @@ import { RouterGroup } from './router-group';
 
 export abstract class Router {
 
-  private listening: boolean;
+  private listening = false;
   private handlers: Handler[] = [];
 
   constructor(private opts: Options) { }
