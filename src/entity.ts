@@ -1,6 +1,6 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-export type Send = <T>(content: T) => void;
+export type Send = (content: string) => void;
 export type RequestCallback = (req: Request, res: Response, next: () => void) => void;
 
 export interface Path {
@@ -39,7 +39,7 @@ export interface Response {
 }
 
 export interface Options {
-  send: Send;
+  send?: Send;
 }
 
 // Dont delete this dummy class, TS do not create the definition of the file if only interface

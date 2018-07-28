@@ -7,7 +7,7 @@ export abstract class Router {
   private listening = false;
   private handlers: Handler[] = [];
 
-  constructor(private opts: Options) { }
+  constructor(private opts: Options = {}) { }
 
   use(path: string, callback: RequestCallback | RouterGroup) {
 
@@ -36,7 +36,11 @@ export abstract class Router {
 
   protected processPath(path: string) {
 
-    const response: Response = { send: this.opts.send };
+    const send = this.opts.send ? this.opts.send : (content: string) => {
+      console.warn(`Provide your own implementation of the 'send' function when initializing the router.`);
+    };
+
+    const response: Response = { send };
 
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
