@@ -3,11 +3,11 @@ const webpack = require('webpack');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = function (ENV) {
+module.exports = function (mode) {
 
-  ENV = ENV || 'dev';
+  mode = mode || 'dev';
 
-  const isProd = ENV === 'prod';
+  const isProd = mode === 'production';
 
   const config = {
 
@@ -53,10 +53,10 @@ module.exports = function (ENV) {
 
     plugins: [
       new webpack.DefinePlugin({
-        'ENV': ENV,
+        'ENV': mode,
         'process.env': {
-          'ENV': ENV,
-          'NODE_ENV': ENV
+          'ENV': mode,
+          'NODE_ENV': mode
         }
       }),
       new webpack.LoaderOptionsPlugin({
