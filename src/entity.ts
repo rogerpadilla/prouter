@@ -1,6 +1,6 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-export type Send = (content: string) => void;
+export type Send = <T>(content: T) => void;
 export type RequestCallback = (req: Request, res: Response, next: () => void) => void;
 
 export interface Path {
