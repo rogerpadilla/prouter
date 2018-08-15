@@ -180,7 +180,7 @@ router.listen();
 ```
 
 
-### split your routing's code using RouterGroup
+### modularize your routing code in different files using Router Group
 
 ```js
 import { BrowserRouter, RouterGroup } from 'prouter';
