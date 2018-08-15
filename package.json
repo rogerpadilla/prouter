@@ -55,7 +55,7 @@
   "contributors": [
     "Roger Padilla <rogerpadilla>"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "path-to-regexp": "^2.2.1"
   },
   "devDependencies": {
