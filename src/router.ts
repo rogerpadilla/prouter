@@ -1,4 +1,4 @@
-import { ProuterRequestCallback, ProuterHandler, ProuterProcessPathCallback, ProuterOptsProcessPathCallback } from './entity';
+import { ProuterRequestCallback, ProuterHandler, ProuterProcessPathCallback, ProuterResponse, ProuterNextMiddleware } from './entity';
 import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 
@@ -41,23 +41,24 @@ export abstract class Router {
     }
 
     const listening = this.listening;
-    let isProcessPathCallbackCalled: boolean;
+    let wasProcessPathCallbackCalled: boolean;
     let index = 0;
 
-    const processPathCallbackWrapper: ProuterProcessPathCallback = (opts) => {
-      if (!isProcessPathCallbackCalled && processPathCallback) {
-        isProcessPathCallbackCalled = true;
-        processPathCallback(opts);
+    const response: ProuterResponse = {
+      end(opts) {
+        if (processPathCallback && !wasProcessPathCallbackCalled) {
+          wasProcessPathCallbackCalled = true;
+          processPathCallback(opts);
+        }
       }
     };
 
-
     /** Call the middlewares for the given path. */
-    const next: ProuterProcessPathCallback = (opts: ProuterOptsProcessPathCallback = {}) => {
+    const next: ProuterNextMiddleware = () => {
 
-      // If next was called and this is the last processor or 'endMode' was passed then call processPathCallbackWrapper and stop here
-      if (index === requestProcessors.length || opts.endMode) {
-        processPathCallbackWrapper(opts);
+      // If next was called and the last processor was already executed then automatically stop.
+      if (index === requestProcessors.length) {
+        response.end();
         return;
       }
 
@@ -66,7 +67,7 @@ export abstract class Router {
 
       index++;
 
-      reqProc.callback(reqProc.request, next);
+      reqProc.callback(reqProc.request, response, next);
     };
 
     next();

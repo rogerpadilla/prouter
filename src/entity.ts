@@ -2,7 +2,7 @@ import * as pathToRegexp from 'path-to-regexp';
 
 export interface ProuterRequestCallback {
   // tslint:disable-next-line:no-any
-  (req: ProuterRequest, next: ProuterProcessPathCallback): any;
+  (req: ProuterRequest, resp: ProuterResponse, next: ProuterNextMiddleware): any;
 }
 
 export interface ProuterPath {
@@ -32,17 +32,25 @@ export interface ProuterRequest extends ProuterPath {
   params: ProuterStringMap;
 }
 
+export interface ProuterResponse {
+  end: ProuterProcessPathCallback;
+}
+
 export interface ProuterRequestProcessor {
   request: ProuterRequest;
   callback: ProuterRequestCallback;
 }
 
 export interface ProuterOptsProcessPathCallback {
-  endMode?: 'end' | 'endAndPreventNavigation';
+  preventNavigation?: boolean;
 }
 
 export interface ProuterProcessPathCallback {
   (opts?: ProuterOptsProcessPathCallback): void;
+}
+
+export interface ProuterNextMiddleware {
+  (): void;
 }
 
 

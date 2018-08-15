@@ -1,6 +1,7 @@
 // tslint:disable:max-file-line-count
 
 import { BrowserRouter, RouterGroup } from './';
+import { runInNewContext } from 'vm';
 
 
 describe('BrowserRouter', () => {
@@ -53,7 +54,7 @@ describe('BrowserRouter', () => {
     expect(router.getPath()).toBe('/');
 
     router
-      .use('/', (req, next) => {
+      .use('/', (req, resp, next) => {
         expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
@@ -74,14 +75,14 @@ describe('BrowserRouter', () => {
     let msg = '';
 
     router
-      .use('/about', (req, next) => {
+      .use('/about', (req, resp) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
         msg = 'changed';
-        next();
+        resp.end();
       })
       .listen();
 
@@ -112,13 +113,13 @@ describe('BrowserRouter', () => {
     let msg = '';
 
     router
-      .use('/about', (req, next) => {
+      .use('/about', (req, resp) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         msg = 'changed';
-        next();
+        resp.end();
       })
       .listen();
 
@@ -185,7 +186,7 @@ describe('BrowserRouter', () => {
   it('parameters & query', (done) => {
 
     router
-      .use('/something/:param1/:param2', (req, next) => {
+      .use('/something/:param1/:param2', (req) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
         expect(req.queryString).toBe('?first=5&second=6');
         expect(req.query).toEqual({ first: '5', second: '6' });
@@ -238,12 +239,12 @@ describe('BrowserRouter', () => {
   it('next also', (done) => {
 
     router
-      .use('/something/:p1/other/:p2', (req, next) => {
+      .use('/something/:p1/other/:p2', (req, resp, next) => {
         expect(req.query).toEqual({ q1: '5', q2: '6' });
         req.query.q3 = '7';
         next();
       })
-      .use('(.*)', (req, next) => {
+      .use('(.*)', (req) => {
         expect(req.query).toEqual({ q1: '5', q2: '6', q3: '7' });
         done();
       });
@@ -258,20 +259,20 @@ describe('BrowserRouter', () => {
     let msg = '';
 
     router
-      .use('/about', (req, next) => {
+      .use('/about', (req, resp) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
         msg = 'hello';
-        next({endMode: 'end'});
+        resp.end();
       })
       .use('(.*)', () => {
         fail('Should not call this');
       });
 
-    router.push('/about', err => {
+    router.push('/about', () => {
       expect(msg).toBe('hello');
       expect(router.getPath()).toBe('/about');
       done();
@@ -283,20 +284,43 @@ describe('BrowserRouter', () => {
     expect(router.getPath()).toBe('/');
 
     router
-      .use('/about', (req, next) => {
+      .use('/about', (req, resp) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
-        next({endMode: 'endAndPreventNavigation'});
+        resp.end({ preventNavigation: true });
       })
       .use('(.*)', () => {
         fail('Should not call this');
       });
 
-    router.push('/about', err => {
+    router.push('/about', () => {
       expect(router.getPath()).toBe('/');
+      done();
+    });
+  });
+
+  it('next in all', (done) => {
+
+    expect(router.getPath()).toBe('/');
+
+    router
+      .use('/about', (req, resp, next) => {
+        expect(req.originalUrl).toBe('/about');
+        expect(req.path).toBe('/about');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        next();
+      })
+      .use('(.*)', (req, resp, next) => {
+        next();
+      });
+
+    router.push('/about', () => {
+      expect(router.getPath()).toBe('/about');
       done();
     });
   });
@@ -330,7 +354,7 @@ describe('BrowserRouter', () => {
     const groupRouter = new RouterGroup();
 
     groupRouter
-      .use('/:p1/other/:p2', (req, next) => {
+      .use('/:p1/other/:p2', (req) => {
         expect(req.originalUrl).toBe('/something/16/other/18');
         expect(req.path).toBe('/something/16/other/18');
         done();

@@ -29,7 +29,7 @@ export class BrowserRouter extends Router {
   push(path: string, callback?: ProuterProcessPathCallback) {
     this.processPath(path, (opts) => {
 
-      if (!opts || opts.endMode !== 'endAndPreventNavigation') {
+      if (!opts || !opts.preventNavigation) {
         history.pushState(undefined, '', path);
       }
 
