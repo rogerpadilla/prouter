@@ -13,7 +13,8 @@ export interface Path {
 }
 
 export interface StringMap {
-  [prop: string]: number | boolean | string;
+  // tslint:disable-next-line:no-any
+  [prop: string]: any;
 }
 
 export interface PathExp extends RegExp {
