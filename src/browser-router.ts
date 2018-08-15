@@ -1,4 +1,5 @@
 import { Router } from './router';
+import { ProuterProcessPathCallback } from './entity';
 
 export class BrowserRouter extends Router {
 
@@ -25,18 +26,22 @@ export class BrowserRouter extends Router {
     return path;
   }
 
-  push(path: string) {
-    return this.processPath(path).then(() => {
-      history.pushState(undefined, '', path);
-    }, (err) => {
-      history.pushState(undefined, '', path);
-      throw err;
+  push(path: string, callback?: ProuterProcessPathCallback) {
+    this.processPath(path, (opts) => {
+
+      if (!opts || opts.endMode !== 'endAndPreventNavigation') {
+        history.pushState(undefined, '', path);
+      }
+
+      if (callback) {
+        callback(opts);
+      }
     });
   }
 
   processCurrentPath() {
     const path = this.getPath();
-    return this.processPath(path);
+    this.processPath(path);
   }
 
 }

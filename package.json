@@ -1,7 +1,7 @@
 {
   "name": "prouter",
   "description": "The power of the express's routing-expressions style in the frontend",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
@@ -15,6 +15,8 @@
     "lint": "tslint -c tslint.json 'src/**/*.ts'",
     "test": "rimraf coverage && npm run lint && jest",
     "jest": "jest",
+    "jest.watch": "jest --watch",
+    "jest.watchAll": "jest --watchAll",
     "start": "rimraf dist && webpack --progress --profile --bail --watch --mode=development",
     "build": "rimraf dist && webpack --progress --profile --bail --mode=production"
   },

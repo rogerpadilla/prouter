@@ -1,6 +1,6 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-import { Path, PathExp, RequestProcessor, Request, Handler } from './entity';
+import { ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterHandler } from './entity';
 
 
 export class RouterHelper {
@@ -9,7 +9,7 @@ export class RouterHelper {
 
     const keys: pathToRegexp.Key[] = [];
 
-    const resp = pathToRegexp(str, keys) as PathExp;
+    const resp = pathToRegexp(str, keys) as ProuterPathExp;
     resp.keys = keys;
 
     return resp;
@@ -17,7 +17,7 @@ export class RouterHelper {
 
   parseQuery(str: string) {
 
-    const searchObj: {[key: string]: string} = {};
+    const searchObj: { [key: string]: string } = {};
 
     if (str === '') {
       return searchObj;
@@ -45,7 +45,7 @@ export class RouterHelper {
       url.href = 'http://example.com' + path;
     }
 
-    const parsedPath: Partial<Path> = {
+    const parsedPath: Partial<ProuterPath> = {
       originalUrl: url.pathname,
       queryString: url.search,
       query: this.parseQuery(url.search)
@@ -57,11 +57,11 @@ export class RouterHelper {
   /**
    * Obtain the request processors for the given path according to the handlers in the router.
    */
-  obtainRequestProcessors(path: string, handlers: Handler[]) {
+  obtainRequestProcessors(path: string, handlers: ProuterHandler[]) {
 
     const parsedPath = this.parsePath(path);
-    const requestProcessors: RequestProcessor[] = [];
-    const request = parsedPath as Request;
+    const requestProcessors: ProuterRequestProcessor[] = [];
+    const request = parsedPath as ProuterRequest;
     request.params = {};
 
     for (const handler of handlers) {

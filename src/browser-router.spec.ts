@@ -48,21 +48,45 @@ describe('BrowserRouter', () => {
       .listen();
   });
 
-  it('basic - push', (done) => {
+  it('basic chain', (done) => {
 
     expect(router.getPath()).toBe('/');
 
     router
-      .use('/about', (req) => {
+      .use('/', (req, next) => {
+        expect(req.originalUrl).toBe('/');
+        expect(req.path).toBe('/');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        next();
+      })
+      .use('(.*)', (req) => {
+        done();
+      })
+      .listen();
+  });
+
+  it('basic - push', (done) => {
+
+    expect(router.getPath()).toBe('/');
+
+    let msg = '';
+
+    router
+      .use('/about', (req, next) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
+        msg = 'changed';
+        next();
       })
       .listen();
 
-    router.push('/about').then(() => {
+    router.push('/about', () => {
+      expect(msg).toBe('changed');
       expect(router.getPath()).toBe('/about');
       done();
     });
@@ -85,18 +109,23 @@ describe('BrowserRouter', () => {
       return _createElement(tag);
     };
 
+    let msg = '';
+
     router
-      .use('/about', (req) => {
+      .use('/about', (req, next) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
-        window.URL = _URL;
-        document.createElement = _createElement;
+        msg = 'changed';
+        next();
       })
       .listen();
 
-    router.push('/about').then(() => {
+    router.push('/about', () => {
+      expect(msg).toBe('changed');
+      window.URL = _URL;
+      document.createElement = _createElement;
       done();
     });
 
@@ -106,11 +135,6 @@ describe('BrowserRouter', () => {
   it('process current path when listen', (done) => {
 
     router
-      .use('/', (req) => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => resolve(), 20);
-        });
-      })
       .use('(.*)', (req) => {
         expect(req.listening).toBeFalsy();
         done();
@@ -121,17 +145,16 @@ describe('BrowserRouter', () => {
   it('proper listening - push', (done) => {
 
     router
-      .use('/something', (req) => {
-        expect(true).toBeFalsy();
+      .use('/something', () => {
+        fail('This should not be called');
       })
       .use('/about', (req) => {
         expect(req.listening).toBeTruthy();
+        done();
       })
       .listen();
 
-    router.push('/about').then(() => {
-      done();
-    });
+    router.push('/about');
   });
 
   it('parameters', (done) => {
@@ -140,12 +163,11 @@ describe('BrowserRouter', () => {
       .use('/about/:id/:num', (req) => {
         expect(req.params.id).toBe('16');
         expect(req.params.num).toBe('18');
+        done();
       })
       .listen();
 
-    router.push('/about/16/18').then(() => {
-      done();
-    });
+    router.push('/about/16/18');
   });
 
   it('query', (done) => {
@@ -154,18 +176,16 @@ describe('BrowserRouter', () => {
       .use('/something', (req) => {
         expect(req.queryString).toBe('?first=5&second=6');
         expect(req.query).toEqual({ first: '5', second: '6' });
-      })
-      .listen();
+        done();
+      });
 
-    router.push('/something?first=5&second=6').then(() => {
-      done();
-    });
+    router.push('/something?first=5&second=6');
   });
 
   it('parameters & query', (done) => {
 
     router
-      .use('/something/:param1/:param2', (req) => {
+      .use('/something/:param1/:param2', (req, next) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
         expect(req.queryString).toBe('?first=5&second=6');
         expect(req.query).toEqual({ first: '5', second: '6' });
@@ -189,7 +209,7 @@ describe('BrowserRouter', () => {
     router.push('/something/16/other/18?first=5&second=6');
   });
 
-  it('path', (done) => {
+  it('any sub-path', (done) => {
 
     router
       .use('/file/:path*', (req) => {
@@ -201,13 +221,15 @@ describe('BrowserRouter', () => {
     router.push('/file/dir/file.jpg');
   });
 
-  it('default only', (done) => {
+  it('do not call if no match', (done) => {
 
     router
-      .use('/abc/:p1/other/:p2', (req) => {
-        expect(true).toBeFalsy();
+      .use('/abc/:p1/other/:p2', () => {
+        fail('This should not be called');
       })
-      .use('(.*)', (req) => done())
+      .use('(.*)', () => {
+        done();
+      })
       .listen();
 
     router.push('/something/16/other/18?q1=5&q2=6');
@@ -216,11 +238,12 @@ describe('BrowserRouter', () => {
   it('next also', (done) => {
 
     router
-      .use('/something/:p1/other/:p2', req => {
+      .use('/something/:p1/other/:p2', (req, next) => {
         expect(req.query).toEqual({ q1: '5', q2: '6' });
         req.query.q3 = '7';
+        next();
       })
-      .use('(.*)', (req) => {
+      .use('(.*)', (req, next) => {
         expect(req.query).toEqual({ q1: '5', q2: '6', q3: '7' });
         done();
       });
@@ -228,77 +251,52 @@ describe('BrowserRouter', () => {
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('abort with promise', (done) => {
+  it('end', (done) => {
 
     expect(router.getPath()).toBe('/');
 
-    const errMsg = 'Some error while navigating';
+    let msg = '';
 
     router
-      .use('/about', (req) => {
+      .use('/about', (req, next) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
-        return Promise.reject(errMsg);
+        msg = 'hello';
+        next({endMode: 'end'});
       })
       .use('(.*)', () => {
         fail('Should not call this');
       });
 
-    router.push('/about').catch(err => {
-      expect(err).toBe(errMsg);
+    router.push('/about', err => {
+      expect(msg).toBe('hello');
       expect(router.getPath()).toBe('/about');
       done();
     });
   });
 
-  it('abort with exception', (done) => {
+  it('end and prevent navigation', (done) => {
 
     expect(router.getPath()).toBe('/');
 
-    const errMsg = 'Some error while navigating';
-
     router
-      .use('/about', (req) => {
+      .use('/about', (req, next) => {
         expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
-        throw errMsg;
+        next({endMode: 'endAndPreventNavigation'});
       })
       .use('(.*)', () => {
         fail('Should not call this');
       });
 
-    router.push('/about').catch(err => {
-      expect(err).toBe(errMsg);
-      expect(router.getPath()).toBe('/about');
-      done();
-    });
-  });
-
-  it('abort with cancelNavigation', (done) => {
-
-    expect(router.getPath()).toBe('/');
-
-    router
-      .use('/about', (req) => {
-        expect(req.originalUrl).toBe('/about');
-        expect(req.path).toBe('/about');
-        expect(req.queryString).toBe('');
-        expect(req.query).toEqual({});
-        expect(router.getPath()).toBe('/');
-        req.cancelNavigation();
-      })
-      .use('(.*)', () => {
-        fail('Should not call this');
-      });
-
-    router.push('/about').then(err => {
-      expect(router.getPath()).toBe('/about');
+    router.push('/about', err => {
+      expect(router.getPath()).toBe('/');
       done();
     });
   });
@@ -317,7 +315,7 @@ describe('BrowserRouter', () => {
     const groupRouter = new RouterGroup();
 
     groupRouter
-      .use('/ask', (req) => {
+      .use('/ask', () => {
         done();
       });
 
@@ -332,7 +330,7 @@ describe('BrowserRouter', () => {
     const groupRouter = new RouterGroup();
 
     groupRouter
-      .use('/:p1/other/:p2', (req) => {
+      .use('/:p1/other/:p2', (req, next) => {
         expect(req.originalUrl).toBe('/something/16/other/18');
         expect(req.path).toBe('/something/16/other/18');
         done();
@@ -344,7 +342,6 @@ describe('BrowserRouter', () => {
   });
 
   it('Emulate browsers with URL support', (done) => {
-
 
     // tslint:disable-next-line:no-unnecessary-class
     class URL {
@@ -362,7 +359,7 @@ describe('BrowserRouter', () => {
     window.URL = URL as typeof _URL;
 
     router
-      .use('/about', (req) => {
+      .use('/about', () => {
         window.URL = _URL;
         done();
       });

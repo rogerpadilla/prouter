@@ -41,54 +41,70 @@ yarn prouter --save
 ```js
 import { BrowserRouter } from 'prouter';
 
-async function main() {
-  
-  // Instantiate the router
-  const router = new BrowserRouter();
-
-  // Declare the paths and its respective handlers
-  router
-    .use('/', async (req) => {
-      const people = await personService.find();
-      const html = PersonListCmp(people);
-      document.querySelector('.router-outlet') = html;
-    })
-    .use('/about', (req) => {
-      send('<h1>Static About page.</h1>');
-    });
-
-  // start listening events for the routing
-  router.listen();
-
-  // programmatically navigate to any route in your router
-  router.push('/about');
-}
-```
-
-
-### basic, including it via a 'script' tag in the HTML file
-
-```js
-const BrowserRouter = prouter.BrowserRouter;
-
 // Instantiate the router
 const router = new BrowserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('/', (req) => {
-    // do some stuff...
+  .use('/', async (req, next)=> {
+    const people = await personService.find();
+    const html = PersonListCmp(people);
+    document.querySelector('.router-outlet') = html;
   })
-  .use('/about', (req) => {
-    // do some stuff...
-  })
-  .listen();
+  .use('/about', (req)=> {
+    send('<h1>Static About page.</h1>');
+  });
 
-// programmatically navigate to any route in your router
-router.push('/about');
+// start listening events for navigation events
+router.listen();
 ```
 
-### using an interceptor/validator handler
+
+### programmatically avoid executing other middlewares and do not change the path in the URL: next({ endMode: 'endAndPreventNavigation' });
+
+```js
+const prouter = require('prouter');
+
+// Instantiate the router
+const router = new prouter.BrowserRouter();
+
+// Declare the paths and its respective handlers
+router
+  .use('(.*)', (req, next) => {
+
+    // this handler will be for any routing event, before other handlers
+    const srcPath = router.getPath();
+    const destPath = req.originalUrl;
+    console.log('coming from', srcPath);
+    console.log('going to', destPath);
+
+    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+
+    if (!isAllowed) {
+      showAlert("You haven't rights to access the page: " + destPath);
+      // (programmatically) avoid executing other middlewares and do not change the path in the URL.
+      next({ endMode: 'endAndPreventNavigation' });
+      return;
+    }
+
+    next();
+  })
+  .use('/', (req)=> {
+    // do some stuff...
+  })
+  .use('/admin', (req)=> {
+    // do some stuff...
+  });
+
+// start listening events for the routing
+router.listen();
+
+// programmatically try to navigate to any route in your router
+router.push('/admin');
+```
+
+
+### programmatically avoid executing other middlewares but allow changing the path in the URL: next({ endMode: 'end' });
 
 ```js
 import { BrowserRouter } from 'prouter';
@@ -104,25 +120,51 @@ router
     const destPath = req.originalUrl;
     console.log('coming from', srcPath);
     console.log('going to', destPath);
-    const isAuthorized = validateUserAuthorization(req.originalUrl);
-    if (!isAuthorized) {
+    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+    if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // (programmatically) avoid executing other middlewares.
-      req.cancelNavigation();
+      // (programmatically) avoid executing other middlewares but allow changing the path in the URL.
+      next({ endMode: 'end' });
+      return;
     }
+    next();
   })
-  .use('/', (req) => {
+  .use('/', (req)=> {
     // do some stuff...
   })
-  .use('/admin', (req) => {
+  .use('/admin', (req)=> {
     // do some stuff...
   });
 
 // start listening events for the routing
 router.listen();
 
-// programmatically navigate to any route in your router
+// programmatically try to navigate to any route in your router
 router.push('/admin');
+```
+
+### do some additional stuff
+
+```js
+import { BrowserRouter } from 'prouter';
+
+// Instantiate the router
+const router = new BrowserRouter();
+
+// Declare the paths and its respective handlers
+router
+  .use('/', async (req, next)=> {
+    const people = await personService.find();
+    const html = PersonListCmp(people);
+    document.querySelector('.router-outlet') = html;
+    next();
+  })
+  .use('(.*)', (req)=> {
+    // do some additional (generic) stuff
+  });
+
+// start listening events for navigation events
+router.listen();
 ```
 
 
@@ -136,13 +178,13 @@ import { BrowserRouter, RouterGroup } from 'prouter';
 const productRouterGroup = new RouterGroup();
 
 productRouterGroup
-  .use('/', (req) => {
+  .use('/', (req, next)=> {
     // do some stuff...
   })
-  .use('/create', (req) => {
+  .use('/create', (req)=> {
     // do some stuff...  
   })
-  .use('/:id', (req) => {
+  .use('/:id', (req)=> {
     const id = req.params.id;
     // do some stuff with the 'id'...
   });
@@ -152,11 +194,12 @@ const router = new BrowserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req) => {
+  .use('(.*)', (req, next)=> {
     // this handler will be for any routing event, before other handlers
     console.log('request info', req);
+    next();
   })
-  .use('/', (req) => {
+  .use('/', (req)=> {
     // do some stuff...
   })
   // mount the product's group of handlers using this base path
@@ -168,3 +211,6 @@ router.listen();
 // programmatically navigate to the detail of the product with this ID
 router.push('/product/123');
 ```
+
+
+### see more advanced usages in the [unit tests.](https://github.com/rogerpadilla/prouter/tree/master/src)

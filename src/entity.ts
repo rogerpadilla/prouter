@@ -1,41 +1,48 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-export interface RequestCallback {
+export interface ProuterRequestCallback {
   // tslint:disable-next-line:no-any
-  (req: Request): any;
+  (req: ProuterRequest, next: ProuterProcessPathCallback): any;
 }
 
-export interface Path {
+export interface ProuterPath {
   originalUrl: string;
   path: string;
   queryString: string;
-  query: StringMap;
+  query: ProuterStringMap;
 }
 
-export interface StringMap {
+export interface ProuterStringMap {
   // tslint:disable-next-line:no-any
   [prop: string]: any;
 }
 
-export interface PathExp extends RegExp {
+export interface ProuterPathExp extends RegExp {
   keys: pathToRegexp.Key[];
 }
 
-export interface Handler {
+export interface ProuterHandler {
   path: string;
-  pathExp: PathExp;
-  callback: RequestCallback;
+  pathExp: ProuterPathExp;
+  callback: ProuterRequestCallback;
 }
 
-export interface Request extends Path {
+export interface ProuterRequest extends ProuterPath {
   listening?: boolean;
-  params: StringMap;
-  cancelNavigation(): void;
+  params: ProuterStringMap;
 }
 
-export interface RequestProcessor {
-  request: Request;
-  callback: RequestCallback;
+export interface ProuterRequestProcessor {
+  request: ProuterRequest;
+  callback: ProuterRequestCallback;
+}
+
+export interface ProuterOptsProcessPathCallback {
+  endMode?: 'end' | 'endAndPreventNavigation';
+}
+
+export interface ProuterProcessPathCallback {
+  (opts?: ProuterOptsProcessPathCallback): void;
 }
 
 

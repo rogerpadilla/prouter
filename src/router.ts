@@ -1,13 +1,13 @@
-import { RequestCallback, Handler } from './entity';
+import { ProuterRequestCallback, ProuterHandler, ProuterProcessPathCallback, ProuterOptsProcessPathCallback } from './entity';
 import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 
 export abstract class Router {
 
   private listening = false;
-  private handlers: Handler[] = [];
+  private handlers: ProuterHandler[] = [];
 
-  use(path: string, callback: RequestCallback | RouterGroup) {
+  use(path: string, callback: ProuterRequestCallback | RouterGroup) {
 
     if (callback instanceof RouterGroup) {
       for (const handler of callback.handlers) {
@@ -32,52 +32,44 @@ export abstract class Router {
     this.listening = true;
   }
 
-  protected processPath(path: string) {
+  protected processPath(path: string, processPathCallback?: ProuterProcessPathCallback) {
 
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
+    if (requestProcessors.length === 0) {
+      return;
+    }
+
     const listening = this.listening;
+    let isProcessPathCallbackCalled: boolean;
+    let index = 0;
 
-    return new Promise((resolve, reject) => {
+    const processPathCallbackWrapper: ProuterProcessPathCallback = (opts) => {
+      if (!isProcessPathCallbackCalled && processPathCallback) {
+        isProcessPathCallbackCalled = true;
+        processPathCallback(opts);
+      }
+    };
 
-      let navigationCancelled: boolean;
 
-      const cancelNavigation = () => {
-        navigationCancelled = true;
-      };
+    /** Call the middlewares for the given path. */
+    const next: ProuterProcessPathCallback = (opts: ProuterOptsProcessPathCallback = {}) => {
 
-      /** Call the middlewares for the given path. */
-      const next = (index: number) => {
+      // If next was called and this is the last processor or 'endMode' was passed then call processPathCallbackWrapper and stop here
+      if (index === requestProcessors.length || opts.endMode) {
+        processPathCallbackWrapper(opts);
+        return;
+      }
 
-        if (index >= requestProcessors.length || navigationCancelled) {
-          resolve();
-          return;
-        }
+      const reqProc = requestProcessors[index];
+      reqProc.request.listening = listening;
 
-        const reqProc = requestProcessors[index];
-        reqProc.request.listening = listening;
-        reqProc.request.cancelNavigation = cancelNavigation;
+      index++;
 
-        const resp = reqProc.callback(reqProc.request);
+      reqProc.callback(reqProc.request, next);
+    };
 
-        const nextIndex = index + 1;
-
-        if (resp instanceof Promise) {
-
-          resp.then(() => {
-            next(nextIndex);
-          }).catch(promErr => {
-            reject(promErr);
-          });
-
-          return;
-        }
-
-        next(nextIndex);
-      };
-
-      next(0);
-    });
+    next();
   }
 
 }
