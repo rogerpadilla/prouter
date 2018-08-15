@@ -1,7 +1,6 @@
 // tslint:disable:max-file-line-count
 
 import { BrowserRouter, RouterGroup } from './';
-import { runInNewContext } from 'vm';
 
 
 describe('BrowserRouter', () => {
