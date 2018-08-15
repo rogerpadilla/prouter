@@ -114,7 +114,7 @@ router
   .use('/', (req) => {
     // do some stuff...
   })
-  .use('/contact', (req) => {
+  .use('/admin', (req) => {
     // do some stuff...
   });
 
@@ -122,7 +122,7 @@ router
 router.listen();
 
 // programmatically navigate to any route in your router
-router.push('/contact');
+router.push('/admin');
 ```
 
 
