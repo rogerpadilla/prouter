@@ -143,7 +143,7 @@ router.listen();
 router.push('/admin');
 ```
 
-### do some additional stuff
+### do some additional (generic) stuff
 
 ```js
 import { BrowserRouter } from 'prouter';
@@ -213,4 +213,4 @@ router.push('/product/123');
 ```
 
 
-### see more advanced usages in the [unit tests.](https://github.com/rogerpadilla/prouter/tree/master/src)
+### see more advanced usages in the [unit tests.](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts)
