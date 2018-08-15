@@ -154,7 +154,7 @@ router.listen();
 router.push('/admin');
 ```
 
-### do some generic stuff after running your middlewares
+### run a generic middleware (for doing some generic stuff) after running specific middlewares
 
 ```js
 import { BrowserRouter } from 'prouter';
