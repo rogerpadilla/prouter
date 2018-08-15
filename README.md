@@ -82,9 +82,9 @@ router
 
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
+    // (programmatically) end the request-response cycle, avoid executing other middlewares and prevent changing the path in the URL.
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // (programmatically) end the request-response cycle, avoid executing other middlewares and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
     }
@@ -127,9 +127,9 @@ router
     console.log('going to', destPath);
     
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+    // (programmatically) end the request-response cycle, avoid executing other middlewares and allow changing the path in the URL.
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // (programmatically) end the request-response cycle, avoid executing other middlewares and allow changing the path in the URL.
       resp.end();
       return;
     }
