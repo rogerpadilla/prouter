@@ -6,6 +6,7 @@
     "no-trailing-whitespace": false,
     "object-literal-sort-keys": false,
     "member-access": false,
+    "no-this-assignment": true,
     "member-ordering": [true, { "order": "fields-first" }],
     "no-inferrable-types": [true],
     "no-internal-module": true,
@@ -44,18 +45,16 @@
     "no-unused-expression": true,
     "no-use-before-declare": false,
     "no-var-keyword": true,
+    "no-implicit-dependencies": true,
     "ordered-imports": false,
     "radix": true,
     "switch-default": true,
-    "triple-equals": [
-      true
-    ],
+    "triple-equals": true,
     "no-string-throw": true,
     "no-null-keyword": true,
-    "typeof-compare": true,
     "array-type": [true, "array"],
     "no-empty-interface": false,
-    "object-literal-key-quotes": [true, "as-needed"],
+    "object-literal-key-quotes": [true, "consistent-as-needed"],
     "indent": [
       true,
       "spaces"
@@ -68,7 +67,6 @@
         "singleline": "never"
       }
     ],
-
     "arrow-parens": [false],
     "align": [true],
     "class-name": true,
@@ -92,7 +90,18 @@
       "single",
       "avoid-escape"
     ],
-    "no-any": false,
-    "ban-types": [true, ["String"]]
+    "prefer-conditional-expression": true,
+    "callable-types": false,
+    "prefer-for-of": false,
+    "ban-types": [true, ["String"]],
+    "no-any": true,
+    "no-unnecessary-class": true,
+    "no-non-null-assertion": true,
+    "no-parameter-reassignment": true,
+    "no-var-requires": true,
+    "ban-comma-operator": true,
+    "no-return-await": true,
+    "prefer-const": true,
+    "interface-over-type-literal": true
   }
 }

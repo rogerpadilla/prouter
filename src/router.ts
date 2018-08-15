@@ -1,4 +1,4 @@
-import { Response, RequestCallback, Handler, Options } from './entity';
+import { RequestCallback, Handler } from './entity';
 import { routerHelper } from './helper';
 import { RouterGroup } from './router-group';
 
@@ -6,8 +6,6 @@ export abstract class Router {
 
   private listening = false;
   private handlers: Handler[] = [];
-
-  constructor(private opts: Options = {}) { }
 
   use(path: string, callback: RequestCallback | RouterGroup) {
 
@@ -36,35 +34,40 @@ export abstract class Router {
 
   protected processPath(path: string) {
 
-    const send = this.opts.send ? this.opts.send : (content: string) => {
-      console.warn(`Provide your own implementation of the 'send' function when initializing the router.`);
-    };
-
-    const response: Response = { send };
-
     const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
 
     const listening = this.listening;
-    let index = 0;
 
-    /** Anonymous function used for processing routing cycle. */
-    const next = () => {
+    return new Promise((resolve, reject) => {
 
-      if (index >= requestProcessors.length) {
-        return;
-      }
+      /** Call the middlewares for the given path. */
+      const next = (index = 0) => {
 
-      const reqProc = requestProcessors[index];
-      reqProc.request.listening = listening;
+        if (index >= requestProcessors.length) {
+          resolve();
+          return;
+        }
 
-      index++;
+        const reqProc = requestProcessors[index];
+        reqProc.request.listening = listening;
 
-      reqProc.callback(reqProc.request, response, next);
-    };
+        const resp = reqProc.callback(reqProc.request);
 
-    next();
+        const nextIndex = index + 1;
 
-    return requestProcessors.length;
+        if (resp instanceof Promise) {
+          resp.then(() => {
+            next(nextIndex);
+          }).catch(promErr => {
+            reject(promErr);
+          });
+        } else {
+          next(nextIndex);
+        }
+      };
+
+      next();
+    });
   }
 
 }

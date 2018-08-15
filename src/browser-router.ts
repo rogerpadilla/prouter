@@ -1,16 +1,9 @@
-import { Options } from './entity';
 import { Router } from './router';
 
 export class BrowserRouter extends Router {
 
-  constructor(opts: Options = {
-    send: () => {
-      throw new Error(`Provide a custom 'send' function if you want to use it from the handler in the browser.`);
-    }
-  }) {
-
-    super(opts);
-
+  constructor() {
+    super();
     this.processCurrentPath = this.processCurrentPath.bind(this);
   }
 
@@ -33,17 +26,14 @@ export class BrowserRouter extends Router {
   }
 
   push(path: string) {
-    history.pushState(undefined, '', path);
-    return this.processPath(path);
+    return this.processPath(path).then(() => {
+      history.pushState(undefined, '', path);
+    });
   }
 
   processCurrentPath() {
     const path = this.getPath();
-    this.processPath(path);
-  }
-
-  protected processPath(path: string) {
-    return super.processPath(path);
+    return this.processPath(path);
   }
 
 }

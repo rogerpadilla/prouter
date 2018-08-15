@@ -23,9 +23,8 @@ export class RouterHelper {
       return searchObj;
     }
 
-    str = str.slice(1);
-
-    const params = str.split('&');
+    const qs = str.slice(1);
+    const params = qs.split('&');
 
     for (const param of params) {
       const paramKv = param.split('=');
