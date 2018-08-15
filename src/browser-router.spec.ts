@@ -5,7 +5,8 @@ import { BrowserRouter, RouterGroup } from './';
 
 describe('BrowserRouter', () => {
 
-  jest.setTimeout(500);
+  // Ensure each test completes in less than this time.
+  jest.setTimeout(20);
 
   let router: BrowserRouter;
 
