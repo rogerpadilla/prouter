@@ -36,7 +36,7 @@ yarn prouter --save
 
 ## Examples
 
-### basic (using es2015 modules syntax)
+### basic
 
 ```js
 import { BrowserRouter } from 'prouter';
@@ -62,7 +62,7 @@ router.listen();
 ```
 
 
-### conditionally avoid executing other middlewares and prevent changing the path in the URL (using commonjs modules)
+### conditionally avoid executing other middlewares and prevent changing the path in the URL
 
 ```js
 const prouter = require('prouter');
