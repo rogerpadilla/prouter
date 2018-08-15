@@ -2,7 +2,10 @@
 
 import { BrowserRouter, RouterGroup } from './';
 
+
 describe('BrowserRouter', () => {
+
+  jest.setTimeout(500);
 
   let router: BrowserRouter;
 
@@ -47,9 +50,7 @@ describe('BrowserRouter', () => {
 
   it('basic - push', (done) => {
 
-    const currentPath = router.getPath();
-
-    expect(currentPath).toBe('/');
+    expect(router.getPath()).toBe('/');
 
     router
       .use('/about', (req) => {
@@ -57,7 +58,7 @@ describe('BrowserRouter', () => {
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
-        expect(router.getPath()).toBe(currentPath);
+        expect(router.getPath()).toBe('/');
       })
       .listen();
 
@@ -102,7 +103,7 @@ describe('BrowserRouter', () => {
     // Restore original objects
   });
 
-  it('proper listening - default path', (done) => {
+  it('process current path when listen', (done) => {
 
     router
       .use('/', (req) => {
@@ -121,7 +122,7 @@ describe('BrowserRouter', () => {
 
     router
       .use('/something', (req) => {
-        throw new Error('Should not call this (unmatched) path');
+        expect(true).toBeFalsy();
       })
       .use('/about', (req) => {
         expect(req.listening).toBeTruthy();
@@ -229,9 +230,7 @@ describe('BrowserRouter', () => {
 
   it('abort with promise', (done) => {
 
-    const currentPath = router.getPath();
-
-    expect(currentPath).toBe('/');
+    expect(router.getPath()).toBe('/');
 
     const errMsg = 'Some error while navigating';
 
@@ -241,23 +240,23 @@ describe('BrowserRouter', () => {
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
-        expect(router.getPath()).toBe(currentPath);
+        expect(router.getPath()).toBe('/');
         return Promise.reject(errMsg);
       })
-      .listen();
+      .use('(.*)', () => {
+        fail('Should not call this');
+      });
 
     router.push('/about').catch(err => {
       expect(err).toBe(errMsg);
-      expect(router.getPath()).toBe(currentPath);
+      expect(router.getPath()).toBe('/about');
       done();
     });
   });
 
   it('abort with exception', (done) => {
 
-    const currentPath = router.getPath();
-
-    expect(currentPath).toBe('/');
+    expect(router.getPath()).toBe('/');
 
     const errMsg = 'Some error while navigating';
 
@@ -267,14 +266,16 @@ describe('BrowserRouter', () => {
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
-        expect(router.getPath()).toBe(currentPath);
+        expect(router.getPath()).toBe('/');
         throw errMsg;
       })
-      .listen();
+      .use('(.*)', () => {
+        fail('Should not call this');
+      });
 
     router.push('/about').catch(err => {
       expect(err).toBe(errMsg);
-      expect(router.getPath()).toBe(currentPath);
+      expect(router.getPath()).toBe('/about');
       done();
     });
   });

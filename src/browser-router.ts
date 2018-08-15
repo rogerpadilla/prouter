@@ -28,6 +28,9 @@ export class BrowserRouter extends Router {
   push(path: string) {
     return this.processPath(path).then(() => {
       history.pushState(undefined, '', path);
+    }, (err) => {
+      history.pushState(undefined, '', path);
+      throw err;
     });
   }
 

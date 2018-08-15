@@ -41,7 +41,7 @@ export abstract class Router {
     return new Promise((resolve, reject) => {
 
       /** Call the middlewares for the given path. */
-      const next = (index = 0) => {
+      const next = (index: number) => {
 
         if (index >= requestProcessors.length) {
           resolve();
@@ -56,17 +56,20 @@ export abstract class Router {
         const nextIndex = index + 1;
 
         if (resp instanceof Promise) {
+
           resp.then(() => {
             next(nextIndex);
           }).catch(promErr => {
             reject(promErr);
           });
-        } else {
-          next(nextIndex);
+
+          return;
         }
+
+        next(nextIndex);
       };
 
-      next();
+      next(0);
     });
   }
 

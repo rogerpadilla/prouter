@@ -15,7 +15,7 @@ So basically, you give prouter a set of path expressions and a callback function
 
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
-- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing the same API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
+- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing a similar API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
 - **Really lightweight:** 7kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
 - KISS principle: unnecessary complexity avoided.
@@ -26,6 +26,9 @@ So basically, you give prouter a set of path expressions and a callback function
 ```bash
 # Using NPM
 npm install prouter --save
+
+# Using Yarn
+yarn prouter --save
 
 # Or with Bower
 bower install prouter --save
@@ -41,28 +44,31 @@ bower install prouter --save
 ```js
 import { BrowserRouter } from 'prouter';
 
-// Instantiate the router
-const router = new BrowserRouter({
-  // (optional) function used to send content (res.send) from the handler
-  send(content) {
-    document.body.innerHTML = content;
-  }
-});
+async function main() {
+  // Instantiate the router
+  const router = new BrowserRouter();
 
-// Declare the paths and its respective handlers
-router
-  .use('/', (req, res, next) => {
-    res.send('<h1>Home page.</h1>');
-  })
-  .use('/about', (req, res, next) => {
-    res.send('<h1>About page.</h1>');
-  });
+  const send = (html: string) => {
+    document.querySelector('.router-outlet') = html;
+  };
 
-// start listening events for the routing
-router.listen();
+  // Declare the paths and its respective handlers
+  router
+    .use('/', async (req) => {
+      const people = await personService.find();
+      const html = PersonListCmp(people);
+      send(html);
+    })
+    .use('/about', (req) => {
+      send('<h1>Static About page.</h1>');
+    });
 
-// programmatically navigate to any route in your router
-router.push('/about');
+  // start listening events for the routing
+  router.listen();
+
+  // programmatically navigate to any route in your router
+  await router.push('/about');
+}
 ```
 
 
@@ -72,20 +78,15 @@ router.push('/about');
 const BrowserRouter = prouter.BrowserRouter;
 
 // Instantiate the router
-const router = new BrowserRouter({
-  // (optional) function used to send content (res.send) from the handler
-  send(content) {
-    document.body.innerHTML = content;
-  }
-});
+const router = new BrowserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('/', (req, res, next) => {
-    res.send('<h1>Home page.</h1>');
+  .use('/', (req) => {
+    // do some stuff...
   })
-  .use('/about', (req, res, next) => {
-    res.send('<h1>About page.</h1>');
+  .use('/about', (req) => {
+    // do some stuff...
   });
 
 // start listening events for the routing
@@ -101,16 +102,11 @@ router.push('/about');
 import { BrowserRouter } from 'prouter';
 
 // Instantiate the router
-const router = new BrowserRouter({
-  // (optional) function used to send content (res.send) from the handler
-  send(content) {
-    document.body.innerHTML = content;
-  }
-});
+const router = new BrowserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, res, next) => {
+  .use('(.*)', (req) => {
     // this handler will be for any routing event, before other handlers
     const srcPath = router.getPath();
     const destPath = req.originalUrl;
@@ -118,18 +114,17 @@ router
     console.log('going to', destPath);
     const isAuthorized = validateUserAuthorization(req.originalUrl);
     if (!isAuthorized) {
-      showAlert("You haven't rights to access the page: " + destPath);
-      // stop the flow since 'next' wasn't called
-      return;
+      const msg = "You haven't rights to access the page: " + destPath;
+      showAlert(msg);
+      // don't execute other middlewares.
+      return Promise.reject(msg);
     }
-    // let's continue with the flow in the other handlers below
-    next();
   })
-  .use('/', (req, res, next) => {
-    res.send('<h1>Home page.</h1>');
+  .use('/', (req) => {
+    // do some stuff...
   })
-  .use('/contact', (req, res, next) => {
-    res.send('<h1>Contact page.</h1>');
+  .use('/contact', (req) => {
+    // do some stuff...
   });
 
 // start listening events for the routing
@@ -150,37 +145,28 @@ import { BrowserRouter, RouterGroup } from 'prouter';
 const productRouterGroup = new RouterGroup();
 
 productRouterGroup
-  .use('/', (req, res, next) => {
-    res.send('<h1>Landing page of Products.</h1>');
+  .use('/', (req) => {
+    // do some stuff...
   })
-  .use('/create', (req, res, next) => {
-    res.send('<form>Create a product.</form>');    
+  .use('/create', (req) => {
+    // do some stuff...  
   })
-  .use('/:id', (req, res, next) => {
+  .use('/:id', (req) => {
     const id = req.params.id;
-    productService.findOneById(id).then(product => {
-      res.send(`<h1>${product.name}<h1>`);    
-    });
+    // do some stuff with the 'id'...
   });
 
 // Instantiate the router
-const router = new BrowserRouter({
-  // (optional) function used to send content (res.send) from the handler
-  send(content) {
-    document.body.innerHTML = content;
-  }
-});
+const router = new BrowserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, res, next) => {
+  .use('(.*)', (req) => {
     // this handler will be for any routing event, before other handlers
     console.log('request info', req);
-    // let's continue with the flow in the other handlers below
-    next();
   })
-  .use('/', (req, res, next) => {
-    res.send('<h1>Home page.</h1>');
+  .use('/', (req) => {
+    // do some stuff...
   })
   // mount the product's group of handlers using this base path
   .use('/product', productRouterGroup);
