@@ -60,7 +60,7 @@ router.listen();
 ```
 
 
-### programmatically avoid executing other middlewares and do not change the path in the URL: next({ endMode: 'endAndPreventNavigation' });
+### programmatically avoid executing other middlewares and do not change the path in the URL
 
 ```js
 const prouter = require('prouter');
@@ -104,7 +104,7 @@ router.push('/admin');
 ```
 
 
-### programmatically avoid executing other middlewares but allow changing the path in the URL: next({ endMode: 'end' });
+### programmatically avoid executing other middlewares but allow changing the path in the URL
 
 ```js
 import { BrowserRouter } from 'prouter';
