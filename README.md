@@ -62,7 +62,7 @@ router.listen();
 ```
 
 
-### conditionally avoid executing other middlewares and do not change the path in the URL (using commonjs modules)
+### conditionally avoid executing other middlewares and prevent changing the path in the URL (using commonjs modules)
 
 ```js
 const prouter = require('prouter');
