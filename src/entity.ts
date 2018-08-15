@@ -29,6 +29,7 @@ export interface Handler {
 export interface Request extends Path {
   listening?: boolean;
   params: StringMap;
+  cancelNavigation(): void;
 }
 
 export interface RequestProcessor {

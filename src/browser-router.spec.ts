@@ -280,6 +280,29 @@ describe('BrowserRouter', () => {
     });
   });
 
+  it('abort with cancelNavigation', (done) => {
+
+    expect(router.getPath()).toBe('/');
+
+    router
+      .use('/about', (req) => {
+        expect(req.originalUrl).toBe('/about');
+        expect(req.path).toBe('/about');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        req.cancelNavigation();
+      })
+      .use('(.*)', () => {
+        fail('Should not call this');
+      });
+
+    router.push('/about').then(err => {
+      expect(router.getPath()).toBe('/about');
+      done();
+    });
+  });
+
   it('Throws error if try to listen more than once', () => {
 
     router.listen();

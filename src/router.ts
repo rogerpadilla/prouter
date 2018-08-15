@@ -40,16 +40,23 @@ export abstract class Router {
 
     return new Promise((resolve, reject) => {
 
+      let navigationCancelled: boolean;
+
+      const cancelNavigation = () => {
+        navigationCancelled = true;
+      };
+
       /** Call the middlewares for the given path. */
       const next = (index: number) => {
 
-        if (index >= requestProcessors.length) {
+        if (index >= requestProcessors.length || navigationCancelled) {
           resolve();
           return;
         }
 
         const reqProc = requestProcessors[index];
         reqProc.request.listening = listening;
+        reqProc.request.cancelNavigation = cancelNavigation;
 
         const resp = reqProc.callback(reqProc.request);
 

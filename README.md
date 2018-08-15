@@ -14,9 +14,9 @@ In web applications, it's useful to provide linkable, bookmarkable, and shareabl
 So basically, you give prouter a set of path expressions and a callback function for each of them, so prouter will call the callback(s) (passing contextual parameters) according to the activated path (in the URL). 
 
 ## Why prouter?
-- **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there: [Polymer](https://www.polymer-project.org/1.0/), [React](http://facebook.github.io/react/), [Handlebars](http://handlebarsjs.com/), etc.
-- **Learn once and reuse it** Express.js is very well known and used across the world, why not bringing a similar API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
-- **Really lightweight:** 7kb (before gzipping).
+- **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there.
+- **Learn once and reuse it** express.js is very well known and used across the world, why not bringing a similar API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
+- **Really lightweight:** 8kb (before gzipping).
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: ES6, CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
 - KISS principle: unnecessary complexity avoided.
 - Unit tests for every feature are created.
@@ -27,11 +27,8 @@ So basically, you give prouter a set of path expressions and a callback function
 # Using NPM
 npm install prouter --save
 
-# Using Yarn
+# Or with Yarn
 yarn prouter --save
-
-# Or with Bower
-bower install prouter --save
 
 # Or just inject it using a 'script' tag in your HTML file
 <script src="prouter.min.js"></script>
@@ -45,19 +42,16 @@ bower install prouter --save
 import { BrowserRouter } from 'prouter';
 
 async function main() {
+  
   // Instantiate the router
   const router = new BrowserRouter();
-
-  const send = (html: string) => {
-    document.querySelector('.router-outlet') = html;
-  };
 
   // Declare the paths and its respective handlers
   router
     .use('/', async (req) => {
       const people = await personService.find();
       const html = PersonListCmp(people);
-      send(html);
+      document.querySelector('.router-outlet') = html;
     })
     .use('/about', (req) => {
       send('<h1>Static About page.</h1>');
@@ -67,7 +61,7 @@ async function main() {
   router.listen();
 
   // programmatically navigate to any route in your router
-  await router.push('/about');
+  router.push('/about');
 }
 ```
 
@@ -87,10 +81,8 @@ router
   })
   .use('/about', (req) => {
     // do some stuff...
-  });
-
-// start listening events for the routing
-router.listen();
+  })
+  .listen();
 
 // programmatically navigate to any route in your router
 router.push('/about');
@@ -114,10 +106,9 @@ router
     console.log('going to', destPath);
     const isAuthorized = validateUserAuthorization(req.originalUrl);
     if (!isAuthorized) {
-      const msg = "You haven't rights to access the page: " + destPath;
-      showAlert(msg);
-      // don't execute other middlewares.
-      return Promise.reject(msg);
+      showAlert("You haven't rights to access the page: " + destPath);
+      // (programmatically) avoid executing other middlewares.
+      req.cancelNavigation();
     }
   })
   .use('/', (req) => {
