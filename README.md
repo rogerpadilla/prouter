@@ -16,7 +16,7 @@ So basically, you give prouter a set of path expressions and a callback function
 ## Why prouter?
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there.
 - **Learn once and reuse it** express.js is very well known and used across the world, why not bringing a similar API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
-- **Really lightweight:** [great performance](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently ~ 7kb before gzipping) are must to have.
+- **Really lightweight:** [great performance](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently least than 7kb before gzipping) are must to have.
 - **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to ES5 with UMD format for the present... thus it transparently supports almost every modules' style out there: es2015 (es6), CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
 - KISS principle: unnecessary complexity avoided.
 - Unit tests for every feature are created.
