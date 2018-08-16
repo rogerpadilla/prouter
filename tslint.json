@@ -93,7 +93,7 @@
     "prefer-conditional-expression": true,
     "callable-types": false,
     "prefer-for-of": false,
-    "ban-types": [true, ["String"]],
+    "ban-types": [true, ["Object", "Use {} instead."], ["String"]],
     "no-any": true,
     "no-unnecessary-class": true,
     "no-non-null-assertion": true,

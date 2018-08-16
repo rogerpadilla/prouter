@@ -1,47 +1,54 @@
-import { Router } from './router';
-import { ProuterProcessPathCallback } from './entity';
+import { ProuterProcessPathCallback, ProuterBrowserRouter, baseRouter } from './';
 
-export class BrowserRouter extends Router {
 
-  constructor() {
-    super();
-    this.processCurrentPath = this.processCurrentPath.bind(this);
-  }
+export function browserRouter() {
 
-  listen() {
+    const baseRouterObj = baseRouter();
 
-    this.processCurrentPath();
+    const processCurrentPath = () => {
+        spread.processCurrentPath();
+    };
 
-    addEventListener('popstate', this.processCurrentPath);
+    const spread = {
 
-    super.listen();
-  }
+        listen() {
 
-  stop() {
-    removeEventListener('popstate', this.processCurrentPath);
-  }
+            processCurrentPath();
 
-  getPath() {
-    const path = decodeURI(location.pathname + location.search);
-    return path;
-  }
+            addEventListener('popstate', processCurrentPath);
 
-  push(path: string, callback?: ProuterProcessPathCallback) {
-    this.processPath(path, (opts) => {
+            baseRouterObj.listen();
+        },
 
-      if (!opts || !opts.preventNavigation) {
-        history.pushState(undefined, '', path);
-      }
+        stop() {
+            removeEventListener('popstate', processCurrentPath);
+        },
 
-      if (callback) {
-        callback(opts);
-      }
-    });
-  }
+        getPath() {
+            const path = decodeURI(location.pathname + location.search);
+            return path;
+        },
 
-  processCurrentPath() {
-    const path = this.getPath();
-    this.processPath(path);
-  }
+        push(path: string, callback?: ProuterProcessPathCallback) {
+            baseRouterObj.processPath(path, (opts) => {
 
+                if (!opts || !opts.preventNavigation) {
+                    history.pushState(undefined, '', path);
+                }
+
+                if (callback) {
+                    callback(opts);
+                }
+            });
+        },
+
+        processCurrentPath() {
+            const path = spread.getPath();
+            baseRouterObj.processPath(path);
+        }
+    };
+
+    const browserRouterObj: ProuterBrowserRouter = { ...baseRouterObj, ...spread };
+
+    return browserRouterObj;
 }

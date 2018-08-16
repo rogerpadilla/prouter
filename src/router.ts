@@ -1,76 +1,82 @@
-import { ProuterRequestCallback, ProuterHandler, ProuterProcessPathCallback, ProuterResponse, ProuterNextMiddleware } from './entity';
+import {
+  ProuterRequestCallback, ProuterParsedHandler, ProuterProcessPathCallback, ProuterResponse,
+  ProuterNextMiddleware, ProuterRouter, ProuterGroup
+} from './entity';
 import { routerHelper } from './helper';
-import { RouterGroup } from './router-group';
 
-export abstract class Router {
+export function baseRouter() {
 
-  private listening = false;
-  private handlers: ProuterHandler[] = [];
+  let listening = false;
+  const handlers: ProuterParsedHandler[] = [];
 
-  use(path: string, callback: ProuterRequestCallback | RouterGroup) {
+  const baseRouterObj: ProuterRouter = {
 
-    if (callback instanceof RouterGroup) {
-      for (const handler of callback.handlers) {
-        const itPath = path + handler.path;
-        const pathExp = routerHelper.stringToRegexp(itPath);
-        this.handlers.push({ path: itPath, pathExp, callback: handler.callback });
+    listen() {
+
+      if (listening) {
+        throw new Error('Already listening.');
       }
-    } else {
-      const pathExp = routerHelper.stringToRegexp(path);
-      this.handlers.push({ path, pathExp, callback });
-    }
 
-    return this;
-  }
+      listening = true;
+    },
 
-  listen() {
+    use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter {
 
-    if (this.listening) {
-      throw new Error('Already listening.');
-    }
-
-    this.listening = true;
-  }
-
-  protected processPath(path: string, processPathCallback?: ProuterProcessPathCallback) {
-
-    const requestProcessors = routerHelper.obtainRequestProcessors(path, this.handlers);
-
-    if (requestProcessors.length === 0) {
-      return;
-    }
-
-    const listening = this.listening;
-    let wasProcessPathCallbackCalled: boolean;
-    let index = 0;
-
-    const response: ProuterResponse = {
-      end(opts) {
-        if (processPathCallback && !wasProcessPathCallbackCalled) {
-          wasProcessPathCallbackCalled = true;
-          processPathCallback(opts);
+      if (typeof callback === 'function') {
+        const pathExp = routerHelper.stringToRegexp(path);
+        handlers.push({ path, pathExp, callback });
+      } else {
+        for (const handler of callback.handlers) {
+          const itPath = path + handler.path;
+          const pathExp = routerHelper.stringToRegexp(itPath);
+          handlers.push({ path: itPath, pathExp, callback: handler.callback });
         }
       }
-    };
 
-    /** Call the middlewares for the given path. */
-    const next: ProuterNextMiddleware = () => {
+      return this;
+    },
 
-      // If next was called and the last processor was already executed then automatically stop.
-      if (index === requestProcessors.length) {
-        response.end();
+    processPath(path: string, processPathCallback?: ProuterProcessPathCallback) {
+
+      const requestProcessors = routerHelper.obtainRequestProcessors(path, handlers);
+
+      if (requestProcessors.length === 0) {
         return;
       }
 
-      const reqProc = requestProcessors[index];
-      reqProc.request.listening = listening;
+      const listeningSnapshop = listening;
+      let wasProcessPathCallbackCalled: boolean;
+      let index = 0;
 
-      index++;
+      const response: ProuterResponse = {
+        end(opts) {
+          if (processPathCallback && !wasProcessPathCallbackCalled) {
+            wasProcessPathCallbackCalled = true;
+            processPathCallback(opts);
+          }
+        }
+      };
 
-      reqProc.callback(reqProc.request, response, next);
-    };
+      /** Call the middlewares for the given path. */
+      const next: ProuterNextMiddleware = () => {
 
-    next();
-  }
+        // If next was called and the last processor was already executed then automatically stop.
+        if (index === requestProcessors.length) {
+          response.end();
+          return;
+        }
 
+        const reqProc = requestProcessors[index];
+        reqProc.request.listening = listeningSnapshop;
+
+        index++;
+
+        reqProc.callback(reqProc.request, response, next);
+      };
+
+      next();
+    }
+  };
+
+  return baseRouterObj;
 }

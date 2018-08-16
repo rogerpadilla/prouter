@@ -1,16 +1,19 @@
-import { ProuterRequestCallback } from './entity';
+import { ProuterRequestCallback, ProuterGroup } from './entity';
 
-export class RouterGroup {
 
-  private _handlers: { path: string, callback: ProuterRequestCallback }[] = [];
+export function routerGroup() {
 
-  get handlers() {
-    return this._handlers;
-  }
+  const groupObj: ProuterGroup = {
 
-  use(path: string, callback: ProuterRequestCallback) {
-    this._handlers.push({ path, callback });
-    return this;
-  }
+    handlers: [],
+
+    use(path: string, callback: ProuterRequestCallback) {
+      groupObj.handlers.push({ path, callback });
+      return groupObj;
+    }
+
+  };
+
+  return groupObj;
 
 }
