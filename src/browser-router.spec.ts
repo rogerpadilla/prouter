@@ -1,6 +1,8 @@
 // tslint:disable:max-file-line-count
 
-import { BrowserRouter, RouterGroup } from './';
+import { buildBrowserRouter } from './browser-router';
+import { buildRouterGroup } from './router-group';
+import { BrowserRouterContract } from './entity';
 
 
 describe('BrowserRouter', () => {
@@ -8,7 +10,7 @@ describe('BrowserRouter', () => {
   // Ensure each test completes in less than this time.
   jest.setTimeout(20);
 
-  let router: BrowserRouter;
+  let router: BrowserRouterContract;
 
   beforeAll(() => {
     const htmlElementsCache = {};
@@ -26,7 +28,7 @@ describe('BrowserRouter', () => {
 
   beforeEach(() => {
     history.pushState(undefined, '', '/');
-    router = new BrowserRouter();
+    router = buildBrowserRouter();
   });
 
   afterEach(() => {
@@ -336,7 +338,7 @@ describe('BrowserRouter', () => {
 
   it('RouterGroup', (done) => {
 
-    const groupRouter = new RouterGroup();
+    const groupRouter = buildRouterGroup();
 
     groupRouter
       .use('/ask', () => {
@@ -351,7 +353,7 @@ describe('BrowserRouter', () => {
 
   it('RouterGroup with params', (done) => {
 
-    const groupRouter = new RouterGroup();
+    const groupRouter = buildRouterGroup();
 
     groupRouter
       .use('/:p1/other/:p2', (req) => {

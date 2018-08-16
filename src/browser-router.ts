@@ -1,47 +1,56 @@
-import { Router } from './router';
-import { ProuterProcessPathCallback } from './entity';
+import { ProuterProcessPathCallback, BrowserRouterContract } from './entity';
+import { buildBasicRouter } from './router';
 
-export class BrowserRouter extends Router {
 
-  constructor() {
-    super();
-    this.processCurrentPath = this.processCurrentPath.bind(this);
-  }
+export function buildBrowserRouter() {
 
-  listen() {
+    const baseRouter = buildBasicRouter();
 
-    this.processCurrentPath();
+    const spread = {
 
-    addEventListener('popstate', this.processCurrentPath);
+        listen() {
 
-    super.listen();
-  }
+            browserRouter.processCurrentPath();
 
-  stop() {
-    removeEventListener('popstate', this.processCurrentPath);
-  }
+            addEventListener('popstate', () => {
+                browserRouter.processCurrentPath();
+            });
 
-  getPath() {
-    const path = decodeURI(location.pathname + location.search);
-    return path;
-  }
+            baseRouter.listen();
+        },
 
-  push(path: string, callback?: ProuterProcessPathCallback) {
-    this.processPath(path, (opts) => {
+        stop() {
+            removeEventListener('popstate', () => {
+                browserRouter.processCurrentPath();
+            });
+        },
 
-      if (!opts || !opts.preventNavigation) {
-        history.pushState(undefined, '', path);
-      }
+        getPath() {
+            const path = decodeURI(location.pathname + location.search);
+            return path;
+        },
 
-      if (callback) {
-        callback(opts);
-      }
-    });
-  }
+        push(path: string, callback?: ProuterProcessPathCallback) {
+            baseRouter.processPath(path, (opts) => {
 
-  processCurrentPath() {
-    const path = this.getPath();
-    this.processPath(path);
-  }
+                if (!opts || !opts.preventNavigation) {
+                    history.pushState(undefined, '', path);
+                }
+
+                if (callback) {
+                    callback(opts);
+                }
+            });
+        },
+
+        processCurrentPath() {
+            const path = browserRouter.getPath();
+            baseRouter.processPath(path);
+        }
+    };
+
+    const browserRouter: BrowserRouterContract = { ...baseRouter, ...spread };
+
+    return browserRouter;
 
 }

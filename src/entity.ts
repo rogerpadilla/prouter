@@ -53,6 +53,37 @@ export interface ProuterNextMiddleware {
   (): void;
 }
 
+export interface Handler {
+  path: string;
+  callback: ProuterRequestCallback;
+}
+
+export interface RouterGroupContract {
+  handlers: Handler[];
+  use(path: string, callback: ProuterRequestCallback): RouterGroupContract;
+}
+
+
+export interface RouterContract {
+
+  use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract;
+
+  listen(): void;
+
+  processPath(path: string, processPathCallback?: ProuterProcessPathCallback): void;
+}
+
+export interface BrowserRouterContract extends RouterContract {
+
+  stop(): void;
+
+  getPath(): string;
+
+  push(path: string, callback?: ProuterProcessPathCallback): void;
+
+  processCurrentPath(): void;
+}
+
 
 // Dont delete this dummy, TS do not create the definition of the file if only interface
 export const prouterSomethingToMakeTsToExportThisFile = 1;

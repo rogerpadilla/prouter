@@ -3,7 +3,7 @@ import * as pathToRegexp from 'path-to-regexp';
 import { ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterHandler } from './entity';
 
 
-export class RouterHelper {
+export const routerHelper = {
 
   stringToRegexp(str: string) {
 
@@ -13,7 +13,7 @@ export class RouterHelper {
     resp.keys = keys;
 
     return resp;
-  }
+  },
 
   parseQuery(str: string) {
 
@@ -32,7 +32,7 @@ export class RouterHelper {
     }
 
     return searchObj;
-  }
+  },
 
   parsePath(path: string) {
 
@@ -48,18 +48,18 @@ export class RouterHelper {
     const parsedPath: Partial<ProuterPath> = {
       originalUrl: url.pathname,
       queryString: url.search,
-      query: this.parseQuery(url.search)
+      query: routerHelper.parseQuery(url.search)
     };
 
     return parsedPath;
-  }
+  },
 
   /**
    * Obtain the request processors for the given path according to the handlers in the router.
    */
   obtainRequestProcessors(path: string, handlers: ProuterHandler[]) {
 
-    const parsedPath = this.parsePath(path);
+    const parsedPath = routerHelper.parsePath(path);
     const requestProcessors: ProuterRequestProcessor[] = [];
     const request = parsedPath as ProuterRequest;
     request.params = {};
@@ -87,7 +87,5 @@ export class RouterHelper {
     return requestProcessors;
   }
 
-}
+};
 
-
-export const routerHelper = new RouterHelper();
