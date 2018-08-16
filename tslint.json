@@ -93,7 +93,7 @@
     "prefer-conditional-expression": true,
     "callable-types": false,
     "prefer-for-of": false,
-    "ban-types": [true, ["String"]],
+    "ban-types": [true, ["Object", "Use {} instead."], ["String"]],
     "no-any": true,
     "no-unnecessary-class": true,
     "no-non-null-assertion": true,
@@ -102,6 +102,16 @@
     "ban-comma-operator": true,
     "no-return-await": true,
     "prefer-const": true,
-    "interface-over-type-literal": true
+    "interface-over-type-literal": true,
+    "ban": [
+      true,
+      "eval",
+      {"name": "$", "message": "please don't"},
+      {"name": "class", "message": "please avoid classes"},
+      {"name": "this", "message": "please avoid this"},
+      {"name": ["it", "only"], "message": "don't focus tests"},
+      {"name": ["chai", "assert", "equal"], "message": "Use 'strictEqual' instead."},
+      {"name": ["*", "forEach"], "message": "Use a regular for loop instead."}
+    ]
   }
 }

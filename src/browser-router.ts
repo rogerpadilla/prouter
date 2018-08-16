@@ -6,23 +6,23 @@ export function buildBrowserRouter() {
 
     const baseRouter = buildBasicRouter();
 
+    const processCurrentPath = () => {
+        browserRouter.processCurrentPath();
+    };
+
     const spread = {
 
         listen() {
 
             browserRouter.processCurrentPath();
 
-            addEventListener('popstate', () => {
-                browserRouter.processCurrentPath();
-            });
+            addEventListener('popstate', processCurrentPath);
 
             baseRouter.listen();
         },
 
         stop() {
-            removeEventListener('popstate', () => {
-                browserRouter.processCurrentPath();
-            });
+            removeEventListener('popstate', processCurrentPath);
         },
 
         getPath() {

@@ -63,7 +63,6 @@ export interface RouterGroupContract {
   use(path: string, callback: ProuterRequestCallback): RouterGroupContract;
 }
 
-
 export interface RouterContract {
 
   use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract;
