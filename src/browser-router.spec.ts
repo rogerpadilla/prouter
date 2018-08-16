@@ -5,7 +5,7 @@ import { routerGroup } from './router-group';
 import { ProuterBrowserRouter } from './entity';
 
 
-describe('BrowserRouter', () => {
+describe('browserRouter', () => {
 
   // Ensure each test completes in less than this time.
   jest.setTimeout(20);

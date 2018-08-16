@@ -113,7 +113,7 @@ router.push('/admin');
 ### conditionally avoid executing other middlewares but allow changing the path in the URL
 
 ```js
-import { BrowserRouter } from 'prouter';
+import { browserRouter } from 'prouter';
 
 // Instantiate the router
 const router = browserRouter();
@@ -158,7 +158,7 @@ router.push('/admin');
 ### run a generic middleware (for doing some generic stuff) after running specific middlewares
 
 ```js
-import { BrowserRouter } from 'prouter';
+import { browserRouter } from 'prouter';
 
 // Instantiate the router
 const router = browserRouter();
