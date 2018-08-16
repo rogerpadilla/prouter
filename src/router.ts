@@ -8,7 +8,14 @@ export function buildBasicRouter() {
 
   const router: RouterContract = {
 
-    // use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract;
+    listen() {
+
+      if (listening) {
+        throw new Error('Already listening.');
+      }
+
+      listening = true;
+    },
 
     use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract {
 
@@ -23,16 +30,7 @@ export function buildBasicRouter() {
         }
       }
 
-      return router;
-    },
-
-    listen() {
-
-      if (listening) {
-        throw new Error('Already listening.');
-      }
-
-      listening = true;
+      return this;
     },
 
     processPath(path: string, processPathCallback?: ProuterProcessPathCallback) {

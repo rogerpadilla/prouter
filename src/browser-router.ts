@@ -7,7 +7,7 @@ export function buildBrowserRouter() {
     const baseRouter = buildBasicRouter();
 
     const processCurrentPath = () => {
-        browserRouter.processCurrentPath();
+        spread.processCurrentPath();
     };
 
     const spread = {
@@ -52,5 +52,4 @@ export function buildBrowserRouter() {
     const browserRouter: BrowserRouterContract = { ...baseRouter, ...spread };
 
     return browserRouter;
-
 }
