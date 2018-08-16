@@ -1,7 +1,7 @@
 import { ProuterRequestCallback, ProuterGroup } from './entity';
 
 
-export function buildRouterGroup() {
+export function routerGroup() {
 
   const groupObj: ProuterGroup = {
 

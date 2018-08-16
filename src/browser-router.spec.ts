@@ -1,7 +1,7 @@
 // tslint:disable:max-file-line-count
 
 import { browserRouter } from './browser-router';
-import { buildRouterGroup } from './router-group';
+import { routerGroup } from './router-group';
 import { ProuterBrowserRouter } from './entity';
 
 
@@ -338,31 +338,31 @@ describe('BrowserRouter', () => {
 
   it('RouterGroup', (done) => {
 
-    const groupRouter = buildRouterGroup();
+    const group = routerGroup();
 
-    groupRouter
+    group
       .use('/ask', () => {
         done();
       });
 
     browserRouterObj
-      .use('/question', groupRouter);
+      .use('/question', group);
 
     browserRouterObj.push('/question/ask');
   });
 
   it('RouterGroup with params', (done) => {
 
-    const groupRouter = buildRouterGroup();
+    const group = routerGroup();
 
-    groupRouter
+    group
       .use('/:p1/other/:p2', (req) => {
         expect(req.originalUrl).toBe('/something/16/other/18');
         expect(req.path).toBe('/something/16/other/18');
         done();
       });
 
-    browserRouterObj.use('/something', groupRouter);
+    browserRouterObj.use('/something', group);
 
     browserRouterObj.push('/something/16/other/18?q1=5&q2=6');
   });
