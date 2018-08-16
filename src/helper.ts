@@ -1,6 +1,6 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-import { ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterHandler } from './entity';
+import { ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterParsedHandler } from './entity';
 
 
 export const routerHelper = {
@@ -57,7 +57,7 @@ export const routerHelper = {
   /**
    * Obtain the request processors for the given path according to the handlers in the router.
    */
-  obtainRequestProcessors(path: string, handlers: ProuterHandler[]) {
+  obtainRequestProcessors(path: string, handlers: ProuterParsedHandler[]) {
 
     const parsedPath = routerHelper.parsePath(path);
     const requestProcessors: ProuterRequestProcessor[] = [];

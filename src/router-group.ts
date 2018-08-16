@@ -1,21 +1,21 @@
-import { ProuterRequestCallback, RouterGroupContract } from './entity';
+import { ProuterRequestCallback, ProuterGroup } from './entity';
 
 
 export function buildRouterGroup() {
 
   const handlers: { path: string, callback: ProuterRequestCallback }[] = [];
 
-  const group: RouterGroupContract = {
+  const groupObj: ProuterGroup = {
 
     handlers,
 
     use(path: string, callback: ProuterRequestCallback) {
       handlers.push({ path, callback });
-      return group;
+      return groupObj;
     }
 
   };
 
-  return group;
+  return groupObj;
 
 }

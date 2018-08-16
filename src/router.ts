@@ -1,12 +1,15 @@
-import { ProuterRequestCallback, ProuterHandler, ProuterProcessPathCallback, ProuterResponse, ProuterNextMiddleware, RouterContract, RouterGroupContract } from './entity';
+import {
+  ProuterRequestCallback, ProuterParsedHandler, ProuterProcessPathCallback, ProuterResponse,
+  ProuterNextMiddleware, ProuterRouter, ProuterGroup
+} from './entity';
 import { routerHelper } from './helper';
 
-export function buildBasicRouter() {
+export function baseRouter() {
 
   let listening = false;
-  const handlers: ProuterHandler[] = [];
+  const handlers: ProuterParsedHandler[] = [];
 
-  const router: RouterContract = {
+  const baseRouterObj: ProuterRouter = {
 
     listen() {
 
@@ -17,7 +20,7 @@ export function buildBasicRouter() {
       listening = true;
     },
 
-    use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract {
+    use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter {
 
       if (typeof callback === 'function') {
         const pathExp = routerHelper.stringToRegexp(path);
@@ -75,5 +78,5 @@ export function buildBasicRouter() {
     }
   };
 
-  return router;
+  return baseRouterObj;
 }

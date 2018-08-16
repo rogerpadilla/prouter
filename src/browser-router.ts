@@ -1,9 +1,9 @@
-import { ProuterProcessPathCallback, BrowserRouterContract, buildBasicRouter } from './';
+import { ProuterProcessPathCallback, ProuterBrowserRouter, baseRouter } from './';
 
 
-export function buildBrowserRouter() {
+export function browserRouter() {
 
-    const baseRouter = buildBasicRouter();
+    const baseRouterObj = baseRouter();
 
     const processCurrentPath = () => {
         spread.processCurrentPath();
@@ -17,7 +17,7 @@ export function buildBrowserRouter() {
 
             addEventListener('popstate', processCurrentPath);
 
-            baseRouter.listen();
+            baseRouterObj.listen();
         },
 
         stop() {
@@ -30,7 +30,7 @@ export function buildBrowserRouter() {
         },
 
         push(path: string, callback?: ProuterProcessPathCallback) {
-            baseRouter.processPath(path, (opts) => {
+            baseRouterObj.processPath(path, (opts) => {
 
                 if (!opts || !opts.preventNavigation) {
                     history.pushState(undefined, '', path);
@@ -44,11 +44,11 @@ export function buildBrowserRouter() {
 
         processCurrentPath() {
             const path = spread.getPath();
-            baseRouter.processPath(path);
+            baseRouterObj.processPath(path);
         }
     };
 
-    const browserRouter: BrowserRouterContract = { ...baseRouter, ...spread };
+    const browserRouterObj: ProuterBrowserRouter = { ...baseRouterObj, ...spread };
 
-    return browserRouter;
+    return browserRouterObj;
 }

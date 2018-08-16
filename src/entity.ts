@@ -23,8 +23,11 @@ export interface ProuterPathExp extends RegExp {
 
 export interface ProuterHandler {
   path: string;
-  pathExp: ProuterPathExp;
   callback: ProuterRequestCallback;
+}
+
+export interface ProuterParsedHandler extends ProuterHandler {
+  pathExp: ProuterPathExp;
 }
 
 export interface ProuterRequest extends ProuterPath {
@@ -53,34 +56,29 @@ export interface ProuterNextMiddleware {
   (): void;
 }
 
-export interface Handler {
-  path: string;
-  callback: ProuterRequestCallback;
+export interface ProuterGroup {
+  handlers: ProuterHandler[];
+  use(path: string, callback: ProuterRequestCallback): ProuterGroup;
 }
 
-export interface RouterGroupContract {
-  handlers: Handler[];
-  use(path: string, callback: ProuterRequestCallback): RouterGroupContract;
-}
+export interface ProuterRouter {
 
-export interface RouterContract {
-
-  use(path: string, callback: ProuterRequestCallback | RouterGroupContract): RouterContract;
+  use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter;
 
   listen(): void;
 
   processPath(path: string, processPathCallback?: ProuterProcessPathCallback): void;
 }
 
-export interface BrowserRouterContract extends RouterContract {
+export interface ProuterBrowserRouter extends ProuterRouter {
 
-  stop(): void;
+  processCurrentPath(): void;
 
   getPath(): string;
 
   push(path: string, callback?: ProuterProcessPathCallback): void;
 
-  processCurrentPath(): void;
+  stop(): void;
 }
 
 
