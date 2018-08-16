@@ -34,8 +34,7 @@
     ],
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "src/**/*.ts",
-      "!**/*.d.ts"
+      "src/**/*.ts"
     ],
     "coverageReporters": [
       "html",

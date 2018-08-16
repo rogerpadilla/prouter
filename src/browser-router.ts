@@ -1,5 +1,4 @@
-import { ProuterProcessPathCallback, BrowserRouterContract } from './entity';
-import { buildBasicRouter } from './router';
+import { ProuterProcessPathCallback, BrowserRouterContract, buildBasicRouter } from './';
 
 
 export function buildBrowserRouter() {
@@ -14,7 +13,7 @@ export function buildBrowserRouter() {
 
         listen() {
 
-            browserRouter.processCurrentPath();
+            processCurrentPath();
 
             addEventListener('popstate', processCurrentPath);
 
@@ -44,7 +43,7 @@ export function buildBrowserRouter() {
         },
 
         processCurrentPath() {
-            const path = browserRouter.getPath();
+            const path = spread.getPath();
             baseRouter.processPath(path);
         }
     };
