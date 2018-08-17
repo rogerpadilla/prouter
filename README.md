@@ -12,7 +12,7 @@ Micro client-side router inspired in the simplicity and power of express router.
 Basically, give prouter a list of path expressions and a callback function for each one (that tuple is known as a middleware), and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). Read more information about middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 
 ## Why prouter?
-- **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that ad more is easily achivable with prouter (see examples below).
+- **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
 - **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently least than 7kb before gzipping) are must to have.
 - **Learn once:** express.js is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so the same power to declare routes).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
@@ -29,6 +29,7 @@ npm install prouter --save
 yarn prouter --save
 
 # Or just include it using a 'script' tag in your HTML file
+<script src="https://unpkg.com/prouter/prouter.min.js"></script>
 ```
 
 ## Examples

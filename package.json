@@ -1,7 +1,7 @@
 {
   "name": "prouter",
   "description": "The power of the express's routing-expressions style in the frontend",
-  "version": "7.0.2",
+  "version": "7.0.3",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
