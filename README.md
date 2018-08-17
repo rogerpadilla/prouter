@@ -240,8 +240,9 @@ router
   .listen();
 
 
-/* the below code is an example (typically, you would put it in a separated file)
-about how you could capture clicks on links and accordingly trigger routing navigation in your app */
+// the below code is an example (typically, you would put it in a separated file)
+// about how you could capture clicks on links and accordingly trigger routing
+// navigation in your app
 
 export function isNavigationPath(path: string) {
   return !!path && !path.startsWith('javascript:void');
