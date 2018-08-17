@@ -7,18 +7,16 @@
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-The power of the [express's routing-expressions style](https://expressjs.com/en/guide/routing.html) available in the frontend.
+Micro client-side router inspired in the simplicity and power of express router.
 
-In web applications, it's useful to provide linkable, bookmarkable, and shareable URLs to meaningful locations within the app without reload the page. In that context, routing refers to the declaration that does the app that it wants to react to changes in the URL (path), and to trigger some callbacks (handlers) accordingly.
-
-So basically, you give prouter a set of path expressions and a callback function for each of them (that tuple is known as a middleware), so prouter will call the callback(s) (passing contextual parameters) according to the activated path (URL). Read more information about middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
+Basically, give prouter a list of path expressions and a callback function for each one (that tuple is known as a middleware), and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). Read more information about middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 
 ## Why prouter?
-- **Unobtrusive:** it is designed from the beginning to play well with vanilla JS or with any library/framework out there.
-- **Learn once and reuse it** express.js is very well known and used across the world, why not bringing a similar API (wherever possible) to the browser? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp).
-- **Really lightweight:** [great performance](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently less than 7kb before gzipping) are must to have.
-- **Forward-thinking:** learns from others Router components like the ones of Express and Angular. Written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports almost every modules' style out there: es2015 (es6), CommonJS, AMD. And can be used also as global browser variable (via 'script' tag in your HTML).
-- KISS principle: unnecessary complexity avoided.
+- **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that ad more is easily achivable with prouter (see examples below).
+- **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently least than 7kb before gzipping) are must to have.
+- **Learn once:** express.js is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so the same power to declare routes).
+- **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
+- **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD.
 - Unit tests for every feature are created.
 
 ## Installation
@@ -38,7 +36,6 @@ yarn prouter --save
 ### basic
 
 ```js
-// Using es2015 modules
 import { browserRouter } from 'prouter';
 
 // Instantiate the router
@@ -53,7 +50,7 @@ router
     resp.end();
   })
   .use('/about', (req, resp)=> {
-    send('<h1>Static About page.</h1>');
+    document.querySelector('.router-outlet') = `<h1>Some static content for the About page.</h1>`;
     resp.end();
   });
 
@@ -75,12 +72,8 @@ const router = prouter.browserRouter();
 router
   .use('(.*)', (req, resp, next) => {
 
-    // this handler will be for any routing event, before other handlers
-    const srcPath = router.getPath();
-    const destPath = req.originalUrl;
-    console.log('coming from', srcPath);
-    console.log('going to', destPath);
-
+    // this handler will run for any routing event, before other handlers
+    
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
     // (programmatically) end the request-response cycle, avoid executing other middlewares
@@ -109,51 +102,6 @@ router.listen();
 router.push('/admin');
 ```
 
-
-### conditionally avoid executing other middlewares but allow changing the path in the URL
-
-```js
-import { browserRouter } from 'prouter';
-
-// Instantiate the router
-const router = browserRouter();
-
-// Declare the paths and its respective handlers
-router
-  .use('(.*)', (req, resp, next) => {
-    
-    // this handler will be for any routing event, before other handlers
-    const srcPath = router.getPath();
-    const destPath = req.originalUrl;
-    console.log('coming from', srcPath);
-    console.log('going to', destPath);
-    
-    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
-    // (programmatically) end the request-response cycle, avoid executing other middlewares
-    // and allow changing the path in the URL.
-    if (!isAllowed) {
-      showAlert("You haven't rights to access the page: " + destPath);
-      resp.end();
-      return;
-    }
-
-    next();
-  })
-  .use('/', (req, resp)=> {
-    // do some stuff...
-    resp.end();
-  })
-  .use('/admin', (req, resp)=> {
-    // do some stuff...
-    resp.end();
-  });
-
-// start listening events for the routing
-router.listen();
-
-// programmatically try to navigate to any route in your router
-router.push('/admin');
-```
 
 ### run a generic middleware (for doing some generic stuff) after running specific middlewares
 
@@ -199,7 +147,7 @@ productRouterGroup
     // do some stuff...  
     resp.end();
   })
-  .use('/:id', (req, resp)=> {
+  .use('/:id(\\d+)', (req, resp)=> {
     const id = req.params.id;
     // do some stuff with the 'id'...
     resp.end();
@@ -227,6 +175,118 @@ router.listen();
 
 // programmatically navigate to the detail of the product with this ID
 router.push('/product/123');
+```
+
+### full example
+
+```js
+import { browserRouter, routerGroup } from 'prouter';
+
+// this can be in a different file for modularization of the routes,
+// and then import it in your main routes file and mount it.
+const productRouterGroup = routerGroup();
+
+productRouterGroup
+  .use('/', (req, resp, next)=> {
+    // do some stuff...
+    next();
+  })
+  .use('/create', (req, resp, next)=> {
+    // do some stuff...  
+    next();
+  })
+  .use('/:id(\\d+)', (req, resp, next)=> {
+    const id = req.params.id;
+    // do some stuff with the 'id'...
+    next();
+  });
+
+// Instantiate the router
+const router = browserRouter();
+
+// Declare the paths and its respective handlers
+router
+  .use('(.*)', (req, resp, next) => {
+
+    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+
+    // (programmatically) end the request-response cycle, avoid executing other middlewares
+    // and prevent changing the path in the URL.
+    if (!isAllowed) {
+      showAlert("You haven't rights to access the page: " + destPath);
+      resp.end({ preventNavigation: true });
+      return;
+    }
+
+    next();
+  })
+  .use('/', (req, resp, next)=> {
+    // do some stuff...
+    next();
+  })
+  .use('/admin', (req, resp, next)=> {
+    // do some stuff...
+    next();
+  })
+  // mount the product's group of handlers using this base path
+  .use('/product', productRouterGroup)
+  .use('(.*)', (req, res, next) => {
+    if (req.listening) {
+      const title = inferTitleFromPath(req.originalUrl, APP_TITLE);
+      updatePageTitle(title);
+    }
+    next();
+  });
+  .listen();
+
+
+/* the below code is an example (you would put it in a separated file) about how you could capture clicks on links and accordingly trigger routing navigation in your app */
+
+export function isNavigationPath(path: string) {
+  return !!path && !path.startsWith('javascript:void');
+}
+
+export function isExternalPath(path: string) {
+  return /^https?:\/\//.test(path);
+}
+
+export function isApplicationPath(path: string) {
+  return isNavigationPath(path) && !isExternalPath(path);
+}
+
+document.body.addEventListener('click', (evt) => {
+
+    const target = evt.target as Element;
+    let link: Element;
+
+    if (target.nodeName === 'A') {
+      link = target;
+    } else {
+      link = target.closest('a');
+      if (!link) {
+        return;
+      }
+    }
+
+    const url = link.getAttribute('href');
+
+    // do nothing if it is not an app's internal link
+    if (!isApplicationPath(url)) {
+      return;
+    }
+    
+    // prevent the default behaviour (i.e. avoid the reload of the page)
+    evt.preventDefault();
+
+    if (url === '/login') {
+      openLoginModal();
+      // just open the modal
+      return;
+    }
+
+    // it is an app's link, so trigger the routing navigation
+    router.push(url);
+  });
 ```
 
 
