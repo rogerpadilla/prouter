@@ -43,13 +43,13 @@ const router = browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('/', async (req, resp)=> {
+  .use('/', async (req, resp) => {
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
     resp.end();
   })
-  .use('/about', (req, resp)=> {
+  .use('/about', (req, resp) => {
     document.querySelector('.router-outlet') = `<h1>Some static content for the About page.</h1>`;
     resp.end();
   });
@@ -86,11 +86,11 @@ router
 
     next();
   })
-  .use('/', (req, resp)=> {
+  .use('/', (req, resp) => {
     // do some stuff...
     resp.end();
   })
-  .use('/admin', (req, resp)=> {
+  .use('/admin', (req, resp) => {
     // do some stuff...
     resp.end();
   });
@@ -113,13 +113,13 @@ const router = browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('/', async (req, resp, next)=> {
+  .use('/', async (req, resp, next) => {
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
     next();
   })
-  .use('(.*)', (req, resp)=> {
+  .use('(.*)', (req, resp) => {
     // do some (generic) stuff
     resp.end();
   });
@@ -139,15 +139,15 @@ import { browserRouter, routerGroup } from 'prouter';
 const productRouterGroup = routerGroup();
 
 productRouterGroup
-  .use('/', (req, resp)=> {
+  .use('/', (req, resp) => {
     // do some stuff...
     resp.end();
   })
-  .use('/create', (req, resp)=> {
+  .use('/create', (req, resp) => {
     // do some stuff...  
     resp.end();
   })
-  .use('/:id(\\d+)', (req, resp)=> {
+  .use('/:id(\\d+)', (req, resp) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
     resp.end();
@@ -158,12 +158,12 @@ const router = browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, resp, next)=> {
+  .use('(.*)', (req, resp, next) => {
     // this handler will be for any routing event, before other handlers
     console.log('request info', req);
     next();
   })
-  .use('/', (req, resp)=> {
+  .use('/', (req, resp) => {
     // do some stuff...
     resp.end();
   })
@@ -187,15 +187,15 @@ import { browserRouter, routerGroup } from 'prouter';
 const productRouterGroup = routerGroup();
 
 productRouterGroup
-  .use('/', (req, resp, next)=> {
+  .use('/', (req, resp, next) => {
     // do some stuff...
     next();
   })
-  .use('/create', (req, resp, next)=> {
+  .use('/create', (req, resp, next) => {
     // do some stuff...  
     next();
   })
-  .use('/:id(\\d+)', (req, resp, next)=> {
+  .use('/:id(\\d+)', (req, resp, next) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
     next();
@@ -220,11 +220,11 @@ router
 
     next();
   })
-  .use('/', (req, resp, next)=> {
+  .use('/', (req, resp, next) => {
     // do some stuff...
     next();
   })
-  .use('/admin', (req, resp, next)=> {
+  .use('/admin', (req, resp, next) => {
     // do some stuff...
     next();
   })
