@@ -4,7 +4,7 @@ import { browserRouter, routerGroup, ProuterBrowserRouter } from './';
 
 describe('browserRouter', () => {
 
-  // Ensure each test completes in less than this time.
+  // Ensure each test completes in less than this short amout of milliseconds.
   jest.setTimeout(20);
 
   let browserRouterObj: ProuterBrowserRouter;

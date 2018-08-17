@@ -13,7 +13,7 @@ Basically, give prouter a list of path expressions and a callback function for e
 
 ## Why prouter?
 - **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
-- **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L8) and tiny size (currently least than 7kb before gzipping) are must to have.
+- **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently least than 7kb before gzipping) are must to have.
 - **Learn once:** express.js is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so the same power to declare routes).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
 - **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD.
@@ -22,7 +22,7 @@ Basically, give prouter a list of path expressions and a callback function for e
 ## Installation
 
 ```bash
-# Using NPM
+# With NPM
 npm install prouter --save
 
 # Or with Yarn
@@ -37,6 +37,7 @@ yarn prouter --save
 ### basic
 
 ```js
+// Using es6 modules
 import { browserRouter } from 'prouter';
 
 // Instantiate the router
@@ -48,10 +49,13 @@ router
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
+    // end the request-response cycle
     resp.end();
   })
   .use('/about', (req, resp) => {
-    document.querySelector('.router-outlet') = `<h1>Some static content for the About page.</h1>`;
+    document.querySelector('.router-outlet') =
+      `<h1>Some static content for the About page.</h1>`;
+    // end the request-response cycle
     resp.end();
   });
 
@@ -63,7 +67,7 @@ router.listen();
 ### conditionally avoid executing other middlewares and prevent changing the path in the URL
 
 ```js
-// Using CommonJs modules
+// Using commonJs modules
 const prouter = require('prouter');
 
 // Instantiate the router
@@ -77,10 +81,10 @@ router
     
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
-    // (programmatically) end the request-response cycle, avoid executing other middlewares
-    // and prevent changing the path in the URL.
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
+      // end the request-response cycle, avoid executing other middlewares
+      // and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
     }
@@ -89,10 +93,12 @@ router
   })
   .use('/', (req, resp) => {
     // do some stuff...
+    // end the request-response cycle
     resp.end();
   })
   .use('/admin', (req, resp) => {
     // do some stuff...
+    // end the request-response cycle
     resp.end();
   });
 
@@ -118,10 +124,12 @@ router
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
+    // pass control to the next middleware function
     next();
   })
   .use('(.*)', (req, resp) => {
-    // do some (generic) stuff
+    // do some (generic) stuff...
+    // end the request-response cycle
     resp.end();
   });
 
@@ -142,15 +150,18 @@ const productRouterGroup = routerGroup();
 productRouterGroup
   .use('/', (req, resp) => {
     // do some stuff...
+    // end the request-response cycle
     resp.end();
   })
   .use('/create', (req, resp) => {
     // do some stuff...  
+    // end the request-response cycle
     resp.end();
   })
   .use('/:id(\\d+)', (req, resp) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
+    // end the request-response cycle
     resp.end();
   });
 
@@ -162,10 +173,12 @@ router
   .use('(.*)', (req, resp, next) => {
     // this handler will be for any routing event, before other handlers
     console.log('request info', req);
+    // pass control to the next middleware function
     next();
   })
   .use('/', (req, resp) => {
     // do some stuff...
+    // end the request-response cycle
     resp.end();
   })
   // mount the product's group of handlers using this base path
@@ -190,15 +203,18 @@ const productRouterGroup = routerGroup();
 productRouterGroup
   .use('/', (req, resp, next) => {
     // do some stuff...
+    // pass control to the next middleware function
     next();
   })
   .use('/create', (req, resp, next) => {
     // do some stuff...  
+    // pass control to the next middleware function
     next();
   })
   .use('/:id(\\d+)', (req, resp, next) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
+    // pass control to the next middleware function
     next();
   });
 
@@ -209,40 +225,52 @@ const router = browserRouter();
 router
   .use('(.*)', (req, resp, next) => {
 
+    // this handler will run for any routing event, before other handlers
+
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
-    // (programmatically) end the request-response cycle, avoid executing other middlewares
-    // and prevent changing the path in the URL.
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
+      // end the request-response cycle, avoid executing other middlewares
+      // and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
     }
 
+    // pass control to the next middleware function
     next();
   })
   .use('/', (req, resp, next) => {
     // do some stuff...
+    // pass control to the next middleware function
     next();
   })
   .use('/admin', (req, resp, next) => {
     // do some stuff...
+    // pass control to the next middleware function
     next();
   })
   // mount the product's group of handlers using this base path
   .use('/product', productRouterGroup)
   .use('(.*)', (req, res, next) => {
+
+    // this handler will run for any routing event, after other handlers
+
     if (req.listening) {
       const title = inferTitleFromPath(req.originalUrl, APP_TITLE);
       updatePageTitle(title);
     }
+
+    // pass control to the next middleware function
     next();
   });
-  .listen();
+
+
+router.listen();
 
 
 // the below code is an example (typically, you would put it in a separated file)
-// about how you could capture clicks on links and accordingly trigger routing
+// about how you could capture clicks on links and accordingly, trigger routing
 // navigation in your app
 
 export function isNavigationPath(path: string) {
