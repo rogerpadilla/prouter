@@ -1,8 +1,5 @@
 // tslint:disable:max-file-line-count
-
-import { browserRouter } from './browser-router';
-import { routerGroup } from './router-group';
-import { ProuterBrowserRouter } from './entity';
+import { browserRouter, routerGroup, ProuterBrowserRouter } from './';
 
 
 describe('browserRouter', () => {
