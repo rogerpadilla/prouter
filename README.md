@@ -9,7 +9,7 @@
 
 Micro client-side router inspired in the simplicity and power of express router.
 
-Basically, give prouter a list of path expressions and a callback (middleware function) for each one (that tuple is known as a middleware), and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). although prouter's target are browsers, you can read more about the (generic) middlewares concept in the express's guide [here](https://expressjs.com/en/guide/writing-middleware.html).
+Basically, give prouter a list of path expressions and a callback (middleware function) for each one (that tuple is known as a middleware), and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). Although prouter's target are browsers, you can read more about the (generic) middlewares concept in the express's guide [here](https://expressjs.com/en/guide/writing-middleware.html).
 
 ## Why prouter?
 - **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
