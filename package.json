@@ -1,7 +1,7 @@
 {
   "name": "prouter",
-  "description": "The power of the express's routing-expressions style in the frontend",
-  "version": "7.0.7",
+  "description": "Micro client-side router inspired in the simplicity and power of express router",
+  "version": "7.0.8",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
