@@ -160,14 +160,14 @@ describe('browserRouter', () => {
   it('parameters', (done) => {
 
     browserRouterObj
-      .use('/about/:id/:num', (req) => {
+      .use('/some-path/:id(\\d+)/:tag', (req) => {
         expect(req.params.id).toBe('16');
-        expect(req.params.num).toBe('18');
+        expect(req.params.tag).toBe('abc');
         done();
       })
       .listen();
 
-    browserRouterObj.push('/about/16/18');
+    browserRouterObj.push('/some-path/16/abc');
   });
 
   it('query', (done) => {

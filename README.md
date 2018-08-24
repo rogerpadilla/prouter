@@ -7,16 +7,16 @@
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-Micro client-side router inspired in the simplicity and power of express router.
+Micro client side router library inspired in the simplicity and power of express router.
 
 Basically, give prouter a list of path expressions and a callback (middleware function) for each one, and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). Although prouter's target are browsers, you can read more about the (generic) middleware concept in the express's guide [here](https://expressjs.com/en/guide/writing-middleware.html).
 
 ## Why prouter?
 - **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
 - **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently least than 7kb before gzipping) are must to have.
-- **Learn once:** express.js is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing URLs [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so the same power to declare routes).
+- **Learn once:** express router is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing paths [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
-- **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. Also, prouter uses the (modern) [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) for routing.
+- **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the (modern) [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) for routing.
 - Unit tests for every feature are created.
 
 ## Installation
@@ -64,7 +64,7 @@ router.listen();
 ```
 
 
-### conditionally avoid executing other middlewares and prevent changing the path in the URL
+### conditionally avoid executing other middlewares (guard) and prevent changing the path in the URL
 
 ```js
 // Using commonJs modules
@@ -192,7 +192,7 @@ router.listen();
 router.push('/product/123');
 ```
 
-### full example
+### full example: modularized routing, generic pre handler acting as a guard, generic post handler.
 
 ```js
 import { browserRouter, routerGroup } from 'prouter';

@@ -1,7 +1,7 @@
 {
   "name": "prouter",
-  "description": "Micro client-side router inspired in the simplicity and power of express router",
-  "version": "7.0.8",
+  "description": "Micro client side router library inspired in the simplicity and power of express router",
+  "version": "7.0.9",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
@@ -21,8 +21,12 @@
     "build": "rimraf dist && webpack --progress --profile --bail --mode=production"
   },
   "keywords": [
+    "client",
+    "side",
     "browser",
-    "router"
+    "router",
+    "routing",
+    "library"
   ],
   "license": "MIT",
   "contributors": [
