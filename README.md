@@ -246,6 +246,13 @@ router
     // and pass control to the next handler
     next();
   })
+  .use('/login', () => {
+    openLoginModal();
+    // as this route opens a modal, we would want to prevent navigation in this handler,
+    // so end the request-response cycle, avoid executing next handlers
+    // and prevent changing the path in the URL.
+    resp.end({ preventNavigation: true });
+  })
   .use('/admin', (req, resp, next) => {
     // do some stuff...
     // and pass control to the next handler
@@ -265,8 +272,8 @@ router
       updatePageTitle(title);
     }
 
-    // pass control to the next handler
-    next();
+    // end the request-response cycle
+    resp.end();
   });
 
 
@@ -310,14 +317,9 @@ document.body.addEventListener('click', (evt) => {
       return;
     }
     
-    // prevent the default behaviour (i.e. avoid the reload of the page)
+    // avoid the default browser's behaviour when clicking on a link
+    // (i.e. do not reload the page).
     evt.preventDefault();
-
-    if (url === '/login') {
-      openLoginModal();
-      // just open the modal
-      return;
-    }
 
     // it is a normal app's link, so trigger the routing navigation
     router.push(url);
