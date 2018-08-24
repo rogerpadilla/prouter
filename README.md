@@ -7,14 +7,14 @@
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-Micro client side router library inspired in the simplicity and power of express router.
+Fast, unopinionated, minimalist client-side router library inspired in the simplicity and power of express router.
 
-Basically, give prouter a list of path expressions and a callback (middleware function) for each one, and prouter will invoke the callbacks (passing contextual parameters) according to the activated path (URL). Although prouter's target are browsers, you can read more about the (generic) middleware concept in the express's guide [here](https://expressjs.com/en/guide/writing-middleware.html).
+Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
 ## Why prouter?
-- **KISS principle everywhere:** do only one thing and do it well. Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
-- **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently least than 7kb before gzipping) are must to have.
-- **Learn once:** express router is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing paths [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes).
+- **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
+- **Performance:** [must be fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently just 4.8kb before gzipping) are must to have.
+- **Learn once:** express router is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing routes [Path-to-RegExp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html)
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
 - **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the (modern) [History API](https://developer.mozilla.org/en-US/docs/Web/API/History_API) for routing.
 - Unit tests for every feature are created.
@@ -64,7 +64,7 @@ router.listen();
 ```
 
 
-### conditionally avoid executing other middlewares (guard) and prevent changing the path in the URL
+### conditionally avoid executing other handlers (guard) and prevent changing the path in the URL
 
 ```js
 // Using commonJs modules
@@ -75,7 +75,7 @@ const router = prouter.browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, resp, next) => {
+  .use('*', (req, resp, next) => {
 
     // this handler will run for any routing event, before other handlers
     
@@ -83,13 +83,13 @@ router
 
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // end the request-response cycle, avoid executing other middlewares
+      // end the request-response cycle, avoid executing other handlers
       // and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
     }
 
-    // pass control to the next middleware function
+    // pass control to the next handler
     next();
   })
   .use('/', (req, resp) => {
@@ -111,7 +111,7 @@ router.push('/admin');
 ```
 
 
-### run a generic middleware (for doing some generic stuff) after running specific middlewares
+### run a generic middleware (for doing some generic stuff) after running specific handlers
 
 ```js
 import { browserRouter } from 'prouter';
@@ -125,10 +125,10 @@ router
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
-  .use('(.*)', (req, resp) => {
+  .use('*', (req, resp) => {
     // do some (generic) stuff...
     // and end the request-response cycle
     resp.end();
@@ -171,10 +171,10 @@ const router = browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, resp, next) => {
+  .use('*', (req, resp, next) => {
     // this handler will be for any routing event, before other handlers
     console.log('request info', req);
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
   .use('/', (req, resp) => {
@@ -204,18 +204,18 @@ const productRouterGroup = routerGroup();
 productRouterGroup
   .use('/', (req, resp, next) => {
     // do some stuff...
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
   .use('/create', (req, resp, next) => {
     // do some stuff...  
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
   .use('/:id(\\d+)', (req, resp, next) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   });
 
@@ -224,7 +224,7 @@ const router = browserRouter();
 
 // Declare the paths and its respective handlers
 router
-  .use('(.*)', (req, resp, next) => {
+  .use('*', (req, resp, next) => {
 
     // this handler will run for any routing event, before other handlers
 
@@ -232,28 +232,28 @@ router
 
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // end the request-response cycle, avoid executing other middlewares
+      // end the request-response cycle, avoid executing other handlers
       // and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
     }
 
-    // pass control to the next middleware function
+    // pass control to the next handler
     next();
   })
   .use('/', (req, resp, next) => {
     // do some stuff...
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
   .use('/admin', (req, resp, next) => {
     // do some stuff...
-    // and pass control to the next middleware function
+    // and pass control to the next handler
     next();
   })
   // mount the product's group of handlers using this base path
   .use('/product', productRouterGroup)
-  .use('(.*)', (req, res, next) => {
+  .use('*', (req, res, next) => {
 
     // this handler will run for any routing event, after the other handlers
 
@@ -265,7 +265,7 @@ router
       updatePageTitle(title);
     }
 
-    // pass control to the next middleware function
+    // pass control to the next handler
     next();
   });
 

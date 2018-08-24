@@ -1,13 +1,16 @@
 import * as pathToRegexp from 'path-to-regexp';
 
-import { ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterParsedHandler } from './entity';
+import {
+  ProuterPath, ProuterPathExp, ProuterRequestProcessor,
+  ProuterRequest, ProuterParsedHandler, ProuterPathKey
+} from './entity';
 
 
 export const routerHelper = {
 
   stringToRegexp(str: string) {
 
-    const keys: pathToRegexp.Key[] = [];
+    const keys: ProuterPathKey[] = [];
 
     const resp = pathToRegexp(str, keys) as ProuterPathExp;
     resp.keys = keys;

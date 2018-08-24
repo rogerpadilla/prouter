@@ -1,5 +1,3 @@
-import * as pathToRegexp from 'path-to-regexp';
-
 export interface ProuterRequestCallback {
   // tslint:disable-next-line:no-any
   (req: ProuterRequest, resp: ProuterResponse, next: ProuterNextMiddleware): any;
@@ -17,8 +15,18 @@ export interface ProuterStringMap {
   [prop: string]: any;
 }
 
+export interface ProuterPathKey {
+  name: string | number;
+  prefix: string;
+  delimiter: string;
+  optional: boolean;
+  repeat: boolean;
+  pattern: string;
+  partial: boolean;
+}
+
 export interface ProuterPathExp extends RegExp {
-  keys: pathToRegexp.Key[];
+  keys: ProuterPathKey[];
 }
 
 export interface ProuterHandler {
