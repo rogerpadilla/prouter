@@ -64,7 +64,7 @@ router.listen();
 ```
 
 
-### guard middleware which conditionally avoid executing other handlers and prevent changing the path in the URL
+### guard middleware which conditionally avoid executing next handlers and prevent changing the path in the URL
 
 ```js
 // Using commonJs modules
@@ -77,7 +77,7 @@ const router = prouter.browserRouter();
 router
   .use('*', (req, resp, next) => {
 
-    // this handler will run for any routing event, before other handlers
+    // this handler will run for any routing event, before any other handlers
     
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
@@ -172,7 +172,7 @@ const router = browserRouter();
 // Declare the paths and its respective handlers
 router
   .use('*', (req, resp, next) => {
-    // this handler will be for any routing event, before other handlers
+    // this handler will be for any routing event, before any other handlers
     console.log('request info', req);
     // and pass control to the next handler
     next();
@@ -226,13 +226,13 @@ const router = browserRouter();
 router
   .use('*', (req, resp, next) => {
 
-    // this handler will run for any routing event, before other handlers
+    // this handler will run for any routing event, before any other handlers
 
     const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
 
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
-      // end the request-response cycle, avoid executing other handlers
+      // end the request-response cycle, avoid executing next handlers
       // and prevent changing the path in the URL.
       resp.end({ preventNavigation: true });
       return;
