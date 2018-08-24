@@ -61,7 +61,7 @@ describe('browserRouter', () => {
         expect(browserRouterObj.getPath()).toBe('/');
         next();
       })
-      .use('(.*)', (req) => {
+      .use('*', (req) => {
         done();
       })
       .listen();
@@ -135,7 +135,7 @@ describe('browserRouter', () => {
   it('process current path when listen', (done) => {
 
     browserRouterObj
-      .use('(.*)', (req) => {
+      .use('*', (req) => {
         expect(req.listening).toBeFalsy();
         done();
       })
@@ -209,25 +209,13 @@ describe('browserRouter', () => {
     browserRouterObj.push('/something/16/other/18?first=5&second=6');
   });
 
-  it('any sub-path', (done) => {
-
-    browserRouterObj
-      .use('/file/:path*', (req) => {
-        expect(req.params.path).toBe('dir/file.jpg');
-        done();
-      })
-      .listen();
-
-    browserRouterObj.push('/file/dir/file.jpg');
-  });
-
   it('do not call if no match', (done) => {
 
     browserRouterObj
       .use('/abc/:p1/other/:p2', () => {
         fail('This should not be called');
       })
-      .use('(.*)', () => {
+      .use('*', () => {
         done();
       })
       .listen();
@@ -243,7 +231,7 @@ describe('browserRouter', () => {
         req.query.q3 = '7';
         next();
       })
-      .use('(.*)', (req) => {
+      .use('*', (req) => {
         expect(req.query).toEqual({ q1: '5', q2: '6', q3: '7' });
         done();
       });
@@ -267,7 +255,7 @@ describe('browserRouter', () => {
         msg = 'hello';
         resp.end();
       })
-      .use('(.*)', () => {
+      .use('*', () => {
         fail('Should not call this');
       });
 
@@ -291,7 +279,7 @@ describe('browserRouter', () => {
         expect(browserRouterObj.getPath()).toBe('/');
         resp.end({ preventNavigation: true });
       })
-      .use('(.*)', () => {
+      .use('*', () => {
         fail('Should not call this');
       });
 
@@ -314,7 +302,7 @@ describe('browserRouter', () => {
         expect(browserRouterObj.getPath()).toBe('/');
         next();
       })
-      .use('(.*)', (req, resp, next) => {
+      .use('*', (req, resp, next) => {
         next();
       });
 

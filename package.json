@@ -1,7 +1,7 @@
 {
   "name": "prouter",
-  "description": "Micro client side router library inspired in the simplicity and power of express router",
-  "version": "7.0.9",
+  "description": "Fast, unopinionated, minimalist client-side router library inspired in the simplicity and power of express router",
+  "version": "8.0.0",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
@@ -24,6 +24,8 @@
     "client",
     "side",
     "browser",
+    "web",
+    "mobile",
     "router",
     "routing",
     "library"
@@ -33,7 +35,7 @@
     "Roger Padilla <rogerpadilla>"
   ],
   "dependencies": {
-    "path-to-regexp": "^2.3.0"
+    "path-to-regexp": "0.1.7"
   },
   "devDependencies": {
     "@types/jest": "23.3.1",
