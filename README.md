@@ -64,7 +64,7 @@ router.listen();
 ```
 
 
-### conditionally avoid executing other handlers (guard) and prevent changing the path in the URL
+### guard middleware which conditionally avoid executing other handlers and prevent changing the path in the URL
 
 ```js
 // Using commonJs modules
