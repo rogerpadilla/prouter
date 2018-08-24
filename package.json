@@ -1,6 +1,6 @@
 {
   "name": "prouter",
-  "description": "Fast, unopinionated, minimalist client-side router library inspired in the simplicity and power of express router",
+  "description": "Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router",
   "version": "8.0.0",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",

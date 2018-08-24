@@ -7,7 +7,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-Fast, unopinionated, minimalist client-side router library inspired in the simplicity and power of express router.
+Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router.
 
 Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
