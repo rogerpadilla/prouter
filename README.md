@@ -12,11 +12,11 @@ Fast, unopinionated, minimalist client side router library inspired in the simpl
 Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
 ## Why prouter?
-- **Performance:** [must be really fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently less than 5kb before gzipping) are must to have to smoothly run in any mobile or desktop browser.
+- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently less than 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
 - **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
-- **Learn once:** express router is very powerfull, flexible and popular, why not bringing a similar API (really a subset) to the frontend? Under the hood, prouter uses the same (wonderful) library than express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html)
+- **Learn once:** express router is very powerfull, flexible and simple, why not bringing a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
-- **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the (modern) [history] API(https://developer.mozilla.org/en-US/docs/Web/API/History_API) for routing.
+- **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the modern [history](https://developer.mozilla.org/en-US/docs/Web/API/History_API) API for routing.
 - Unit tests for every feature are created.
 
 ## Installation
@@ -59,7 +59,7 @@ router
     resp.end();
   });
 
-// start listening events for navigation events
+// start listening for navigation events
 router.listen();
 ```
 
@@ -103,7 +103,7 @@ router
     resp.end();
   });
 
-// start listening events for the routing
+// start listening for navigation events
 router.listen();
 
 // programmatically try to navigate to any route in your router
@@ -125,7 +125,7 @@ router
     const people = await personService.find();
     const html = PersonListCmp(people);
     document.querySelector('.router-outlet') = html;
-    // and pass control to the next handler
+    // pass control to the next handler
     next();
   })
   .use('*', (req, resp) => {
@@ -134,7 +134,7 @@ router
     resp.end();
   });
 
-// start listening events for navigation events
+// start listening for navigation events
 router.listen();
 ```
 
@@ -172,9 +172,9 @@ const router = browserRouter();
 // Declare the paths and its respective handlers
 router
   .use('*', (req, resp, next) => {
-    // this handler will be for any routing event, before any other handlers
+    // this handler will run for any routing event, before any other handlers
     console.log('request info', req);
-    // and pass control to the next handler
+    // pass control to the next handler
     next();
   })
   .use('/', (req, resp) => {
@@ -185,7 +185,7 @@ router
   // mount the product's group of handlers using this base path
   .use('/product', productRouterGroup);
 
-// start listening events for the routing
+// start listening for the routing
 router.listen();
 
 // programmatically navigate to the detail of the product with this ID
@@ -266,7 +266,7 @@ router
 
     // req.listening will be true when this callback was called due to a
     // client-side navigation (useful to differentiate client-side vs
-    // server.side rendering - when using a mix of both SSR and CSR)
+    // server-side rendering - when using a mix of both SSR and CSR)
     if (req.listening) {
       const title = inferTitleFromPath(req.originalUrl, APP_TITLE);
       updatePageTitle(title);
@@ -276,7 +276,7 @@ router
     resp.end();
   });
 
-
+// start listening for the routing
 router.listen();
 
 
