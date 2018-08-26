@@ -159,7 +159,7 @@ productRouterGroup
     // and end the request-response cycle
     resp.end();
   })
-  .use('/:id(\d+)', (req, resp) => {
+  .use('/:id(\\d+)', (req, resp) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
     // and end the request-response cycle
@@ -212,7 +212,7 @@ productRouterGroup
     // and pass control to the next handler
     next();
   })
-  .use('/:id(\d+)', (req, resp, next) => {
+  .use('/:id(\\d+)', (req, resp, next) => {
     const id = req.params.id;
     // do some stuff with the 'id'...
     // and pass control to the next handler
