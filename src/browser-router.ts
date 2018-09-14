@@ -43,12 +43,12 @@ export function browserRouter() {
 
           const oldPath = br.getPath();
 
+          history.pushState(undefined, undefined, newPath);
+
           const navigationEvt: ProuterNavigationEvent = {
             oldPath,
             newPath
           };
-
-          history.pushState(undefined, undefined, newPath);
 
           subscriptors.navigation.forEach(subscriptor => {
             subscriptor(navigationEvt);
