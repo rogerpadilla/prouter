@@ -1,54 +1,71 @@
-import { ProuterProcessPathCallback, ProuterBrowserRouter, baseRouter } from './';
+import { baseRouter } from './router';
+import { ProuterSubscriptors, ProuterSubscriptionType, ProuterSubscriptorCallback, ProuterNavigationEvent } from './entity';
 
 
 export function browserRouter() {
 
-    const baseRouterObj = baseRouter();
+  const baseRouterObj = baseRouter();
 
-    const processCurrentPath = () => {
-        spread.processCurrentPath();
-    };
+  const subscriptors: ProuterSubscriptors = {
+    navigation: []
+  };
 
-    const spread = {
+  const processCurrentPath = () => {
+    br.processCurrentPath();
+  };
 
-        listen() {
+  const br = {
 
-            processCurrentPath();
+    ...baseRouterObj,
 
-            addEventListener('popstate', processCurrentPath);
+    listen() {
 
-            baseRouterObj.listen();
-        },
+      processCurrentPath();
 
-        stop() {
-            removeEventListener('popstate', processCurrentPath);
-        },
+      addEventListener('popstate', processCurrentPath);
 
-        getPath() {
-            const path = decodeURI(location.pathname + location.search);
-            return path;
-        },
+      baseRouterObj.listen();
+    },
 
-        push(path: string, callback?: ProuterProcessPathCallback) {
-            baseRouterObj.processPath(path, (opts) => {
+    stop() {
+      removeEventListener('popstate', processCurrentPath);
+    },
 
-                if (!opts || !opts.preventNavigation) {
-                    history.pushState(undefined, '', path);
-                }
+    getPath() {
+      const path = decodeURI(location.pathname + location.search);
+      return path;
+    },
 
-                if (callback) {
-                    callback(opts);
-                }
-            });
-        },
+    push(newPath: string) {
+      baseRouterObj.processPath(newPath, opts => {
 
-        processCurrentPath() {
-            const path = spread.getPath();
-            baseRouterObj.processPath(path);
+        if (!opts || !opts.preventnavigation) {
+
+          const oldPath = br.getPath();
+
+          const navigationEvt: ProuterNavigationEvent = {
+            oldPath,
+            newPath
+          };
+
+          history.pushState(undefined, undefined, newPath);
+
+          subscriptors.navigation.forEach(subscriptor => {
+            subscriptor(navigationEvt);
+          });
         }
-    };
+      });
+    },
 
-    const browserRouterObj: ProuterBrowserRouter = { ...baseRouterObj, ...spread };
+    processCurrentPath() {
+      const path = br.getPath();
+      baseRouterObj.processPath(path);
+    },
 
-    return browserRouterObj;
+    on(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback) {
+      subscriptors[type].push(callback);
+    }
+  };
+
+  return br;
 }
