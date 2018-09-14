@@ -53,7 +53,7 @@ export interface ProuterRequestProcessor {
 }
 
 export interface ProuterOptsProcessPathCallback {
-  preventNavigation?: boolean;
+  preventnavigation?: boolean;
 }
 
 export interface ProuterProcessPathCallback {
@@ -84,11 +84,28 @@ export interface ProuterBrowserRouter extends ProuterRouter {
 
   getPath(): string;
 
-  push(path: string, callback?: ProuterProcessPathCallback): void;
+  push(path: string): void;
 
   stop(): void;
+
+  on(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback): void;
 }
 
+export interface ProuterNavigationEvent {
+  oldPath: string;
+  newPath: string;
+}
 
-// Dont delete this dummy, TS do not create the definition of the file if only interface
+export interface ProuterSubscriptorCallback {
+  (evt: ProuterNavigationEvent): void;
+}
+
+export interface ProuterSubscriptors {
+  navigation: ProuterSubscriptorCallback[];
+}
+
+export type ProuterSubscriptionType = keyof ProuterSubscriptors;
+
+
+// Dont delete this dummy, TS do not create the definition of the file if only interfaces
 export const prouterSomethingToMakeTsToExportThisFile = 1;

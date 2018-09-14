@@ -242,7 +242,21 @@ router
     next();
   })
   .use('/', (req, resp, next) => {
-    // do some stuff...
+    
+    const doInfiniteScroll = () => {
+      // do infinite scroll ...
+    };
+
+    window.addEventListener('scroll', doInfiniteScroll);
+
+    // subscribe to the navigation event (useful to know/react when going to a different route)
+    router.on('navigation', (navigationEvt) => {
+      // if changing the path, then remove the listener for the window.scroll. 
+      if (navigationEvt.newUrl !== '/') {
+        window.removeEventListener('scroll', doInfiniteScroll);
+      }
+    });
+
     // and pass control to the next handler
     next();
   })

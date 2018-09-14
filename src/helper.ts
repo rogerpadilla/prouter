@@ -1,8 +1,7 @@
 import * as pathToRegexp from 'path-to-regexp';
 
 import {
-  ProuterPath, ProuterPathExp, ProuterRequestProcessor,
-  ProuterRequest, ProuterParsedHandler, ProuterPathKey
+  ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterParsedHandler, ProuterPathKey
 } from './entity';
 
 
