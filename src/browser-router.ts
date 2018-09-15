@@ -1,5 +1,5 @@
 import { baseRouter } from './router';
-import { ProuterSubscriptors, ProuterSubscriptionType, ProuterSubscriptorCallback, ProuterNavigationEvent } from './entity';
+import { ProuterSubscriptors, ProuterSubscriptionType, ProuterSubscriptorCallback, ProuterNavigationEvent, ProuterBrowserRouter } from './entity';
 
 
 export function browserRouter() {
@@ -14,7 +14,7 @@ export function browserRouter() {
     br.processCurrentPath();
   };
 
-  const br = {
+  const br: ProuterBrowserRouter = {
 
     ...baseRouterObj,
 
@@ -39,7 +39,7 @@ export function browserRouter() {
     push(newPath: string) {
       baseRouterObj.processPath(newPath, opts => {
 
-        if (!opts || !opts.preventnavigation) {
+        if (!opts || !opts.preventNavigation) {
 
           const oldPath = br.getPath();
 
@@ -64,6 +64,12 @@ export function browserRouter() {
 
     on(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback) {
       subscriptors[type].push(callback);
+    },
+
+    off(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback) {
+      subscriptors[type] = subscriptors[type].filter(cb => {
+        return cb !== callback;
+      });
     }
   };
 
