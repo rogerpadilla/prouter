@@ -294,7 +294,7 @@ describe('browserRouter', () => {
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
-        resp.end({ preventnavigation: true });
+        resp.end({ preventNavigation: true });
       })
       .use('*', () => {
         fail('Should not call this');

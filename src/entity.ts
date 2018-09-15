@@ -53,7 +53,7 @@ export interface ProuterRequestProcessor {
 }
 
 export interface ProuterOptsProcessPathCallback {
-  preventnavigation?: boolean;
+  preventNavigation?: boolean;
 }
 
 export interface ProuterProcessPathCallback {
