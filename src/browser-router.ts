@@ -39,7 +39,7 @@ export function browserRouter() {
     push(newPath: string) {
       baseRouterObj.processPath(newPath, opts => {
 
-        if (!opts || !opts.preventnavigation) {
+        if (!opts || !opts.preventNavigation) {
 
           const oldPath = br.getPath();
 
