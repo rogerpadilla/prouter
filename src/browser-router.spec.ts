@@ -294,7 +294,7 @@ describe('browserRouter', () => {
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
         expect(router.getPath()).toBe('/');
-        resp.end({ preventnavigation: true });
+        resp.end({ preventNavigation: true });
       })
       .use('*', () => {
         fail('Should not call this');
@@ -436,6 +436,33 @@ describe('browserRouter', () => {
     router.on('navigation', () => {
       fail('Should not navigate since no match in the registered handlers');
     });
+
+    router.push('/hello');
+  });
+
+  it('should unsubscribe from navigation event', (done) => {
+
+    expect(router.getPath()).toBe('/');
+
+    router
+      .use('/hello', (req, resp, next) => {
+        expect(req.originalUrl).toBe('/hello');
+        expect(req.path).toBe('/hello');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        next();
+        done();
+      })
+      .listen();
+
+    const onNavigation = () => {
+      fail('Should not enter here since unsubscribed');
+    };
+
+    router.on('navigation', onNavigation);
+
+    router.off('navigation', onNavigation);
 
     router.push('/hello');
   });
