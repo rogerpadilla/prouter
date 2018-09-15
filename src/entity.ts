@@ -89,6 +89,8 @@ export interface ProuterBrowserRouter extends ProuterRouter {
   stop(): void;
 
   on(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback): void;
+
+  off(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback): void;
 }
 
 export interface ProuterNavigationEvent {
