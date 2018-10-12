@@ -43,7 +43,7 @@ export function browserRouter() {
 
           const oldPath = br.getPath();
 
-          history.pushState(undefined, undefined, newPath);
+          history.pushState(undefined, '', newPath);
 
           const navigationEvt: ProuterNavigationEvent = {
             oldPath,

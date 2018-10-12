@@ -24,7 +24,7 @@ describe('browserRouter', () => {
   });
 
   beforeEach(() => {
-    history.pushState(undefined, undefined, '/');
+    history.pushState(undefined, '', '/');
     router = browserRouter();
   });
 
