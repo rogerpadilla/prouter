@@ -1,6 +1,6 @@
 import {
   ProuterRequestCallback, ProuterParsedHandler, ProuterProcessPathCallback, ProuterResponse,
-  ProuterNextMiddleware, ProuterRouter, ProuterGroup
+  ProuterNextMiddleware, ProuterRouter, ProuterGroup, ProuterProcessPathOptions
 } from './entity';
 import { routerHelper } from './helper';
 
@@ -49,9 +49,10 @@ export function baseRouter() {
       let index = 0;
 
       const response: ProuterResponse = {
-        end(opts) {
+        end() {
           if (processPathCallback && !wasProcessPathCallbackCalled) {
             wasProcessPathCallbackCalled = true;
+            const opts: ProuterProcessPathOptions = { preventNavigation: response.preventNavigation };
             processPathCallback(opts);
           }
         }

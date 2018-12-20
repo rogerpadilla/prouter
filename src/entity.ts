@@ -43,8 +43,12 @@ export interface ProuterRequest extends ProuterPath {
   params: ProuterStringMap;
 }
 
-export interface ProuterResponse {
-  end: ProuterProcessPathCallback;
+export interface ProuterProcessPathOptions {
+  preventNavigation?: boolean;
+}
+
+export interface ProuterResponse extends ProuterProcessPathOptions {
+  end(): void;
 }
 
 export interface ProuterRequestProcessor {
@@ -52,12 +56,8 @@ export interface ProuterRequestProcessor {
   callback: ProuterRequestCallback;
 }
 
-export interface ProuterOptsProcessPathCallback {
-  preventNavigation?: boolean;
-}
-
 export interface ProuterProcessPathCallback {
-  (opts?: ProuterOptsProcessPathCallback): void;
+  (opts?: ProuterProcessPathOptions): void;
 }
 
 export interface ProuterNextMiddleware {
