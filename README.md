@@ -85,7 +85,8 @@ router
       showAlert("You haven't rights to access the page: " + destPath);
       // end the request-response cycle, avoid executing other handlers
       // and prevent changing the path in the URL.
-      resp.end({ preventNavigation: true });
+      resp.preventNavigation = true;
+      resp.end();
       return;
     }
 
@@ -234,7 +235,8 @@ router
       showAlert("You haven't rights to access the page: " + destPath);
       // end the request-response cycle, avoid executing next handlers
       // and prevent changing the path in the URL.
-      resp.end({ preventNavigation: true });
+      resp.preventNavigation = true;
+      resp.end();
       return;
     }
 
@@ -266,7 +268,8 @@ router
     // as this route opens a modal, we would want to prevent navigation in this handler,
     // so end the request-response cycle, avoid executing next handlers
     // and prevent changing the path in the URL.
-    resp.end({ preventNavigation: true });
+    resp.preventNavigation = true;
+    resp.end();
   })
   .use('/admin', (req, resp, next) => {
     // do some stuff...
