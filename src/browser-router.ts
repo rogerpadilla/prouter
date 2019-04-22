@@ -1,46 +1,55 @@
 import { baseRouter } from './router';
-import { ProuterSubscriptors, ProuterSubscriptionType, ProuterSubscriptorCallback, ProuterNavigationEvent, ProuterBrowserRouter } from './entity';
+import {
+  ProuterSubscriptors,
+  ProuterSubscriptionType,
+  ProuterSubscriptorCallback,
+  ProuterNavigationEvent,
+  ProuterBrowserRouter,
+  ProuterBrowserOptions
+} from './entity';
+import { routerHelper } from './helper';
 
-
-export function browserRouter() {
-
+export function browserRouter(options: ProuterBrowserOptions = {}) {
   const baseRouterObj = baseRouter();
 
   const subscriptors: ProuterSubscriptors = {
     navigation: []
   };
 
-  const processCurrentPath = () => {
+  let previousPath = routerHelper.getPath();
+
+  const onPopState = () => {
+    const newPath = routerHelper.getPath();
+    /* 'popstate' event is also triggered for 'hash' changes (in the URL),
+     * ignore them if the 'ignoreHashChange' option is provided and if the
+     * path didn't changed. */
+    if (options.ignoreHashChange && newPath === previousPath) {
+      return;
+    }
+    previousPath = newPath;
     br.processCurrentPath();
   };
 
   const br: ProuterBrowserRouter = {
-
     ...baseRouterObj,
 
     listen() {
+      br.processCurrentPath();
 
-      processCurrentPath();
-
-      addEventListener('popstate', processCurrentPath);
+      addEventListener('popstate', onPopState);
 
       baseRouterObj.listen();
     },
 
     stop() {
-      removeEventListener('popstate', processCurrentPath);
+      removeEventListener('popstate', onPopState);
     },
 
-    getPath() {
-      const path = decodeURI(location.pathname + location.search);
-      return path;
-    },
+    getPath: routerHelper.getPath,
 
     push(newPath: string) {
       baseRouterObj.processPath(newPath, opts => {
-
         if (!opts || !opts.preventNavigation) {
-
           const oldPath = br.getPath();
 
           history.pushState(undefined, '', newPath);

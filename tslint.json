@@ -1,12 +1,19 @@
 {
-  "extends": ["tslint:latest"],
+  "extends": [
+    "tslint:latest",
+    "tslint-config-prettier"
+  ],
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ],
   "rules": {
+    "prettier": true,
     "eofline": false,
     "no-consecutive-blank-lines": [false],
     "no-trailing-whitespace": false,
     "object-literal-sort-keys": false,
     "member-access": false,
-    "no-this-assignment": true,
+    "no-this-assignment": [true],
     "member-ordering": [true, { "order": "fields-first" }],
     "no-inferrable-types": [true],
     "no-internal-module": true,
@@ -17,7 +24,7 @@
     "no-arg": true,
     "no-bitwise": true,
     "no-conditional-assignment": true,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "variable-name": [true, "ban-keywords", "check-format"],
     "no-console": [
       true,
       "debug",
@@ -39,7 +46,7 @@
     "no-empty": true,
     "no-eval": true,
     "no-string-literal": false,
-    "no-submodule-imports": false,
+    "no-submodule-imports": true,
     "no-shadowed-variable": true,
     "no-switch-case-fall-through": true,
     "no-unused-expression": true,
@@ -47,6 +54,7 @@
     "no-var-keyword": true,
     "no-implicit-dependencies": true,
     "ordered-imports": false,
+    "space-before-function-paren": false,
     "radix": true,
     "switch-default": true,
     "triple-equals": true,
@@ -54,7 +62,7 @@
     "no-null-keyword": true,
     "array-type": [true, "array"],
     "no-empty-interface": false,
-    "object-literal-key-quotes": [true, "consistent-as-needed"],
+    "object-literal-key-quotes": [true, "as-needed"],
     "indent": [
       true,
       "spaces"
@@ -86,7 +94,7 @@
       "check-whitespace"
     ],
     "quotemark": [
-      false,
+      true,
       "single",
       "avoid-escape"
     ],

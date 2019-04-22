@@ -1,14 +1,20 @@
 import * as pathToRegexp from 'path-to-regexp';
 
 import {
-  ProuterPath, ProuterPathExp, ProuterRequestProcessor, ProuterRequest, ProuterParsedHandler, ProuterPathKey
+  ProuterPath,
+  ProuterPathExp,
+  ProuterRequestProcessor,
+  ProuterRequest,
+  ProuterParsedHandler,
+  ProuterPathKey
 } from './entity';
 
-
 export const routerHelper = {
+  getPath() {
+    return decodeURI(location.pathname + location.search);
+  },
 
   stringToRegexp(str: string) {
-
     const keys: ProuterPathKey[] = [];
 
     const resp = pathToRegexp(str, keys) as ProuterPathExp;
@@ -18,7 +24,6 @@ export const routerHelper = {
   },
 
   parseQuery(str: string) {
-
     const searchObj: { [key: string]: string } = {};
 
     if (str === '') {
@@ -37,7 +42,6 @@ export const routerHelper = {
   },
 
   parsePath(path: string) {
-
     let url: URL | HTMLAnchorElement;
 
     if (typeof URL === 'function') {
@@ -60,18 +64,15 @@ export const routerHelper = {
    * Obtain the request processors for the given path according to the handlers in the router.
    */
   obtainRequestProcessors(path: string, handlers: ProuterParsedHandler[]) {
-
     const parsedPath = routerHelper.parsePath(path);
     const requestProcessors: ProuterRequestProcessor[] = [];
     const request = parsedPath as ProuterRequest;
     request.params = {};
 
     for (const handler of handlers) {
-
       const result = handler.pathExp.exec(request.originalUrl);
 
       if (result) {
-
         const req = { ...request };
         req.path = request.originalUrl;
 
@@ -88,6 +89,4 @@ export const routerHelper = {
 
     return requestProcessors;
   }
-
 };
-
