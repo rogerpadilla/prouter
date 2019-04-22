@@ -4,7 +4,7 @@ export interface ProuterRequestCallback {
 }
 
 export interface ProuterPath {
-  originalUrl: string;
+  readonly originalUrl: string;
   path: string;
   queryString: string;
   query: ProuterStringMap;
@@ -70,7 +70,6 @@ export interface ProuterGroup {
 }
 
 export interface ProuterRouter {
-
   use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter;
 
   listen(): void;
@@ -78,8 +77,11 @@ export interface ProuterRouter {
   processPath(path: string, processPathCallback?: ProuterProcessPathCallback): void;
 }
 
-export interface ProuterBrowserRouter extends ProuterRouter {
+export interface ProuterBrowserOptions {
+  readonly ignoreHashChange?: boolean;
+}
 
+export interface ProuterBrowserRouter extends ProuterRouter {
   processCurrentPath(): void;
 
   getPath(): string;
@@ -94,8 +96,8 @@ export interface ProuterBrowserRouter extends ProuterRouter {
 }
 
 export interface ProuterNavigationEvent {
-  oldPath: string;
-  newPath: string;
+  readonly oldPath: string;
+  readonly newPath: string;
 }
 
 export interface ProuterSubscriptorCallback {
@@ -107,7 +109,6 @@ export interface ProuterSubscriptors {
 }
 
 export type ProuterSubscriptionType = keyof ProuterSubscriptors;
-
 
 // Dont delete this dummy, TS do not create the definition of the file if only interfaces
 export const prouterSomethingToMakeTsToExportThisFile = 1;

@@ -71,7 +71,9 @@ router.listen();
 const prouter = require('prouter');
 
 // Instantiate the router
-const router = prouter.browserRouter();
+const router = prouter.browserRouter({
+  ignoreHashChange: true // this allows to ignore 'hash' changes in the URL.
+});
 
 // Declare the paths and its respective handlers
 router
@@ -250,6 +252,8 @@ router
     };    
     
     const onNavigation = (navigationEvt) => {
+      console.log('new path', navigationEvt.oldPath);
+      console.log('old path', navigationEvt.newPath);
       // if navigating, then remove the listener for the window.scroll. 
       router.off('navigation', onNavigation);
       window.removeEventListener('scroll', doInfiniteScroll);

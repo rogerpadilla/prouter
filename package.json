@@ -1,7 +1,7 @@
 {
   "name": "prouter",
   "description": "Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router",
-  "version": "9.0.1",
+  "version": "9.1.0",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
@@ -12,11 +12,10 @@
     "url": "https://github.com/rogerpadilla/prouter.git"
   },
   "scripts": {
-    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "tslint": "tslint --fix --config tslint.json 'src/**/*.ts'",
+    "lint": "npm run tslint",
     "test": "rimraf coverage && npm run lint && jest",
-    "jest": "jest",
-    "jest.watch": "jest --watch",
-    "jest.watchAll": "jest --watchAll",
+    "test.watch": "npm run lint && rimraf coverage && jest --watchAll",
     "start": "rimraf dist && webpack --progress --profile --bail --watch --mode=development",
     "build": "rimraf dist && webpack --progress --profile --bail --mode=production"
   },
@@ -38,20 +37,56 @@
   },
   "devDependencies": {
     "@types/jest": "24.0.11",
-    "@types/node": "11.12.2",
+    "@types/node": "11.13.6",
     "awesome-typescript-loader": "5.2.1",
     "copy-webpack-plugin": "5.0.2",
-    "jest": "24.5.0",
+    "jest": "24.7.1",
+    "prettier": "1.17.0",
     "rimraf": "2.6.3",
     "source-map-loader": "0.2.4",
-    "ts-jest": "24.0.1",
-    "tslint": "5.14.0",
-    "typescript": "3.4.1",
-    "webpack": "4.29.6",
-    "webpack-cli": "3.3.0"
+    "ts-jest": "24.0.2",
+    "tslint": "5.16.0",
+    "tslint-config-prettier": "1.18.0",
+    "tslint-plugin-prettier": "2.0.1",
+    "typescript": "3.4.4",
+    "webpack": "4.30.0",
+    "webpack-cli": "3.3.1"
   },
   "engines": {
     "node": ">= 4.2.1",
     "npm": ">= 3"
+  },
+  "prettier": {
+    "trailingComma": "none",
+    "tabWidth": 2,
+    "semi": true,
+    "singleQuote": true,
+    "printWidth": 120
+  },
+  "jest": {
+    "verbose": true,
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testMatch": [
+      "**/*.spec.ts"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "collectCoverage": true,
+    "coverageReporters": [
+      "html",
+      "lcov"
+    ],
+    "coverageDirectory": "coverage"
   }
 }

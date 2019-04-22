@@ -1,18 +1,21 @@
 import {
-  ProuterRequestCallback, ProuterParsedHandler, ProuterProcessPathCallback, ProuterResponse,
-  ProuterNextMiddleware, ProuterRouter, ProuterGroup, ProuterProcessPathOptions
+  ProuterRequestCallback,
+  ProuterParsedHandler,
+  ProuterProcessPathCallback,
+  ProuterResponse,
+  ProuterNextMiddleware,
+  ProuterRouter,
+  ProuterGroup,
+  ProuterProcessPathOptions
 } from './entity';
 import { routerHelper } from './helper';
 
 export function baseRouter() {
-
   let listening = false;
   const handlers: ProuterParsedHandler[] = [];
 
   const baseRouterObj: ProuterRouter = {
-
     listen() {
-
       if (listening) {
         throw new Error('Already listening.');
       }
@@ -21,7 +24,6 @@ export function baseRouter() {
     },
 
     use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter {
-
       if (typeof callback === 'function') {
         const pathExp = routerHelper.stringToRegexp(path);
         handlers.push({ path, pathExp, callback });
@@ -37,7 +39,6 @@ export function baseRouter() {
     },
 
     processPath(path: string, processPathCallback?: ProuterProcessPathCallback) {
-
       const requestProcessors = routerHelper.obtainRequestProcessors(path, handlers);
 
       if (requestProcessors.length === 0) {
@@ -60,7 +61,6 @@ export function baseRouter() {
 
       /** Call the middlewares for the given path. */
       const next: ProuterNextMiddleware = () => {
-
         // If next was called and the last processor was already executed then automatically stop.
         if (index === requestProcessors.length) {
           response.end();
