@@ -5,9 +5,9 @@ export interface ProuterRequestCallback {
 
 export interface ProuterPath {
   readonly originalUrl: string;
-  path: string;
-  queryString: string;
-  query: ProuterStringMap;
+  readonly path: string;
+  readonly queryString: string;
+  readonly query: ProuterStringMap;
 }
 
 export interface ProuterStringMap {
@@ -16,13 +16,13 @@ export interface ProuterStringMap {
 }
 
 export interface ProuterPathKey {
-  name: string | number;
-  prefix: string;
-  delimiter: string;
-  optional: boolean;
-  repeat: boolean;
-  pattern: string;
-  partial: boolean;
+  readonly name: string | number;
+  readonly prefix: string;
+  readonly delimiter: string;
+  readonly optional: boolean;
+  readonly repeat: boolean;
+  readonly pattern: string;
+  readonly partial: boolean;
 }
 
 export interface ProuterPathExp extends RegExp {
@@ -30,17 +30,17 @@ export interface ProuterPathExp extends RegExp {
 }
 
 export interface ProuterHandler {
-  path: string;
-  callback: ProuterRequestCallback;
+  readonly path: string;
+  readonly callback: ProuterRequestCallback;
 }
 
 export interface ProuterParsedHandler extends ProuterHandler {
-  pathExp: ProuterPathExp;
+  readonly pathExp: ProuterPathExp;
 }
 
 export interface ProuterRequest extends ProuterPath {
-  listening?: boolean;
   params: ProuterStringMap;
+  listening?: boolean;
 }
 
 export interface ProuterProcessPathOptions {
@@ -52,8 +52,8 @@ export interface ProuterResponse extends ProuterProcessPathOptions {
 }
 
 export interface ProuterRequestProcessor {
-  request: ProuterRequest;
-  callback: ProuterRequestCallback;
+  readonly request: ProuterRequest;
+  readonly callback: ProuterRequestCallback;
 }
 
 export interface ProuterProcessPathCallback {
@@ -65,15 +65,13 @@ export interface ProuterNextMiddleware {
 }
 
 export interface ProuterGroup {
-  handlers: ProuterHandler[];
+  readonly handlers: ProuterHandler[];
   use(path: string, callback: ProuterRequestCallback): ProuterGroup;
 }
 
 export interface ProuterRouter {
   use(path: string, callback: ProuterRequestCallback | ProuterGroup): ProuterRouter;
-
   listen(): void;
-
   processPath(path: string, processPathCallback?: ProuterProcessPathCallback): void;
 }
 
@@ -83,15 +81,10 @@ export interface ProuterBrowserOptions {
 
 export interface ProuterBrowserRouter extends ProuterRouter {
   processCurrentPath(): void;
-
   getPath(): string;
-
   push(path: string): void;
-
   stop(): void;
-
   on(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback): void;
-
   off(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback): void;
 }
 
