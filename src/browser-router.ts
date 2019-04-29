@@ -26,8 +26,15 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
     if (options.ignoreHashChange && newPath === previousPath) {
       return;
     }
-    previousPath = newPath;
     br.processCurrentPath();
+    triggerOnNavigation({ oldPath: previousPath, newPath });
+    previousPath = newPath;
+  };
+
+  const triggerOnNavigation = (navigationEvt: ProuterNavigationEvent) => {
+    subscriptors.navigation.forEach(subscriptor => {
+      subscriptor(navigationEvt);
+    });
   };
 
   const br: ProuterBrowserRouter = {
@@ -35,9 +42,7 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
 
     listen() {
       br.processCurrentPath();
-
       addEventListener('popstate', onPopState);
-
       baseRouterObj.listen();
     },
 
@@ -51,17 +56,8 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
       baseRouterObj.processPath(newPath, opts => {
         if (!opts || !opts.preventNavigation) {
           const oldPath = br.getPath();
-
           history.pushState(undefined, '', newPath);
-
-          const navigationEvt: ProuterNavigationEvent = {
-            oldPath,
-            newPath
-          };
-
-          subscriptors.navigation.forEach(subscriptor => {
-            subscriptor(navigationEvt);
-          });
+          triggerOnNavigation({ oldPath, newPath });
         }
       });
     },

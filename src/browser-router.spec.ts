@@ -495,4 +495,65 @@ describe('browserRouter', () => {
 
     location.hash = 'something';
   });
+
+  it('should trigger "prouter.onnavigation" event on "history.back"', done => {
+    expect(router.getPath()).toBe('/');
+
+    history.pushState(undefined, '', '/hello');
+
+    let activated: boolean;
+
+    router
+      .use('/', (req, res, next) => {
+        expect(req.originalUrl).toBe('/');
+        expect(req.path).toBe('/');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/');
+        activated = true;
+        next();
+      })
+      .listen();
+
+    const onNavigation = () => {
+      router.off('navigation', onNavigation);
+      expect(activated).toBe(true);
+      done();
+    };
+
+    router.on('navigation', onNavigation);
+
+    history.back();
+  });
+
+  it('should trigger "prouter.onnavigation" event on "history.forward"', done => {
+    expect(router.getPath()).toBe('/');
+
+    history.pushState(undefined, '', '/hello');
+    history.back();
+
+    let activated: boolean;
+
+    router
+      .use('/hello', (req, res, next) => {
+        expect(req.originalUrl).toBe('/hello');
+        expect(req.path).toBe('/hello');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        expect(router.getPath()).toBe('/hello');
+        activated = true;
+        next();
+      })
+      .listen();
+
+    const onNavigation = () => {
+      router.off('navigation', onNavigation);
+      expect(activated).toBe(true);
+      done();
+    };
+
+    router.on('navigation', onNavigation);
+
+    history.forward();
+  });
 });
