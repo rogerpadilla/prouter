@@ -3,11 +3,7 @@ const webpack = require('webpack');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-module.exports = function (mode) {
-
-  mode = mode || 'dev';
-
-  const isProd = mode === 'production';
+module.exports = function () {
 
   const config = {
 
@@ -52,41 +48,13 @@ module.exports = function (mode) {
     },
 
     plugins: [
-      new webpack.DefinePlugin({
-        'ENV': mode,
-        'process.env': {
-          'ENV': mode,
-          'NODE_ENV': mode
-        }
-      }),
-      new webpack.LoaderOptionsPlugin({
-        minimize: isProd,
-        debug: !isProd,
-        options: {
-          tslint: {
-            emitErrors: isProd,
-            failOnHint: isProd,
-            resourcePath: 'src'
-          }
-        }
-      }),
       new CheckerPlugin(),
-      new webpack.optimize.ModuleConcatenationPlugin(),
       new CopyWebpackPlugin([
         { from: 'package.json' },
         { from: 'README.md' },
         { from: 'LICENSE' },
       ])
     ]
-  }
-
-  if (isProd) {
-    config.plugins.push(
-      new webpack.NoEmitOnErrorsPlugin(),
-      new webpack.optimize.UglifyJsPlugin({
-        sourceMap: true
-      })
-    );
   }
 
   return config;

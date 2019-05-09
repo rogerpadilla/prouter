@@ -12,7 +12,7 @@ Fast, unopinionated, minimalist client side router library inspired in the simpl
 Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
 ## Why prouter?
-- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
+- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
 - **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
 - **Learn once:** express router is very powerfull, flexible and simple, why not bringing a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
