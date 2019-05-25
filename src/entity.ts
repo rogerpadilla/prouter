@@ -4,7 +4,6 @@ export interface ProuterRequestCallback {
 }
 
 export interface ProuterPath {
-  readonly originalUrl: string;
   readonly path: string;
   readonly queryString: string;
   readonly query: ProuterStringMap;
