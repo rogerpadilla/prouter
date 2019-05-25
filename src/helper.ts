@@ -16,10 +16,8 @@ export const routerHelper = {
 
   stringToRegexp(str: string) {
     const keys: ProuterPathKey[] = [];
-
     const resp = pathToRegexp(str, keys) as ProuterPathExp;
     resp.keys = keys;
-
     return resp;
   },
 
@@ -31,10 +29,10 @@ export const routerHelper = {
     }
 
     const qs = str.slice(1);
-    const params = qs.split('&');
+    const args = qs.split('&');
 
-    for (const param of params) {
-      const paramKv = param.split('=');
+    for (const arg of args) {
+      const paramKv = arg.split('=');
       searchObj[decodeURIComponent(paramKv[0])] = decodeURIComponent(paramKv[1]);
     }
 
@@ -52,7 +50,7 @@ export const routerHelper = {
     }
 
     const parsedPath: Partial<ProuterPath> = {
-      originalUrl: url.pathname,
+      path: url.pathname,
       queryString: url.search,
       query: routerHelper.parseQuery(url.search)
     };
@@ -66,21 +64,18 @@ export const routerHelper = {
   obtainRequestProcessors(path: string, handlers: ProuterParsedHandler[]) {
     const parsedPath = routerHelper.parsePath(path);
     const requestProcessors: ProuterRequestProcessor[] = [];
-    const request = parsedPath as ProuterRequest;
-    request.params = {};
+    const req = parsedPath as ProuterRequest;
+    req.params = {};
 
     for (const handler of handlers) {
-      const result = handler.pathExp.exec(request.originalUrl);
+      const result = handler.pathExp.exec(req.path);
 
       if (result) {
-        const req = { ...request };
-        req.path = request.originalUrl;
-
-        const args = result.slice(1);
+        const params = result.slice(1);
         const keys = handler.pathExp.keys;
 
-        for (let i = 0; i < args.length; i++) {
-          req.params[keys[i].name] = decodeURIComponent(args[i]);
+        for (let i = 0; i < params.length; i++) {
+          req.params[keys[i].name] = decodeURIComponent(params[i]);
         }
 
         requestProcessors.push({ callback: handler.callback, request: req });

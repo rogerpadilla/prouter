@@ -1,7 +1,7 @@
 {
   "name": "prouter",
   "description": "Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router",
-  "version": "9.1.2",
+  "version": "10.0.0",
   "main": "prouter.min.js",
   "homepage": "https://github.com/rogerpadilla/prouter",
   "bugs": {
@@ -36,12 +36,12 @@
     "path-to-regexp": "0.1.7"
   },
   "devDependencies": {
-    "@types/jest": "24.0.12",
-    "@types/node": "12.0.0",
+    "@types/jest": "24.0.13",
+    "@types/node": "12.0.2",
     "awesome-typescript-loader": "5.2.1",
     "copy-webpack-plugin": "5.0.3",
     "jest": "24.8.0",
-    "prettier": "1.17.0",
+    "prettier": "1.17.1",
     "rimraf": "2.6.3",
     "source-map-loader": "0.2.4",
     "ts-jest": "24.0.2",
@@ -49,7 +49,7 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.0.1",
     "typescript": "3.4.5",
-    "webpack": "4.31.0",
+    "webpack": "4.32.2",
     "webpack-cli": "3.3.2"
   },
   "engines": {

@@ -29,7 +29,7 @@ npm install prouter --save
 yarn prouter --save
 
 # Or just include it using a 'script' tag in your HTML file
-<script src="https://unpkg.com/prouter/prouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prouter@10.0.0/prouter.min.js"></script>
 ```
 
 ## Examples
@@ -81,7 +81,7 @@ router
 
     // this handler will run for any routing event, before any other handlers
     
-    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+    const isAllowed = authService.validateHasAccessToUrl(req.path);
 
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
@@ -231,7 +231,7 @@ router
 
     // this handler will run for any routing event, before any other handlers
 
-    const isAllowed = authService.validateHasAccessToUrl(req.originalUrl);
+    const isAllowed = authService.validateHasAccessToUrl(req.path);
 
     if (!isAllowed) {
       showAlert("You haven't rights to access the page: " + destPath);
@@ -290,7 +290,7 @@ router
     // client-side navigation (useful to differentiate client-side vs
     // server-side rendering - when using a mix of both SSR and CSR)
     if (req.listening) {
-      const title = inferTitleFromPath(req.originalUrl, APP_TITLE);
+      const title = inferTitleFromPath(req.path, APP_TITLE);
       updatePageTitle(title);
     }
 

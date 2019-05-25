@@ -36,7 +36,6 @@ describe('browserRouter', () => {
 
     router
       .use('/', (req, res) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -54,7 +53,6 @@ describe('browserRouter', () => {
 
     router
       .use('/', (req, res, next) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -77,7 +75,6 @@ describe('browserRouter', () => {
     let msg = '';
 
     router.use('/about', (req, res, next) => {
-      expect(req.originalUrl).toBe('/about');
       expect(req.path).toBe('/about');
       expect(req.queryString).toBe('');
       expect(req.query).toEqual({});
@@ -119,7 +116,6 @@ describe('browserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
-        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -227,15 +223,17 @@ describe('browserRouter', () => {
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('next also', done => {
+  it('pass custom params to next middleware', done => {
     router
       .use('/something/:p1/other/:p2', (req, res, next) => {
         expect(req.query).toEqual({ q1: '5', q2: '6' });
         req.query.q3 = '7';
+        req.params.customParam = 123;
         next();
       })
       .use('*', (req, res) => {
         expect(req.query).toEqual({ q1: '5', q2: '6', q3: '7' });
+        expect(req.params).toMatchObject({ p1: '16', p2: '18', customParam: 123 });
         res.end();
         done();
       });
@@ -250,7 +248,6 @@ describe('browserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
-        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -273,7 +270,6 @@ describe('browserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
-        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -297,7 +293,6 @@ describe('browserRouter', () => {
 
     router
       .use('/about', (req, res, next) => {
-        expect(req.originalUrl).toBe('/about');
         expect(req.path).toBe('/about');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -337,7 +332,6 @@ describe('browserRouter', () => {
     const group = routerGroup();
 
     group.use('/:p1/other/:p2', (req, res) => {
-      expect(req.originalUrl).toBe('/something/16/other/18');
       expect(req.path).toBe('/something/16/other/18');
       res.end();
       done();
@@ -378,7 +372,6 @@ describe('browserRouter', () => {
 
     router
       .use('/hello', (req, res, next) => {
-        expect(req.originalUrl).toBe('/hello');
         expect(req.path).toBe('/hello');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -402,7 +395,6 @@ describe('browserRouter', () => {
 
     router
       .use('/', (req, res, next) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -423,7 +415,6 @@ describe('browserRouter', () => {
 
     router
       .use('/hello', (req, res, next) => {
-        expect(req.originalUrl).toBe('/hello');
         expect(req.path).toBe('/hello');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -451,7 +442,6 @@ describe('browserRouter', () => {
 
     router
       .use('/', (req, res, next) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -479,7 +469,6 @@ describe('browserRouter', () => {
 
     localRouter
       .use('/', (req, res, next) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -505,7 +494,6 @@ describe('browserRouter', () => {
 
     router
       .use('/', (req, res, next) => {
-        expect(req.originalUrl).toBe('/');
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
@@ -536,7 +524,6 @@ describe('browserRouter', () => {
 
     router
       .use('/hello', (req, res, next) => {
-        expect(req.originalUrl).toBe('/hello');
         expect(req.path).toBe('/hello');
         expect(req.queryString).toBe('');
         expect(req.query).toEqual({});
