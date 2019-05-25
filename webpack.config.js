@@ -50,9 +50,7 @@ module.exports = function () {
     plugins: [
       new CheckerPlugin(),
       new CopyWebpackPlugin([
-        { from: 'package.json' },
-        { from: 'README.md' },
-        { from: 'LICENSE' },
+        'package.json', 'README.md', 'CHANGELOG.md', 'LICENSE'
       ])
     ]
   }
