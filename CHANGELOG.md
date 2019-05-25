@@ -1,4 +1,4 @@
-# [10.0.0](https://github.com/rogerpadilla/prouter/pull/25) (2019-05-25)
+# [10.0.0](https://github.com/rogerpadilla/prouter/compare/9.1.2...10.0.0) (2019-05-25)
 
 ### Features
 * Now the `request` instance is shared between middlewares (similar to express), so it is now possible augment it and to pass custom parameters from a middleware to the next ones (use `req.params.customParamX = 123`).
