@@ -75,7 +75,7 @@ const prouter = require('prouter');
 
 // Instantiate the router
 const router = prouter.browserRouter({
-  ignoreHashChange: true // this allows to ignore 'hash' changes in the URL.
+  processHashChange: true // this allows to process 'hash' changes in the URL.
 });
 
 // Declare the paths and its respective handlers

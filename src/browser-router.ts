@@ -27,9 +27,9 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
   const onPopState = () => {
     const newPath = routerHelper.getPath();
     /* 'popstate' event is also triggered for 'hash' changes (in the URL),
-     * ignore them if the 'ignoreHashChange' option is provided and if the
+     * ignore them if the 'processHashChange' option is not provided and if the
      * path didn't changed. */
-    if (options.ignoreHashChange && newPath === previousPath) {
+    if (!options.processHashChange && newPath === previousPath) {
       return;
     }
     br.processCurrentPath();

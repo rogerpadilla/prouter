@@ -435,39 +435,12 @@ describe('browserRouter', () => {
     router.push('/hello');
   });
 
-  it('should not ignore "hash" changes by default', done => {
+  it('should ignore "hash" changes by default', done => {
     expect(router.getPath()).toBe('/');
 
     let counter = 0;
 
     router
-      .use('/', (req, res, next) => {
-        expect(req.path).toBe('/');
-        expect(req.queryString).toBe('');
-        expect(req.query).toEqual({});
-        counter++;
-        next();
-      })
-      .listen();
-
-    window.onhashchange = () => {
-      expect(counter).toBe(2);
-      done();
-    };
-
-    location.hash = 'something';
-  });
-
-  it('should ignore "hash" changes if configured', done => {
-    const localRouter = browserRouter({
-      ignoreHashChange: true
-    });
-
-    expect(localRouter.getPath()).toBe('/');
-
-    let counter = 0;
-
-    localRouter
       .use('/', (req, res, next) => {
         expect(req.path).toBe('/');
         expect(req.queryString).toBe('');
@@ -485,31 +458,53 @@ describe('browserRouter', () => {
     location.hash = 'something';
   });
 
+  it('should not ignore "hash" changes if configured', done => {
+    const localRouter = browserRouter({
+      processHashChange: true
+    });
+
+    expect(localRouter.getPath()).toBe('/');
+
+    let counter = 0;
+
+    localRouter
+      .use('/', (req, res, next) => {
+        expect(req.path).toBe('/');
+        expect(req.queryString).toBe('');
+        expect(req.query).toEqual({});
+        counter++;
+        next();
+      })
+      .listen();
+
+    window.onhashchange = () => {
+      expect(counter).toBe(2);
+      done();
+    };
+
+    location.hash = 'something';
+  });
+
   it('should trigger "prouter.onnavigation" event on "history.back"', done => {
     expect(router.getPath()).toBe('/');
 
     history.pushState(undefined, '', '/hello');
 
-    let activated: boolean;
-
-    router
-      .use('/', (req, res, next) => {
-        expect(req.path).toBe('/');
-        expect(req.queryString).toBe('');
-        expect(req.query).toEqual({});
-        expect(router.getPath()).toBe('/');
-        activated = true;
-        next();
-      })
-      .listen();
-
-    const onNavigation = () => {
-      router.off('navigation', onNavigation);
-      expect(activated).toBe(true);
-      done();
+    const init = () => {
+      router
+        .use('/', (req, res, next) => {
+          expect(req.path).toBe('/');
+          expect(req.queryString).toBe('');
+          expect(req.query).toEqual({});
+          expect(router.getPath()).toBe('/');
+          window.removeEventListener('popstate', init);
+          next();
+          done();
+        })
+        .listen();
     };
 
-    router.on('navigation', onNavigation);
+    window.addEventListener('popstate', init);
 
     history.back();
   });
@@ -517,30 +512,31 @@ describe('browserRouter', () => {
   it('should trigger "prouter.onnavigation" event on "history.forward"', done => {
     expect(router.getPath()).toBe('/');
 
+    let counter = 0;
+
     history.pushState(undefined, '', '/hello');
-    history.back();
 
-    let activated: boolean;
-
-    router
-      .use('/hello', (req, res, next) => {
-        expect(req.path).toBe('/hello');
-        expect(req.queryString).toBe('');
-        expect(req.query).toEqual({});
-        expect(router.getPath()).toBe('/hello');
-        activated = true;
-        next();
-      })
-      .listen();
-
-    const onNavigation = () => {
-      router.off('navigation', onNavigation);
-      expect(activated).toBe(true);
-      done();
+    const init = () => {
+      counter++;
+      if (counter < 2) {
+        history.forward();
+        return;
+      }
+      router
+        .use('/hello', (req, res, next) => {
+          expect(req.path).toBe('/hello');
+          expect(req.queryString).toBe('');
+          expect(req.query).toEqual({});
+          expect(router.getPath()).toBe('/hello');
+          window.removeEventListener('popstate', init);
+          next();
+          done();
+        })
+        .listen();
     };
 
-    router.on('navigation', onNavigation);
+    window.addEventListener('popstate', init);
 
-    history.forward();
+    history.back();
   });
 });
