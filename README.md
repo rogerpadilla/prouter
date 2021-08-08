@@ -1,9 +1,8 @@
 # prouter
 
-[![build status](https://travis-ci.org/rogerpadilla/prouter.svg?branch=master)](https://travis-ci.org/rogerpadilla/prouter?branch=master)
-[![coverage status](https://coveralls.io/repos/rogerpadilla/prouter/badge.svg?branch=master)](https://coveralls.io/r/rogerpadilla/prouter?branch=master)
-[![dependencies status](https://david-dm.org/rogerpadilla/prouter/status.svg)](https://david-dm.org/rogerpadilla/prouter/status.svg)
-[![dev dependencies status](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)](https://david-dm.org/rogerpadilla/prouter/dev-status.svg)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sonemonu/prouter/blob/main/LICENSE)
+[![tests](https://github.com/sonemonu/prouter/actions/workflows/tests.yml/badge.svg)](https://github.com/sonemonu/prouter)
+[![coverage status](https://coveralls.io/repos/sonemonu/prouter/badge.svg?branch=main)](https://coveralls.io/r/sonemonu/prouter?branch=main)
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
@@ -12,7 +11,8 @@ Fast, unopinionated, minimalist client side router library inspired in the simpl
 Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
 ## Why prouter?
-- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
+
+- **Performance:** [fast](https://github.com/sonemonu/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
 - **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
 - **Learn once:** express router is very powerfull, flexible and simple, why not bringing a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
@@ -20,6 +20,7 @@ Basically, give prouter a list of path expressions (routes) and a callback funct
 - Unit tests for every feature are created.
 
 ### Want to see it in action?
+
 It is being used in this web app [wherudo.com](https://wherudo.com). There you can see how prouter is used to to do universal rendering for all the pages of that site.
 
 ## Installation
@@ -66,7 +67,6 @@ router
 router.listen();
 ```
 
-
 ### guard middleware which conditionally avoid executing next handlers and prevent changing the path in the URL
 
 ```js
@@ -81,9 +81,8 @@ const router = prouter.browserRouter({
 // Declare the paths and its respective handlers
 router
   .use('*', (req, resp, next) => {
-
     // this handler will run for any routing event, before any other handlers
-    
+
     const isAllowed = authService.validateHasAccessToUrl(req.path);
 
     if (!isAllowed) {
@@ -116,7 +115,6 @@ router.listen();
 router.push('/admin');
 ```
 
-
 ### run a generic middleware (for doing some generic stuff) after running specific handlers
 
 ```js
@@ -144,7 +142,6 @@ router
 router.listen();
 ```
 
-
 ### modularize your routing code in different files using Router Group
 
 ```js
@@ -161,7 +158,7 @@ productRouterGroup
     resp.end();
   })
   .use('/create', (req, resp) => {
-    // do some stuff...  
+    // do some stuff...
     // and end the request-response cycle
     resp.end();
   })
@@ -198,7 +195,7 @@ router.listen();
 router.push('/product/123');
 ```
 
-### full example: modularized routing, generic pre handler acting as a guard, generic post handler.
+### full example: modularized routing, generic pre handler acting as a guard, generic post handler
 
 ```js
 import { browserRouter, routerGroup } from 'prouter';
@@ -214,7 +211,7 @@ productRouterGroup
     next();
   })
   .use('/create', (req, resp, next) => {
-    // do some stuff...  
+    // do some stuff...
     // and pass control to the next handler
     next();
   })
@@ -249,15 +246,15 @@ router
     next();
   })
   .use('/', (req, resp, next) => {
-    
+
     const doInfiniteScroll = () => {
       // do infinite scroll ...
-    };    
-    
+    };
+
     const onNavigation = (navigationEvt) => {
       console.log('new path', navigationEvt.oldPath);
       console.log('old path', navigationEvt.newPath);
-      // if navigating, then remove the listener for the window.scroll. 
+      // if navigating, then remove the listener for the window.scroll.
       router.off('navigation', onNavigation);
       window.removeEventListener('scroll', doInfiniteScroll);
     };
@@ -265,7 +262,7 @@ router
     window.addEventListener('scroll', doInfiniteScroll);
 
     // subscribe to the navigation event
-    router.on('navigation', onNavigation);    
+    router.on('navigation', onNavigation);
 
     // and pass control to the next handler
     next();
@@ -341,7 +338,7 @@ document.body.addEventListener('click', (evt) => {
     if (!isApplicationPath(url)) {
       return;
     }
-    
+
     // avoid the default browser's behaviour when clicking on a link
     // (i.e. do not reload the page).
     evt.preventDefault();
@@ -351,5 +348,4 @@ document.body.addEventListener('click', (evt) => {
   });
 ```
 
-
-### see more advanced usages in the [unit tests.](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts)
+### see more advanced usages in the [unit tests.](https://github.com/sonemonu/prouter/blob/master/src/browser-router.spec.ts)

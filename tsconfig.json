@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "es6",
-    "moduleResolution": "node",
+    "target": "ES5",
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "sourceMap": true,
     "strict": true,
     "noUnusedLocals": true,
@@ -10,17 +10,7 @@
     "suppressImplicitAnyIndexErrors": true,
     "declaration": true,
     "declarationDir": "dist",
-    "lib": [
-      "es2017",
-      "dom"
-    ]
+    "lib": ["ES2019", "DOM"]
   },
-  "include": [
-    "src"
-  ],
-  "compileOnSave": false,
-  "buildOnSave": false,
-  "atom": {
-    "rewriteTsconfig": false
-  }
+  "exclude": ["node_modules", "dist", "coverage"]
 }

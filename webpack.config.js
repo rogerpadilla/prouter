@@ -1,12 +1,9 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
-const webpack = require('webpack');
-const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = function () {
-
   const config = {
-
     devtool: 'source-map',
 
     resolve: {
@@ -29,11 +26,11 @@ module.exports = function () {
     module: {
       rules: [
         /*
-        * Source map loader support for *.js files
-        * Extracts SourceMaps for source files that as added as sourceMappingURL comment.
-        *
-        * See: https://github.com/webpack/source-map-loader
-        */
+         * Source map loader support for *.js files
+         * Extracts SourceMaps for source files that as added as sourceMappingURL comment.
+         *
+         * See: https://github.com/webpack/source-map-loader
+         */
         {
           test: /\.js$/,
           use: 'source-map-loader',
@@ -42,18 +39,16 @@ module.exports = function () {
 
         {
           test: /\.ts$/,
-          loader: 'awesome-typescript-loader'
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.build.json'
+          }
         }
       ]
     },
 
-    plugins: [
-      new CheckerPlugin(),
-      new CopyWebpackPlugin([
-        'package.json', 'README.md', 'CHANGELOG.md', 'LICENSE'
-      ])
-    ]
-  }
+    plugins: [new CopyWebpackPlugin({ patterns: ['package.json', 'README.md', 'CHANGELOG.md', 'LICENSE'] })]
+  };
 
   return config;
 };

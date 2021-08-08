@@ -38,7 +38,7 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
   };
 
   const triggerOnNavigation = (navigationEvt: ProuterNavigationEvent) => {
-    subscriptors.navigation.forEach(subscriptor => {
+    subscriptors.navigation.forEach((subscriptor) => {
       subscriptor(navigationEvt);
     });
   };
@@ -114,7 +114,7 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
     getPath: routerHelper.getPath,
 
     push(newPath: string) {
-      br.processPath(newPath, opts => {
+      br.processPath(newPath, (opts) => {
         if (!opts || !opts.preventNavigation) {
           const oldPath = br.getPath();
           history.pushState(undefined, '', newPath);
@@ -133,7 +133,7 @@ export function browserRouter(options: ProuterBrowserOptions = {}) {
     },
 
     off(type: ProuterSubscriptionType, callback: ProuterSubscriptorCallback) {
-      subscriptors[type] = subscriptors[type].filter(cb => {
+      subscriptors[type] = subscriptors[type].filter((cb) => {
         return cb !== callback;
       });
     }

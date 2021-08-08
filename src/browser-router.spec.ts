@@ -1,5 +1,8 @@
 // tslint:disable:max-file-line-count
-import { browserRouter, routerGroup, ProuterBrowserRouter } from './';
+
+import { browserRouter } from './browser-router';
+import { ProuterBrowserRouter } from './entity';
+import { routerGroup } from './router-group';
 
 describe('browserRouter', () => {
   // Ensure each test completes in less than this short amout of milliseconds.
@@ -9,7 +12,7 @@ describe('browserRouter', () => {
 
   beforeAll(() => {
     const htmlElementsCache = {};
-    document.querySelector = jasmine.createSpy('document - querySelector').and.callFake((selector: string) => {
+    document.querySelector = jest.fn((selector: string) => {
       if (!selector) {
         return undefined;
       }
@@ -31,7 +34,7 @@ describe('browserRouter', () => {
     router.stop();
   });
 
-  it('basic', done => {
+  it('basic', (done) => {
     expect(router.getPath()).toBe('/');
 
     router
@@ -46,7 +49,7 @@ describe('browserRouter', () => {
       .listen();
   });
 
-  it('basic chain - no push', done => {
+  it('basic chain - no push', (done) => {
     expect(router.getPath()).toBe('/');
 
     let msg = '';
@@ -69,7 +72,7 @@ describe('browserRouter', () => {
       .listen();
   });
 
-  it('basic chain - push', done => {
+  it('basic chain - push', (done) => {
     expect(router.getPath()).toBe('/');
 
     let msg = '';
@@ -83,7 +86,7 @@ describe('browserRouter', () => {
       res.end();
     });
 
-    router.on('navigation', navigationEvt => {
+    router.on('navigation', (navigationEvt) => {
       expect(router.getPath()).toBe('/about');
       expect(navigationEvt.oldPath).toBe('/');
       expect(navigationEvt.newPath).toBe('/about');
@@ -94,9 +97,11 @@ describe('browserRouter', () => {
     router.push('/about');
   });
 
-  it('basic chain - push - old browser', done => {
+  it('basic chain - push - old browser', (done) => {
     const _URL = window.URL;
     // Emulates old browsers which doesn't supports URL constructor
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     delete window.URL;
     const domCreateElement = document.createElement;
 
@@ -133,7 +138,7 @@ describe('browserRouter', () => {
     router.push('/about');
   });
 
-  it('process current path when listen', done => {
+  it('process current path when listen', (done) => {
     router
       .use('/', (req, res) => {
         expect(req.listening).toBeFalsy();
@@ -143,7 +148,7 @@ describe('browserRouter', () => {
       .listen();
   });
 
-  it('proper listening - push', done => {
+  it('proper listening - push', (done) => {
     router
       .use('/something', () => {
         fail('This should not be called');
@@ -158,7 +163,7 @@ describe('browserRouter', () => {
     router.push('/about');
   });
 
-  it('parameters', done => {
+  it('parameters', (done) => {
     router
       .use('/some-path/:id(\\d+)/:tag', (req, res) => {
         expect(req.params.id).toBe('16');
@@ -171,7 +176,7 @@ describe('browserRouter', () => {
     router.push('/some-path/16/abc');
   });
 
-  it('query', done => {
+  it('query', (done) => {
     router.use('/something', (req, res) => {
       expect(req.queryString).toBe('?first=5&second=6');
       expect(req.query).toEqual({ first: '5', second: '6' });
@@ -182,7 +187,7 @@ describe('browserRouter', () => {
     router.push('/something?first=5&second=6');
   });
 
-  it('parameters & query', done => {
+  it('parameters & query', (done) => {
     router
       .use('/something/:param1/:param2', (req, res) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
@@ -196,7 +201,7 @@ describe('browserRouter', () => {
     router.push('/something/16/18?first=5&second=6');
   });
 
-  it('divided parameters', done => {
+  it('divided parameters', (done) => {
     router
       .use('/something/:param1/other/:param2', (req, res) => {
         expect(req.params).toEqual({ param1: '16', param2: '18' });
@@ -209,7 +214,7 @@ describe('browserRouter', () => {
     router.push('/something/16/other/18?first=5&second=6');
   });
 
-  it('do not call if no match', done => {
+  it('do not call if no match', (done) => {
     router
       .use('/abc/:p1/other/:p2', () => {
         fail('This should not be called');
@@ -217,13 +222,12 @@ describe('browserRouter', () => {
       .use('*', (req, res) => {
         res.end();
         done();
-      })
-      .listen();
+      });
 
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('pass custom params to next middleware', done => {
+  it('pass custom params to next middleware', (done) => {
     router
       .use('/something/:p1/other/:p2', (req, res, next) => {
         expect(req.query).toEqual({ q1: '5', q2: '6' });
@@ -241,7 +245,7 @@ describe('browserRouter', () => {
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('order', done => {
+  it('order', (done) => {
     expect(router.getPath()).toBe('/');
 
     let msg = '';
@@ -288,7 +292,7 @@ describe('browserRouter', () => {
     expect(router.getPath()).toBe('/');
   });
 
-  it('next() in every callback', done => {
+  it('next() in every callback', (done) => {
     expect(router.getPath()).toBe('/');
 
     router
@@ -316,7 +320,7 @@ describe('browserRouter', () => {
     }).toThrowError();
   });
 
-  it('RouterGroup', done => {
+  it('RouterGroup', (done) => {
     const group = routerGroup();
 
     group.use('/ask', () => {
@@ -328,7 +332,7 @@ describe('browserRouter', () => {
     router.push('/question/ask');
   });
 
-  it('RouterGroup with params', done => {
+  it('RouterGroup with params', (done) => {
     const group = routerGroup();
 
     group.use('/:p1/other/:p2', (req, res) => {
@@ -342,7 +346,7 @@ describe('browserRouter', () => {
     router.push('/something/16/other/18?q1=5&q2=6');
   });
 
-  it('Emulate browsers with URL support', done => {
+  it('Emulate browsers with URL support', (done) => {
     // tslint:disable-next-line:no-unnecessary-class
     class URL {
       constructor(path: string) {
@@ -367,7 +371,7 @@ describe('browserRouter', () => {
     router.push('/about');
   });
 
-  it('should produce navigation event', done => {
+  it('should produce navigation event', (done) => {
     expect(router.getPath()).toBe('/');
 
     router
@@ -380,7 +384,7 @@ describe('browserRouter', () => {
       })
       .listen();
 
-    router.on('navigation', navigationEvt => {
+    router.on('navigation', (navigationEvt) => {
       expect(router.getPath()).toBe('/hello');
       expect(navigationEvt.oldPath).toBe('/');
       expect(navigationEvt.newPath).toBe('/hello');
@@ -410,7 +414,7 @@ describe('browserRouter', () => {
     router.push('/hello');
   });
 
-  it('should unsubscribe from navigation event', done => {
+  it('should unsubscribe from navigation event', (done) => {
     expect(router.getPath()).toBe('/');
 
     router
@@ -435,7 +439,7 @@ describe('browserRouter', () => {
     router.push('/hello');
   });
 
-  it('should ignore "hash" changes by default', done => {
+  it('should ignore "hash" changes by default', (done) => {
     expect(router.getPath()).toBe('/');
 
     let counter = 0;
@@ -458,7 +462,7 @@ describe('browserRouter', () => {
     location.hash = 'something';
   });
 
-  it('should not ignore "hash" changes if configured', done => {
+  it('should not ignore "hash" changes if configured', (done) => {
     const localRouter = browserRouter({
       processHashChange: true
     });
@@ -485,7 +489,7 @@ describe('browserRouter', () => {
     location.hash = 'something';
   });
 
-  it('should trigger "prouter.onnavigation" event on "history.back"', done => {
+  it('should trigger "prouter.onnavigation" event on "history.back"', (done) => {
     expect(router.getPath()).toBe('/');
 
     history.pushState(undefined, '', '/hello');
@@ -509,7 +513,7 @@ describe('browserRouter', () => {
     history.back();
   });
 
-  it('should trigger "prouter.onnavigation" event on "history.forward"', done => {
+  it('should trigger "prouter.onnavigation" event on "history.forward"', (done) => {
     expect(router.getPath()).toBe('/');
 
     let counter = 0;
