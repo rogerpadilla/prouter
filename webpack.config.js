@@ -47,7 +47,7 @@ module.exports = function () {
       ]
     },
 
-    plugins: [new CopyWebpackPlugin({ patterns: ['package.json', 'README.md', 'CHANGELOG.md', 'LICENSE'] })]
+    plugins: [new CopyWebpackPlugin({ patterns: ['package.json', 'README.md', 'LICENSE'] })]
   };
 
   return config;
