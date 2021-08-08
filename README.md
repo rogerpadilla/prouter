@@ -2,7 +2,7 @@
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sonemonu/prouter/blob/main/LICENSE)
 [![tests](https://github.com/sonemonu/prouter/actions/workflows/tests.yml/badge.svg)](https://github.com/sonemonu/prouter)
-[![coverage status](https://coveralls.io/repos/sonemonu/prouter/badge.svg?branch=main)](https://coveralls.io/r/sonemonu/prouter?branch=main)
+[![coverage status](https://coveralls.io/repos/github/sonemonu/prouter/badge.svg)](https://coveralls.io/r/sonemonu/prouter)
 [![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
