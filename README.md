@@ -19,10 +19,6 @@ Basically, give prouter a list of path expressions (routes) and a callback funct
 - **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the modern [history](https://developer.mozilla.org/en-US/docs/Web/API/History_API) API for routing.
 - Unit tests for every feature are created.
 
-### Want to see it in action?
-
-It is being used in this web app [wherudo.com](https://wherudo.com). There you can see how prouter is used to to do universal rendering for all the pages of that site.
-
 ## Installation
 
 ```bash
