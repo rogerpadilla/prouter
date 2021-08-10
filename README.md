@@ -1,9 +1,8 @@
 # prouter
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/sonemonu/prouter/blob/main/LICENSE)
-[![tests](https://github.com/sonemonu/prouter/actions/workflows/tests.yml/badge.svg)](https://github.com/sonemonu/prouter)
-[![coverage status](https://coveralls.io/repos/github/sonemonu/prouter/badge.svg)](https://coveralls.io/github/sonemonu/prouter)
-[![npm downloads](https://img.shields.io/npm/dm/prouter.svg)](https://www.npmjs.com/package/prouter)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/rogerpadilla/prouter/blob/main/LICENSE)
+[![tests](https://github.com/rogerpadilla/prouter/actions/workflows/tests.yml/badge.svg)](https://github.com/rogerpadilla/prouter)
+[![coverage status](https://coveralls.io/repos/github/rogerpadilla/prouter/badge.svg)](https://coveralls.io/github/rogerpadilla/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
 Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router.
@@ -12,7 +11,7 @@ Basically, give prouter a list of path expressions (routes) and a callback funct
 
 ## Why prouter?
 
-- **Performance:** [fast](https://github.com/sonemonu/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
+- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
 - **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
 - **Learn once:** express router is very powerfull, flexible and simple, why not bringing a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
@@ -344,4 +343,4 @@ document.body.addEventListener('click', (evt) => {
   });
 ```
 
-### see more advanced usages in the [unit tests.](https://github.com/sonemonu/prouter/blob/master/src/browser-router.spec.ts)
+### see more advanced usages in the [unit tests.](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts)
