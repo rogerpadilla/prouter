@@ -10,7 +10,8 @@ console.debug('*** mode', mode);
 
 const config: Configuration = {
   mode,
-
+  profile: true,
+  bail: isProductionMode,
   devtool: 'source-map',
 
   resolve: {
