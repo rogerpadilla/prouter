@@ -16,7 +16,7 @@
     "lint": "npm run eslint",
     "test": "rimraf coverage && npm run lint && jest",
     "test.watch": "npm run lint && rimraf coverage && jest --watchAll",
-    "start": "rimraf dist && webpack",
+    "start": "rimraf dist && webpack --watch",
     "build": "rimraf dist && NODE_ENV=production webpack"
   },
   "keywords": [
