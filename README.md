@@ -5,9 +5,9 @@
 [![coverage status](https://coveralls.io/repos/github/rogerpadilla/prouter/badge.svg)](https://coveralls.io/github/rogerpadilla/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-Fast, unopinionated, minimalist client-side router library inspired by the simplicity and flexibility of express router.
+Fast, unopinionated, minimalist client-side routing library inspired by the simplicity and flexibility of [express middlewares](https://expressjs.com/en/guide/writing-middleware.html).
 
-Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
+Essentially, give `prouter` a list of path expressions (routes) and a callback function (handler) for each one, and `prouter` will automatically invoke these callbacks according to the active path in the URL.
 
 ## Why prouter?
 
