@@ -28,7 +28,7 @@ npm install prouter --save
 yarn prouter --save
 
 # Or just include it using a 'script' tag in your HTML file
-<script src="https://cdn.jsdelivr.net/npm/prouter@10.0.0/prouter.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prouter/prouter.min.js"></script>
 ```
 
 ## Examples
