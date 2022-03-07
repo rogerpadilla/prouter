@@ -5,15 +5,15 @@
 [![coverage status](https://coveralls.io/repos/github/rogerpadilla/prouter/badge.svg)](https://coveralls.io/github/rogerpadilla/prouter)
 [![npm version](https://badge.fury.io/js/prouter.svg)](https://www.npmjs.com/prouter)
 
-Fast, unopinionated, minimalist client side router library inspired in the simplicity and flexibility of express router.
+Fast, unopinionated, minimalist client-side router library inspired by the simplicity and flexibility of express router.
 
 Basically, give prouter a list of path expressions (routes) and a callback function (handler) for each one, and prouter will invoke the callbacks according to the activated path in the URL.
 
 ## Why prouter?
 
-- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must to have to smoothly run in any mobile or desktop browser.
-- **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achivable with prouter (see examples below).
-- **Learn once:** express router is very powerfull, flexible and simple, why not bringing a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that express for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
+- **Performance:** [fast](https://github.com/rogerpadilla/prouter/blob/master/src/browser-router.spec.ts#L7) and tiny size (currently under 5kb before gzipping) are both must-haves to smoothly run in any mobile or desktop browser.
+- **KISS principle everywhere:** do only one thing and do it well, routing! Guards? conditional execution? generic pre and post middlewares? all that and more is easily achievable with prouter (see examples below).
+- **Learn once:** express router is very powerful, flexible, and simple, why not bring a similar API to the frontend? Under the hood, prouter uses the same (wonderful) library that `express` for parsing routes [path-to-regexp](https://github.com/pillarjs/path-to-regexp) (so it allows the same flexibility to declare routes). Read more about the concept of middlewares [here](https://expressjs.com/en/guide/writing-middleware.html).
 - **Unobtrusive:** it is designed from the beginning to play well with vanilla JavaScript or with any other library or framework.
 - **Forward-thinking:** written in TypeScript for the future and transpiled to es5 with UMD format for the present... thus it transparently supports any module style: es6, commonJS, AMD. By default, prouter uses the modern [history](https://developer.mozilla.org/en-US/docs/Web/API/History_API) API for routing.
 - Unit tests for every feature are created.
