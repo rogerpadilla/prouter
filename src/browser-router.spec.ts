@@ -11,7 +11,7 @@ describe('browserRouter', () => {
   let router: ProuterBrowserRouter;
 
   beforeAll(() => {
-    const htmlElementsCache = {};
+    const htmlElementsCache = {} as Record<string, any>;
     document.querySelector = jest.fn((selector: string) => {
       if (!selector) {
         return undefined;
@@ -348,23 +348,23 @@ describe('browserRouter', () => {
 
   it('Emulate browsers with URL support', (done) => {
     // tslint:disable-next-line:no-unnecessary-class
-    class URL {
+    class MyURL {
       constructor(path: string) {
         const parser = document.createElement('a');
         parser.href = 'http://example.com' + path;
-        const propsToCopy = ['pathname', 'hash', 'hostname', 'host', 'search'];
+        const propsToCopy = ['pathname', 'hash', 'hostname', 'host', 'search'] satisfies (keyof typeof parser)[];
         for (const prop of propsToCopy) {
-          this[prop] = parser[prop];
+          (this as any)[prop] = parser[prop];
         }
       }
     }
 
     const _URL = window.URL;
-    window.URL = URL as typeof _URL;
+    window.URL = MyURL as typeof _URL;
 
     router.use('/about', (req, res) => {
-      window.URL = _URL;
       res.end();
+      window.URL = _URL;
       done();
     });
 

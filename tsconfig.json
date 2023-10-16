@@ -6,7 +6,6 @@
     "sourceMap": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
-    "suppressImplicitAnyIndexErrors": true,
     "declaration": true,
     "declarationDir": "dist",
     "lib": ["ESNext", "DOM"],
